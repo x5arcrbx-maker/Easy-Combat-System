@@ -1,31 +1,29 @@
 local SkillsModule = {}
 
 --//:SERVICES//:--
+local Debris = game:GetService("Debris")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
-local ServerStorage 	  = game:GetService("ServerStorage")
-local ReplicatedStorage   = game:GetService("ReplicatedStorage")
-local Players 			  = game:GetService("Players")
-local TweenService 		  = game:GetService("TweenService")
-local Debris 			  = game:GetService("Debris")
+local TweenService = game:GetService("TweenService")
 
 --//:MODULES//:--
-local HitModule 	   = require(ServerScriptService.Modules.PVP.HitModule)
-local ClashModule 	   = require(ServerScriptService.Modules.PVP.ClashModule)
 local AnimationService = require(ReplicatedStorage.Modules.Packages.AnimationService)
+local HitModule = require(ServerScriptService.Modules.PVP.HitModule)
 
 --//:REMOTES//:--
-local vfxRemote: UnreliableRemoteEvent  = ReplicatedStorage.Remotes_Bindables.Remotes.GeneralPlayer.SkillVFX
-local animRemote: UnreliableRemoteEvent	= ReplicatedStorage.Remotes_Bindables.Remotes.GeneralPlayer.SkillAnimations
+local vfxRemote: UnreliableRemoteEvent = ReplicatedStorage.Remotes_Bindables.Remotes.GeneralPlayer.SkillVFX
+local animRemote: UnreliableRemoteEvent = ReplicatedStorage.Remotes_Bindables.Remotes.GeneralPlayer.SkillAnimations
 local addCooldownRemote: RemoteEvent = ReplicatedStorage.Remotes_Bindables.Remotes.GeneralPlayer.CooldownGUI
 
 --//:VARIABLES//:--
 local Collection = workspace.Collection
-local Trash		 = Collection.Trash
+local Trash = Collection.Trash
 local SkillsetsVFX: Folder = ReplicatedStorage.FX.VFX.Actions.Combat.Skillsets
 
-local hitTracker	  = {} -- Tracks hits for skills that use touched events
+local hitTracker = {} -- Tracks hits for skills that use touched events
 local playerCooldowns = {} --Table for Cooldowns
-local PREVENTION_ATTRIBUTES: {string} = { --//Attributes that prevent attacks
+local PREVENTION_ATTRIBUTES: { string } = { --//Attributes that prevent attacks
 	"Knocked",
 	"Gripped",
 	"Carried",
@@ -34,7 +32,7 @@ local PREVENTION_ATTRIBUTES: {string} = { --//Attributes that prevent attacks
 	"Stunned",
 	"Blocking",
 }
-local DOWNED_ATTRIBUTES: {string} = {
+local DOWNED_ATTRIBUTES: { string } = {
 	"Knocked",
 	"Gripped",
 	"Carried",
@@ -53,13 +51,9 @@ local function resetCooldownsOnRespawn()
 end
 resetCooldownsOnRespawn()
 
-
 -- Get remaining cooldown for a skill (in seconds)
 -- returns (number)
-local function getRemainingCooldown(
-	player: Player,
-	skill: string
-): (number)
+local function getRemainingCooldown(player: Player, skill: string): number
 	local onCooldown = playerCooldowns[player]
 	if not onCooldown then
 		return 0
@@ -126,11 +120,7 @@ local function skillAllowed(
 end
 
 -- Sets the "IsAttacking" attribute
-local function setIsAttacking(
-	char: Model,
-	hitType: string,
-	durationOfAttacking: number
-)
+local function setIsAttacking(char: Model, hitType: string, durationOfAttacking: number)
 	durationOfAttacking = durationOfAttacking or 0.25
 
 	char:SetAttribute("IsAttacking", true)
@@ -140,27 +130,21 @@ local function setIsAttacking(
 	end)
 end
 
-
 --Breathing functions--
-local function subtractBreathingBar(
-	breathing_AMOUNT: number,
-	breathing_NEEDED: number,
-	character: Model
-)
-	
+local function subtractBreathingBar(breathing_AMOUNT: number, breathing_NEEDED: number, character: Model)
 	character:SetAttribute("BreathingBar", breathing_AMOUNT - breathing_NEEDED)
 end
 
 --Checks if player has enough breathing to use a skill
-local function checkBreathingBar(
-	breathing_NEEDED: number,
-	character: Model
-): (boolean, number)
-
+local function checkBreathingBar(breathing_NEEDED: number, character: Model): (boolean, number)
 	local breathing_AMOUNT: number = character:GetAttribute("BreathingBar")
-	if not breathing_AMOUNT then return false, 0 end
-	if breathing_AMOUNT < breathing_NEEDED then return false, 0 end
-	
+	if not breathing_AMOUNT then
+		return false, 0
+	end
+	if breathing_AMOUNT < breathing_NEEDED then
+		return false, 0
+	end
+
 	return true, breathing_AMOUNT
 end
 -------------------------
@@ -171,12 +155,10 @@ Players.PlayerRemoving:Connect(function(player)
 end)
 
 -- Checks if character can player VFX
-local function canPlayFX(
-	char : Model
-): (boolean)
+local function canPlayFX(char: Model): boolean
 	-- Check if char  can play FX (not stunned, ragdolled, etc.)
 	for _, attribute in ipairs(PREVENTION_ATTRIBUTES) do
-		if char :GetAttribute(attribute) then
+		if char:GetAttribute(attribute) then
 			return false
 		end
 	end
@@ -184,60 +166,50 @@ local function canPlayFX(
 end
 -----------------------
 
-
 -- VisualizeHitbox function (for debugging)
-local function visualizeHitbox(
-	hitboxCFrame: CFrame,
-	hitboxSize: Vector3,
-	TIME: number
-)
+local function _visualizeHitbox(hitboxCFrame: CFrame, hitboxSize: Vector3, TIME: number)
 	TIME = TIME or 0.1
 	local visualizer = Instance.new("Part")
-	visualizer.Size 	  	= hitboxSize
-	visualizer.CFrame 	  	= hitboxCFrame
-	visualizer.Anchored   	= true
+	visualizer.Size = hitboxSize
+	visualizer.CFrame = hitboxCFrame
+	visualizer.Anchored = true
 	visualizer.Transparency = 0.8
-	visualizer.CanCollide 	= false
-	visualizer.BrickColor 	= BrickColor.new("Really red")
-	visualizer.Parent 		= workspace
+	visualizer.CanCollide = false
+	visualizer.BrickColor = BrickColor.new("Really red")
+	visualizer.Parent = workspace
 	Debris:AddItem(visualizer, TIME)
 end
-
 
 --//:FUNCTIONS (Skills)
 --[ BASE COMBAT ]--
 
 --M1 / Normal Attack
-function SkillsModule.NormalAttack(
-	char: Model,
-	hum: Humanoid, 
-	hrp: BasePart, 
-	combo: number, 
-	hitType: string
-)
-	
+function SkillsModule.NormalAttack(char: Model, hum: Humanoid, hrp: BasePart, combo: number, hitType: string)
 	for _, v in DOWNED_ATTRIBUTES do
-		if char:GetAttribute(v) then return end
+		if char:GetAttribute(v) then
+			return
+		end
 	end
-	if hum:GetState() == Enum.HumanoidStateType.Dead then return end
-	
+	if hum:GetState() == Enum.HumanoidStateType.Dead then
+		return
+	end
+
 	--STATS
-	local DMG 		   = 3.25 --Changes depending on combo value and hitType
-	local STUN_TIME	   = 0.65 --Changes depending on combo value and hitType
-	local PBable  	   = false
-	local KB 	  	   = true
-	local KBforce	   --Changes depending on combo value and hitType
-	local KB_TIME 	   = 0.1
+	local DMG = 3.25 --Changes depending on combo value and hitType
+	local STUN_TIME = 0.65 --Changes depending on combo value and hitType
+	local PBable = false
+	local KB = true
+	local KBforce --Changes depending on combo value and hitType
+	local KB_TIME = 0.1
 	local KB_Direction = "Look"
-	local Ragdoll	   --Changes depending on combo value and hitType
+	local Ragdoll --Changes depending on combo value and hitType
 	local Ragdoll_TIME --Changes depending on combo value and hitType
 
-	local STARTUP	   --Changes depending on combo value and hitType
-
+	local STARTUP --Changes depending on combo value and hitType
 
 	char:SetAttribute("UsingAttack", true)
 	char:SetAttribute("Slowed", true)
-	
+
 	--	Handle UsingAttack
 	if hitType == "Sharp" then
 		STARTUP = 0.2
@@ -279,7 +251,7 @@ function SkillsModule.NormalAttack(
 			end)
 		end
 	end
-	
+
 	--[[ --forwardVelocity function
 		local function forwardVelocity(char : Model, hum : Humanoid, hrp : BasePart)
 		--preventing velocity if ragdolled, stunned, or blocking
@@ -311,10 +283,14 @@ function SkillsModule.NormalAttack(
 		--Setting IsAttacking (for clashes and to prevent stacking attacks)
 		if hitType == "Sharp" then
 			setIsAttacking(char, hitType, 0.2)
-			length = 5 height = 5 depth = 7.5
+			length = 5
+			height = 5
+			depth = 7.5
 		else
 			setIsAttacking(char, hitType, 0.15)
-			length = 4.5 height = 5 depth = 7
+			length = 4.5
+			height = 5
+			depth = 7
 		end
 
 		--Setup
@@ -322,7 +298,7 @@ function SkillsModule.NormalAttack(
 		params.FilterType = Enum.RaycastFilterType.Exclude
 		params.FilterDescendantsInstances = { char }
 
-		local hitboxSize: Vector3  = Vector3.new(length, height, depth)
+		local hitboxSize: Vector3 = Vector3.new(length, height, depth)
 		local hitboxCFrame: CFrame = hrp.CFrame * CFrame.new(0, 0, -depth / 2) --Position of hitbox
 
 		--Getting parts in box
@@ -333,9 +309,13 @@ function SkillsModule.NormalAttack(
 			for _, v in pairs(partsInBox) do
 				if v.Name == "HumanoidRootPart" then
 					local opponentChar = v.Parent :: Model?
-					if not opponentChar then return end
-					local opponentHum  = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
-					if not opponentHum then return end
+					if not opponentChar then
+						return
+					end
+					local opponentHum = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
+					if not opponentHum then
+						return
+					end
 
 					if combo < 5 then --Not final hit
 						KBforce = 15
@@ -351,13 +331,13 @@ function SkillsModule.NormalAttack(
 						end
 
 						HitModule.Hit(
-							hum, 
-							opponentHum, 
-							hitType, 
-							DMG, 
-							STUN_TIME, 
-							PBable, 
-							KB, 
+							hum,
+							opponentHum,
+							hitType,
+							DMG,
+							STUN_TIME,
+							PBable,
+							KB,
 							KBforce,
 							KB_TIME,
 							KB_Direction,
@@ -399,7 +379,7 @@ function SkillsModule.NormalAttack(
 		end
 	end
 	task.delay(STARTUP, handleAttack)
-	
+
 	--[[
 	task.delay(STARTUP, function()
 		--Hitbox size changes based on hitType
@@ -496,31 +476,28 @@ function SkillsModule.NormalAttack(
 		end
 	end)
 	]]
-	
 end
 
 --M2 / Heavy Attack
-function SkillsModule.HeavyAttack(
-	char: Model, 
-	hum: Humanoid, 
-	hrp: BasePart, 
-	hitType: string
-)
-	
+function SkillsModule.HeavyAttack(char: Model, hum: Humanoid, hrp: BasePart, hitType: string)
 	for _, v in DOWNED_ATTRIBUTES do
-		if char:GetAttribute(v) then return end
+		if char:GetAttribute(v) then
+			return
+		end
 	end
-	if hum:GetState() == Enum.HumanoidStateType.Dead then return end
-	
+	if hum:GetState() == Enum.HumanoidStateType.Dead then
+		return
+	end
+
 	--STATS
-	local DMG		   = 5
-	local STUN_TIME    = 2.5
-	local PBable 	   = true
-	local KB 		   = true
-	local KBforce 	   = 60
-	local KB_TIME 	   = 0.1
+	local DMG = 5
+	local STUN_TIME = 2.5
+	local PBable = true
+	local KB = true
+	local KBforce = 60
+	local KB_TIME = 0.1
 	local KB_Direction = "Look"
-	local Ragdoll 	   = true
+	local Ragdoll = true
 	local Ragdoll_TIME = STUN_TIME
 	local Effect
 	local StatusEffect
@@ -547,17 +524,19 @@ function SkillsModule.HeavyAttack(
 
 		--preventing velocity if ragdolled, stunned, or blocking
 		for _, attribute in pairs(PREVENTION_ATTRIBUTES) do
-			if char:GetAttribute(attribute) then return end
+			if char:GetAttribute(attribute) then
+				return
+			end
 		end
 
 		--Actual velocity code
 		local bv: BodyVelocity = Instance.new("BodyVelocity")
 		bv.MaxForce = Vector3.new(100000, 100000, 100000)
 		bv.Velocity = hrp.CFrame.LookVector * 50
-		bv.Parent 	= hrp
+		bv.Parent = hrp
 		Debris:AddItem(bv, 0.15)
 	end
-	
+
 	local function handleAttack()
 		--Hitbox size changes based on hitType
 		local length: number, height: number, depth: number
@@ -565,10 +544,14 @@ function SkillsModule.HeavyAttack(
 		--Setting IsAttacking (for clashes)
 		if hitType == "Sharp" then
 			setIsAttacking(char, hitType, 0.2)
-			length = 5.5 height = 7.5 depth = 10.5
+			length = 5.5
+			height = 7.5
+			depth = 10.5
 		else
 			setIsAttacking(char, hitType, 0.15)
-			length = 6.5 height = 8.5 depth = 9.5
+			length = 6.5
+			height = 8.5
+			depth = 9.5
 		end
 
 		--Setup
@@ -576,7 +559,7 @@ function SkillsModule.HeavyAttack(
 		params.FilterType = Enum.RaycastFilterType.Exclude
 		params.FilterDescendantsInstances = { char }
 
-		local hitboxSize: Vector3  = Vector3.new(length, height, depth)
+		local hitboxSize: Vector3 = Vector3.new(length, height, depth)
 		local hitboxCFrame: CFrame = hrp.CFrame * CFrame.new(0, 0, -depth / 2) --Position of hitbox
 
 		--Getting parts in box
@@ -587,10 +570,13 @@ function SkillsModule.HeavyAttack(
 			for _, v in pairs(partsInBox) do
 				if v.Name == "HumanoidRootPart" then
 					local opponentChar = v.Parent :: Model?
-					if not opponentChar then return end
-					local opponentHum  = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
-					if not opponentHum then return end
-					local opponentHrp = v
+					if not opponentChar then
+						return
+					end
+					local opponentHum = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
+					if not opponentHum then
+						return
+					end
 
 					--Checking for fists or katana
 					if hitType == "Blunt" then
@@ -627,12 +613,12 @@ function SkillsModule.HeavyAttack(
 			end
 		end
 	end
-	
+
 	task.delay(STARTUP, function()
 		forwardVelocity()
 		handleAttack()
 	end)
-	
+
 	--[[
 	task.delay(0.6, forwardVelocity)
 	task.delay(0.6, function()
@@ -705,44 +691,42 @@ function SkillsModule.HeavyAttack(
 		end
 	end)
 	]]
-	
 end
 -------------------
 
 --[ SUBSKILLS ]--
-function SkillsModule.Subskill(
-	player: Player, 
-	char: Model, 
-	hum: Humanoid, 
-	skill: string
-)
+function SkillsModule.Subskill(player: Player, char: Model, hum: Humanoid, skill: string)
 	-- Early exit if already using an attack
 	for _, v in DOWNED_ATTRIBUTES do
-		if char:GetAttribute(v) then return end
+		if char:GetAttribute(v) then
+			return
+		end
 	end
-	if hum:GetState() == Enum.HumanoidStateType.Dead then return end
+	if hum:GetState() == Enum.HumanoidStateType.Dead then
+		return
+	end
 
 	-----| BDAs |-----
 
 	-----| Breaths |-----
 	if skill == "Hunter Step" then
 		--STATS
-		local hitType 	   = "Sharp"
-		local DMG 		   = 5
-		local STUN_TIME    = 0.6
-		local PBable 	   = true
-		local KB 		   = false
-		local KBforce 	   = nil
-		local KB_TIME 	   = nil
+		local hitType = "Sharp"
+		local DMG = 5
+		local STUN_TIME = 0.6
+		local PBable = true
+		local KB = false
+		local KBforce = nil
+		local KB_TIME = nil
 		local KB_Direction = "Look"
-		local Ragdoll 	   = false
+		local Ragdoll = false
 		local Ragdoll_TIME = nil
-		local Effect 	   = true
+		local Effect = true
 		local StatusEffect = "Bleed"
 
 		--COOLDOWN and STARTUP
 		local COOLDOWN = 20 --real is (20s)
-		local STARTUP  = 0.25
+		local STARTUP = 0.25
 
 		local ok = skillAllowed(player, char, skill, COOLDOWN, true, STARTUP + 0.1)
 		if not ok then
@@ -752,13 +736,13 @@ function SkillsModule.Subskill(
 		--VFX
 		local function playVFX_Highlight()
 			--Create highlight (Indicator), set properties, and tween transparency
-			local highlight: Highlight    = Instance.new("Highlight")
-			highlight.DepthMode 		  = Enum.HighlightDepthMode.Occluded
-			highlight.OutlineColor		  = Color3.fromRGB(255, 255, 255)
+			local highlight: Highlight = Instance.new("Highlight")
+			highlight.DepthMode = Enum.HighlightDepthMode.Occluded
+			highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
 			highlight.OutlineTransparency = 0.7
-			highlight.FillColor 		  = Color3.fromRGB(255, 255, 255)
-			highlight.FillTransparency    = 0.8
-			highlight.Parent 			  = char --Parent to char 
+			highlight.FillColor = Color3.fromRGB(255, 255, 255)
+			highlight.FillTransparency = 0.8
+			highlight.Parent = char --Parent to char
 			TweenService:Create( --Tween transparency for both fill and outline
 				highlight,
 				TweenInfo.new(STARTUP, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, 0),
@@ -769,7 +753,7 @@ function SkillsModule.Subskill(
 		local function playVFX_Whirlwinds(hrp: BasePart)
 			--Find whirlWind (VFX), set position, tween transparency / rotation
 			local whirlWind: MeshPart = SkillsetsVFX.Subskills.Slayer[skill].Whirlwind:Clone()
-			whirlWind.Parent   = Trash
+			whirlWind.Parent = Trash
 			whirlWind.Position = hrp.Position + Vector3.new(0, -2, 0)
 			TweenService:Create( --Tween transparency and rotation
 				whirlWind,
@@ -784,7 +768,7 @@ function SkillsModule.Subskill(
 
 			--Find whirlWind2 (VFX), set position, tween transparency / rotation
 			local whirlWind2: MeshPart = SkillsetsVFX.Subskills.Slayer[skill].Whirlwind2:Clone()
-			whirlWind2.Parent   = Trash
+			whirlWind2.Parent = Trash
 			whirlWind2.Position = hrp.Position
 			TweenService:Create( --Tween transparency and rotation
 				whirlWind2,
@@ -809,18 +793,12 @@ function SkillsModule.Subskill(
 		--Animation
 		local function playAnimation(humanoid: Humanoid)
 			local animator: Animator? = humanoid:FindFirstChildOfClass("Animator")
-			if not animator then return end
+			if not animator then
+				return
+			end
 
 			local animation = ReplicatedStorage.Animations.Skills.Subskills.Breaths[skill]
-			AnimationService:Play(
-				animation,
-				animator,
-				0,
-				0,
-				1,
-				1,
-				1
-			)
+			AnimationService:Play(animation, animator, 0, 0, 1, 1, 1)
 		end
 		playAnimation(hum) --Play animation as soon as skill is validated
 
@@ -834,7 +812,7 @@ function SkillsModule.Subskill(
 		params.FilterDescendantsInstances = { char }
 		local length = 7.5
 		local height = 7.5
-		local depth  = 40
+		local depth = 40
 		local hitboxSize = Vector3.new(length, height, depth)
 
 		task.delay(STARTUP, function()
@@ -847,9 +825,13 @@ function SkillsModule.Subskill(
 				for _, v in partsInBox do
 					if v.Name == "HumanoidRootPart" then
 						local opponentChar = v.Parent :: Model?
-						if not opponentChar then return end
+						if not opponentChar then
+							return
+						end
 						local opponentHum = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
-						if not opponentHum then return end
+						if not opponentHum then
+							return
+						end
 						local opponentHrp = v
 						local opponentHrp_Position = opponentHrp.Position
 
@@ -881,10 +863,9 @@ function SkillsModule.Subskill(
 			end
 		end)
 	end
-	
+
 	-----| General |-----
 	if skill == "Sting & Send" then
-		
 	end
 end
 
@@ -894,38 +875,39 @@ end
 
 -----| BDAs |-----
 --Akaza (Skillset, BDA)
-function SkillsModule.Akaza(
-	player: Player, 
-	char: Model, 
-	hum: Humanoid, 
-	skill: string
-)
+function SkillsModule.Akaza(player: Player, char: Model, hum: Humanoid, skill: string)
 	-- Early exit if already using an attack
 	for _, v in DOWNED_ATTRIBUTES do
-		if char:GetAttribute(v) then return end
+		if char:GetAttribute(v) then
+			return
+		end
 	end
-	if hum:GetState() == Enum.HumanoidStateType.Dead then return end
+	if hum:GetState() == Enum.HumanoidStateType.Dead then
+		return
+	end
 
 	--CHECKING WHAT SKILL WAS USED
 	if skill == "Annihilation Type: Punch" then
 		--STATS
-		local hitType	   = "Blunt"
-		local DMG 		   = 10
-		local STUN_TIME    = 2.5
-		local PBable	   = true
-		local KB	 	   = true
-		local KBforce	   = 90
-		local KB_TIME	   = 0.2
+		local hitType = "Blunt"
+		local DMG = 10
+		local STUN_TIME = 2.5
+		local PBable = true
+		local KB = true
+		local KBforce = 90
+		local KB_TIME = 0.2
 		local KB_Direction = "Look"
-		local Ragdoll 	   = true
+		local Ragdoll = true
 		local Ragdoll_TIME = STUN_TIME --(2.5)
 
 		--COOLDOWN & STARTUP
 		local COOLDOWN = 15 --(15s)
-		local STARTUP  = 0.7
+		local STARTUP = 0.7
 
 		local ok = skillAllowed(player, char, skill, COOLDOWN, true, 1.2)
-		if not ok then return end
+		if not ok then
+			return
+		end
 
 		animRemote:FireAllClients(hum, skill)
 		task.delay(STARTUP, function()
@@ -950,10 +932,13 @@ function SkillsModule.Akaza(
 				for _, v in partsInBox do
 					if v.Name == "HumanoidRootPart" then
 						local opponentChar = v.Parent :: Model?
-						if not opponentChar then return end
-						local opponentHum  = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
-						if not opponentHum then return end
-						local opponentHrp = v
+						if not opponentChar then
+							return
+						end
+						local opponentHum = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
+						if not opponentHum then
+							return
+						end
 
 						HitModule.Hit(
 							hum,
@@ -978,22 +963,22 @@ function SkillsModule.Akaza(
 
 	if skill == "Chaotic Blue Metal Afterglow" then
 		--STATS
-		local hitCount 	   = 8
+		local hitCount = 8
 
-		local hitType 	   = "Blunt"
-		local DMG          = 6.5 / hitCount --Per hit (8 hits total)
-		local STUN_TIME    = 0.6
-		local PBable 	   = false
-		local KB 		   = true
-		local KBforce 	   = 7.5
-		local KB_TIME 	   = 0.1
+		local hitType = "Blunt"
+		local DMG = 6.5 / hitCount --Per hit (8 hits total)
+		local STUN_TIME = 0.6
+		local PBable = false
+		local KB = true
+		local KBforce = 7.5
+		local KB_TIME = 0.1
 		local KB_Direction = "Look"
-		local Ragdoll 	   = false
+		local Ragdoll = false
 		local Ragdoll_TIME = STUN_TIME --(2.5)
 
 		--COOLDOWN
 		local COOLDOWN = 13 --(15s)
-		local STARTUP  = 0.4
+		local STARTUP = 0.4
 
 		local ok = skillAllowed(player, char, skill, COOLDOWN, true, 1.25)
 		if not ok then
@@ -1005,7 +990,9 @@ function SkillsModule.Akaza(
 			setIsAttacking(char, hitType, 0.15 * hitCount)
 
 			local hrp = char:FindFirstChild("HumanoidRootPart") :: BasePart?
-			if not hrp then return end
+			if not hrp then
+				return
+			end
 
 			--Setup
 			local params = OverlapParams.new()
@@ -1027,10 +1014,13 @@ function SkillsModule.Akaza(
 					for _, v in pairs(partsInBox) do
 						if v.Name == "HumanoidRootPart" then
 							local opponentChar = v.Parent :: Model?
-							if not opponentChar then return end
-							local opponentHum  = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
-							if not opponentHum then return end
-							local opponentHrp = v
+							if not opponentChar then
+								return
+							end
+							local opponentHum = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
+							if not opponentHum then
+								return
+							end
 
 							HitModule.Hit(
 								hum,
@@ -1057,31 +1047,35 @@ function SkillsModule.Akaza(
 
 	if skill == "Flying Planet" then
 		--STATS
-		local hitType 	   		  = "Blunt"
-		local DMG 		   		  = 8.5 -- Damage dealt to the target
-		local STUN_TIME    		  = 2
-		local PBable 	   		  = true
-		local KB 		   		  = true
-		local KBforce 	  		  = 100
-		local KB_TIME 	   		  = 0.1
-		local KB_Direction 		  = "UpLook"
-		local Direction_Divider   = 4
-		local RAGDOLL	   		  = true
-		local RAGDOLL_TIME 		  = STUN_TIME
+		local hitType = "Blunt"
+		local DMG = 8.5 -- Damage dealt to the target
+		local STUN_TIME = 2
+		local PBable = true
+		local KB = true
+		local KBforce = 100
+		local KB_TIME = 0.1
+		local KB_Direction = "UpLook"
+		local Direction_Divider = 4
+		local RAGDOLL = true
+		local RAGDOLL_TIME = STUN_TIME
 
 		--COOLDOWN
 		local COOLDOWN = 10 -- 13s
-		local STARTUP  = 0.2
+		local STARTUP = 0.2
 
 		local ok = skillAllowed(player, char, skill, COOLDOWN, true, 0.5)
-		if not ok then return end
+		if not ok then
+			return
+		end
 
 		animRemote:FireAllClients(hum, skill)
 
 		task.delay(STARTUP, function()
 			--Getting RootPart info
 			local hrp = char:FindFirstChild("HumanoidRootPart") :: BasePart?
-			if not hrp then return end
+			if not hrp then
+				return
+			end
 			vfxRemote:FireAllClients(hrp, skill)
 
 			setIsAttacking(char, hitType, 0.15)
@@ -1100,10 +1094,13 @@ function SkillsModule.Akaza(
 				for _, v in pairs(partsInBox) do
 					if v.Name == "HumanoidRootPart" then
 						local opponentChar = v.Parent :: Model?
-						if not opponentChar then return end
-						local opponentHum  = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
-						if not opponentHum then return end
-						local opponentHrp = v
+						if not opponentChar then
+							return
+						end
+						local opponentHum = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
+						if not opponentHum then
+							return
+						end
 
 						HitModule.Hit(
 							hum,
@@ -1143,52 +1140,58 @@ function SkillsModule.Akaza(
 
 	if skill == "Crush Type" then
 		--STATS
-		local hitType 	   = "Blunt"
-		local DMG 		   = 6.5 -- Damage dealt to the target
-		local STUN_TIME    = 1.5
-		local PBable 	   = false
-		local KB 	   	   = true
-		local KBforce 	   = 40
-		local KB_TIME 	   = 0.1
+		local hitType = "Blunt"
+		local DMG = 6.5 -- Damage dealt to the target
+		local STUN_TIME = 1.5
+		local PBable = false
+		local KB = true
+		local KBforce = 40
+		local KB_TIME = 0.1
 		local KB_Direction = "Away"
-		local RAGDOLL 	   = true
+		local RAGDOLL = true
 		local RAGDOLL_TIME = STUN_TIME
 
 		--COOLDOWN
 		local COOLDOWN = 12 -- 13s
-		local STARTUP  = 0.35
+		local STARTUP = 0.35
 
 		local ok = skillAllowed(player, char, skill, COOLDOWN, false)
-		if not ok then return end
+		if not ok then
+			return
+		end
 
 		animRemote:FireAllClients(hum, skill)
 
 		task.delay(STARTUP, function()
 			--Getting RootPart
 			local hrp = char:FindFirstChild("HumanoidRootPart") :: BasePart?
-			if not hrp then return end
+			if not hrp then
+				return
+			end
 
 			--Velocity
-			local bv: BodyVelocity= Instance.new("BodyVelocity")
+			local bv: BodyVelocity = Instance.new("BodyVelocity")
 			bv.Name = "CrushType_BodyVelocity"
 			bv.Velocity = hrp.CFrame.LookVector * 85 + hrp.CFrame.UpVector * 50
 			bv.MaxForce = Vector3.new(100000, 100000, 100000)
-			bv.Parent   = hrp
+			bv.Parent = hrp
 			Debris:AddItem(bv, 0.1)
 
 			--Delay so skill doesn't instantly set off
 			task.delay(STARTUP, function()
 				local landedConnection: RBXScriptConnection
 				landedConnection = hum.StateChanged:Connect(function(_, newState)
-					if newState ~= Enum.HumanoidStateType.Landed and newState ~= Enum.HumanoidStateType.Running then return end
-					
+					if newState ~= Enum.HumanoidStateType.Landed and newState ~= Enum.HumanoidStateType.Running then
+						return
+					end
+
 					print("Landed reached (" .. script.Name .. ")")
 					landedConnection:Disconnect()
 					vfxRemote:FireAllClients(hrp, skill)
-					
+
 					char:SetAttribute("UsingAttack", false)
 					char:SetAttribute("Slowed", false)
-					
+
 					--Setup
 					local params = OverlapParams.new()
 					params.FilterType = Enum.RaycastFilterType.Exclude
@@ -1204,10 +1207,13 @@ function SkillsModule.Akaza(
 						for _, v in pairs(partsInBox) do
 							if v.Name == "HumanoidRootPart" then
 								local opponentChar = v.Parent :: Model?
-								if not opponentChar then return end
-								local opponentHum  = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
-								if not opponentHum then return end
-								local opponentHrp = v
+								if not opponentChar then
+									return
+								end
+								local opponentHum = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
+								if not opponentHum then
+									return
+								end
 
 								HitModule.Hit(
 									hum,
@@ -1228,7 +1234,7 @@ function SkillsModule.Akaza(
 						end
 					end
 				end)
-				
+
 				task.delay(0.75, function()
 					if landedConnection then
 						landedConnection:Disconnect()
@@ -1241,46 +1247,47 @@ function SkillsModule.Akaza(
 	end
 end
 
-function SkillsModule.Doma(
-	player: Player, 
-	char: Model, 
-	hum: Humanoid, 
-	skill: string,
-	mousePos: Vector3?
-)
+function SkillsModule.Doma(player: Player, char: Model, hum: Humanoid, skill: string, _mousePos: Vector3?)
 	-- Early exit if already using an attack
 	for _, v in DOWNED_ATTRIBUTES do
-		if char:GetAttribute(v) then return end
+		if char:GetAttribute(v) then
+			return
+		end
 	end
-	if hum:GetState() == Enum.HumanoidStateType.Dead then return end
-	
+	if hum:GetState() == Enum.HumanoidStateType.Dead then
+		return
+	end
+
 	if skill == "Freezing Clouds" then
 		--STATS
-		local hitCount  = 6
-		local hitType   = "Sharp"
-		local DMG 		= 6.5 / hitCount -- Damage dealt to the target
+		local hitCount = 6
+		local hitType = "Sharp"
+		local DMG = 6.5 / hitCount -- Damage dealt to the target
 		local STUN_TIME = 0.6
-		local PBable 	= false
-		local KB 	    = true
-		local KBforce   = 5
-		local KB_TIME   = 0.1
+		local PBable = false
+		local KB = true
+		local KBforce = 5
+		local KB_TIME = 0.1
 		local KB_Direction = "Look"
 
 		--COOLDOWN
 		local COOLDOWN = 13 -- REAL CD IS 15s
-		local STARTUP  = 0.25
-
+		local STARTUP = 0.25
 
 		local ok = skillAllowed(player, char, skill, COOLDOWN, true, 1.15)
-		if not ok then return end
+		if not ok then
+			return
+		end
 
 		animRemote:FireAllClients(hum, skill)
-		
+
 		task.delay(STARTUP, function()
 			local hrp = char:FindFirstChild("HumanoidRootPart") :: BasePart?
-			if not hrp then return end
+			if not hrp then
+				return
+			end
 			vfxRemote:FireAllClients(hrp, skill)
-			
+
 			--Setup
 			local params = OverlapParams.new()
 			params.FilterType = Enum.RaycastFilterType.Exclude
@@ -1291,9 +1298,13 @@ function SkillsModule.Doma(
 			local hitboxSize = Vector3.new(length, height, depth) -- width, height depth
 
 			--Multiple hits
-			setIsAttacking(char, hitType, .5)
+			setIsAttacking(char, hitType, 0.5)
 			for i = 1, hitCount do
-				if i <= 1 then PBable = true else PBable = false end
+				if i <= 1 then
+					PBable = true
+				else
+					PBable = false
+				end
 				local hitboxCFrame = hrp.CFrame * CFrame.new(0, 0, -depth / 2) --Position of hitbox
 				local partsInBox = workspace:GetPartBoundsInBox(hitboxCFrame, hitboxSize, params)
 
@@ -1301,23 +1312,26 @@ function SkillsModule.Doma(
 					for _, v in pairs(partsInBox) do
 						if v.Name == "HumanoidRootPart" then
 							local opponentChar = v.Parent :: Model?
-							if not opponentChar then return end
-							local opponentHum  = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
-							if not opponentHum then return end
-							local opponentHrp = v
+							if not opponentChar then
+								return
+							end
+							local opponentHum = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
+							if not opponentHum then
+								return
+							end
 
 							--print('HRP Found!')
 
 							--Preventing an attack when player isn't supposed to attack or opponent isn't supposed to be hit
 							HitModule.Hit(
-								hum, 
-								opponentHum, 
-								hitType, 
-								DMG, 
-								STUN_TIME, 
-								PBable, 
-								KB, 
-								KBforce, 
+								hum,
+								opponentHum,
+								hitType,
+								DMG,
+								STUN_TIME,
+								PBable,
+								KB,
+								KBforce,
 								KB_TIME,
 								KB_Direction,
 								0
@@ -1330,26 +1344,27 @@ function SkillsModule.Doma(
 			end
 		end)
 	end
-	
+
 	if skill == "Barren Hanging Garden" then
 		--STATS
-		local hitCount  = 8
-		local hitType   = "Sharp"
-		local DMG 		= 8 / hitCount -- Damage dealt to the target
+		local hitCount = 8
+		local hitType = "Sharp"
+		local DMG = 8 / hitCount -- Damage dealt to the target
 		local STUN_TIME = 0.6
-		local PBable 	= false
-		local KB 	    = true
-		local KBforce   = 17.5
-		local KB_TIME   = 0.1
+		local PBable = false
+		local KB = true
+		local KBforce = 17.5
+		local KB_TIME = 0.1
 		local KB_Direction = "Look"
 
 		--COOLDOWN
 		local COOLDOWN = 13 -- REAL CD IS 15s
-		local STARTUP  = 0.3
-
+		local STARTUP = 0.3
 
 		local ok = skillAllowed(player, char, skill, COOLDOWN, true, 1.6)
-		if not ok then return end
+		if not ok then
+			return
+		end
 
 		animRemote:FireAllClients(hum, skill)
 
@@ -1364,7 +1379,9 @@ function SkillsModule.Doma(
 
 		task.delay(STARTUP, function()
 			local hrp = char:FindFirstChild("HumanoidRootPart") :: BasePart?
-			if not hrp then return end
+			if not hrp then
+				return
+			end
 			vfxRemote:FireAllClients(hrp, skill)
 
 			--Setup
@@ -1379,10 +1396,14 @@ function SkillsModule.Doma(
 			--Multiple hits
 			setIsAttacking(char, hitType, 1.2)
 			for i = 1, hitCount do
-				if i <= 2 then PBable = true else PBable = false end
-				
+				if i <= 2 then
+					PBable = true
+				else
+					PBable = false
+				end
+
 				forwardVelocity(hrp)
-				
+
 				local hitboxCFrame = hrp.CFrame * CFrame.new(0, 0, -depth / 2) --Position of hitbox
 				local partsInBox = workspace:GetPartBoundsInBox(hitboxCFrame, hitboxSize, params)
 
@@ -1390,23 +1411,26 @@ function SkillsModule.Doma(
 					for _, v in pairs(partsInBox) do
 						if v.Name == "HumanoidRootPart" then
 							local opponentChar = v.Parent :: Model?
-							if not opponentChar then return end
-							local opponentHum  = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
-							if not opponentHum then return end
-							local opponentHrp = v
+							if not opponentChar then
+								return
+							end
+							local opponentHum = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
+							if not opponentHum then
+								return
+							end
 
 							--print('HRP Found!')
 
 							--Preventing an attack when player isn't supposed to attack or opponent isn't supposed to be hit
 							HitModule.Hit(
-								hum, 
-								opponentHum, 
-								hitType, 
-								DMG, 
-								STUN_TIME, 
-								PBable, 
-								KB, 
-								KBforce, 
+								hum,
+								opponentHum,
+								hitType,
+								DMG,
+								STUN_TIME,
+								PBable,
+								KB,
+								KBforce,
 								KB_TIME,
 								KB_Direction,
 								0
@@ -1419,30 +1443,34 @@ function SkillsModule.Doma(
 			end
 		end)
 	end
-	
+
 	if skill == "Frozen Lotus" then
 		--STATS
-		local hitCount     = 1
-		local hitType      = "Sharp"
-		local DMG 		   = 6 / hitCount -- Damage dealt to the target
-		local STUN_TIME    = 0.6
-		local PBable 	   = false
-		local Effect 	   = true
+		local hitCount = 1
+		local hitType = "Sharp"
+		local DMG = 6 / hitCount -- Damage dealt to the target
+		local STUN_TIME = 0.6
+		local PBable = false
+		local Effect = true
 		local StatusEffect = "Frost"
-		
+
 		--COOLDOWN
 		local COOLDOWN = 12 --15s
-		local STARTUP  = 0.3
+		local STARTUP = 0.3
 		local ENDLAG = 0.75
 		local DURATION = 3
-		
+
 		local ok = skillAllowed(player, char, skill, COOLDOWN, true, ENDLAG)
-		if not ok then return end
+		if not ok then
+			return
+		end
 
 		animRemote:FireAllClients(hum, skill)
 
 		local hrp = char:FindFirstChild("HumanoidRootPart") :: BasePart?
-		if not hrp then return end
+		if not hrp then
+			return
+		end
 
 		local function backwardVelocity()
 			--preventing velocity if ragdolled, stunned, or blocking
@@ -1456,65 +1484,75 @@ function SkillsModule.Doma(
 			local bv: BodyVelocity = Instance.new("BodyVelocity")
 			bv.MaxForce = Vector3.new(100000, 100000, 100000)
 			bv.Velocity = (hrp.CFrame.LookVector * -50) + (hrp.CFrame.UpVector * 50)
-			bv.Parent 	= hrp
+			bv.Parent = hrp
 			Debris:AddItem(bv, 0.1)
 		end
-		
-		local function playVFX(hrp: BasePart): BasePart
-			if not canPlayFX(char) then return end
 
-			local part: BasePart = SkillsetsVFX.BDAs.Doma["Frozen Lotus"]
+		local function playVFX(): BasePart
+			if not canPlayFX(char) then
+				return
+			end
 
 			--//MAIN
+			local part: BasePart = SkillsetsVFX.BDAs.Doma["Frozen Lotus"]
 			part = part:Clone()
 			--Particles
 			for _, v: Instance in pairs(part:GetDescendants()) do
-				if not v:IsA("ParticleEmitter") then continue end
+				if not v:IsA("ParticleEmitter") then
+					continue
+				end
 				v.Enabled = false --Disable particles because they are played on the client
 			end
-			
+
 			--Properties
 			part.Parent = Trash
 			part.CFrame = CFrame.lookAlong(
-				hrp.Position + (
-					(hrp.CFrame.UpVector * (part.Size.Y / 3.75) ) 
-						+ (hrp.CFrame.LookVector * (part.Size.Z / 2) ) 
-				) , 
+				hrp.Position
+					+ ((hrp.CFrame.UpVector * (part.Size.Y / 3.75)) + (hrp.CFrame.LookVector * (part.Size.Z / 2))),
 				hrp.CFrame.LookVector
 			)
 			task.delay(DURATION, function()
 				part.CanTouch = false
 			end)
 			Debris:AddItem(part, DURATION + 2)
-			
+
 			return part
 		end
-		
+
 		task.delay(STARTUP, function()
-			if not hrp then return end
+			hrp = char:FindFirstChild("HumanoidRootPart")
+			if not hrp then
+				return
+			end
 			vfxRemote:FireAllClients(hrp, skill)
-			
+
 			backwardVelocity()
 			setIsAttacking(char, hitType, 0.15)
-			
-			local hitbox: BasePart = playVFX(hrp)
+
+			local hitbox: BasePart = playVFX()
 			--Setup
 			hitTracker[char] = hitTracker[char] or {}
 			local hitBySkill = hitTracker[char][skill] or {}
 			hitTracker[char][skill] = hitBySkill
-			
-			local touchedConnection 
+
+			local touchedConnection
 			touchedConnection = hitbox.Touched:Connect(function(hit: BasePart)
 				if hit.Parent ~= char then
-					if not hit.Parent:IsA("Model") then return end
-					local opponentChar = hit.Parent :: Model
-					local opponentHum  = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
-					if not opponentHum then return end
-					
-					for _, attribute in pairs(DOWNED_ATTRIBUTES) do
-						if opponentChar:GetAttribute(attribute) then return end
+					if not hit.Parent:IsA("Model") then
+						return
 					end
-					
+					local opponentChar = hit.Parent :: Model
+					local opponentHum = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
+					if not opponentHum then
+						return
+					end
+
+					for _, attribute in pairs(DOWNED_ATTRIBUTES) do
+						if opponentChar:GetAttribute(attribute) then
+							return
+						end
+					end
+
 					if not hitBySkill[opponentChar] then
 						hitBySkill[opponentChar] = true
 
@@ -1539,7 +1577,6 @@ function SkillsModule.Doma(
 					end
 				end
 			end)
-			
 
 			task.delay(DURATION, function()
 				for _, v in pairs(hitBySkill) do
@@ -1553,20 +1590,19 @@ function SkillsModule.Doma(
 					touchedConnection = nil
 				end
 			end)
-			
 		end)
 	end
-	
+
 	if skill == "Wintry Icicles" then
 		--STATS
-		local hitCount  = 4
-		local hitType   = "Sharp"
-		local DMG 		= 8 / hitCount -- Damage dealt to the target
+		local hitCount = 4
+		local hitType = "Sharp"
+		local DMG = 8 / hitCount -- Damage dealt to the target
 		local STUN_TIME = 1
-		local PBable 	= false
-		local KB 	    = true
-		local KBforce   = 5
-		local KB_TIME   = 0.1
+		local PBable = false
+		local KB = true
+		local KBforce = 5
+		local KB_TIME = 0.1
 		local KB_Direction = "Away"
 		local Ragdoll = true
 		local Ragdoll_TIME = STUN_TIME
@@ -1575,13 +1611,15 @@ function SkillsModule.Doma(
 
 		--COOLDOWN
 		local COOLDOWN = 15 -- REAL CD IS 15s
-		local STARTUP  = 0.15
-		local DURATION = .4
+		local STARTUP = 0.15
+		local DURATION = 0.4
 		local MAX_DISTANCE = 50 -- Max distance the projectile can be spawned
-		
+
 		local ok = skillAllowed(player, char, skill, COOLDOWN, true, DURATION)
-		if not ok then return end
-		
+		if not ok then
+			return
+		end
+
 		local function playVFX(hrp: BasePart, opponentHrp: BasePart): BasePart
 			--//MAIN
 			local model: Model = SkillsetsVFX.BDAs.Doma["Wintry Icicles"]
@@ -1591,80 +1629,84 @@ function SkillsModule.Doma(
 
 			--Properties
 			model.Parent = Trash
-			model:PivotTo(
-				CFrame.new(
-					opponentHrp.Position + (hrp.CFrame.UpVector * 15)
-				)
-			)
+			model:PivotTo(CFrame.new(opponentHrp.Position + (hrp.CFrame.UpVector * 15)))
 			for _, part: BasePart in pairs(model:GetChildren()) do
-				if not part:IsA("BasePart") then continue end
+				if not part:IsA("BasePart") then
+					continue
+				end
 
 				--part.Position = opponentHrp.Position + (hrp.CFrame.UpVector * 15)
 				TweenService:Create(
-					part, 
-					TweenInfo.new(DURATION, Enum.EasingStyle.Quad, Enum.EasingDirection.In, 0, false, 0), 
-					{Position = part.Position + (hrp.CFrame.UpVector * math.random(-18,-15) )}
+					part,
+					TweenInfo.new(DURATION, Enum.EasingStyle.Quad, Enum.EasingDirection.In, 0, false, 0),
+					{ Position = part.Position + (hrp.CFrame.UpVector * math.random(-18, -15)) }
 				):Play()
-				
+
 				task.delay(DURATION, function()
 					TweenService:Create(
-						part, 
-						TweenInfo.new(.75, Enum.EasingStyle.Sine, Enum.EasingDirection.Out, 0, false, 0), 
-						{Transparency = 1}
+						part,
+						TweenInfo.new(0.75, Enum.EasingStyle.Sine, Enum.EasingDirection.Out, 0, false, 0),
+						{ Transparency = 1 }
 					):Play()
-					
+
 					--Particles
 					for _, v: Instance in pairs(part:GetChildren()) do
-						if not v:IsA("ParticleEmitter") then continue end
+						if not v:IsA("ParticleEmitter") then
+							continue
+						end
 						v.Enabled = false --Disable particles because they are played on the client
 					end
 				end)
-			end	
-			
+			end
+
 			--hitbox.CanTouch = false
-			
+
 			--task.wait(0.1) --Pause before moving projectile
-			
+
 			--hitbox.CanTouch = true
 			task.delay(DURATION, function()
 				hitbox.CanTouch = false
 			end)
-			
+
 			Debris:AddItem(model, DURATION + 3)
-		
+
 			return hitbox
 		end
-		
+
 		animRemote:FireAllClients(hum, skill)
 
 		task.delay(STARTUP, function()
 			local hrp = char:FindFirstChild("HumanoidRootPart") :: BasePart?
-			if not hrp then return end
+			if not hrp then
+				return
+			end
 			--vfxRemote:FireAllClients(hrp, skill)
-			
+
 			local params = OverlapParams.new()
 			params.FilterType = Enum.RaycastFilterType.Exclude
-			params.FilterDescendantsInstances = {char}
-			
-			local length: number, height: number, depth: number = 10, 10, 50 -- Size of the box
+			params.FilterDescendantsInstances = { char }
+
+			local length: number, height: number, depth: number = 10, 10, MAX_DISTANCE -- Size of the box
 			local hitboxSize: Vector3 = Vector3.new(length, height, depth)
 			local hitboxCFrame = hrp.CFrame * CFrame.new(0, 0, -depth / 2) --Position of hitbox
 
-			local partsInBox = workspace:GetPartBoundsInBox(
-				hitboxCFrame,
-				hitboxSize,
-				params
-			)
+			local partsInBox = workspace:GetPartBoundsInBox(hitboxCFrame, hitboxSize, params)
 			if partsInBox then
 				for _, v in ipairs(partsInBox) do
-					if v.Name ~= "HumanoidRootPart" then continue end
+					if v.Name ~= "HumanoidRootPart" then
+						continue
+					end
 
 					local opponentChar = v.Parent :: Model?
-					if not opponentChar then return end
-					local opponentHum  = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
-					if not opponentHum then return end
+					if not opponentChar then
+						return
+					end
+					local opponentHum = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
+					if not opponentHum then
+						return
+					end
 					local opponentHrp = v
-					
+
 					--Multiple hits
 					local hitbox: BasePart = playVFX(hrp, opponentHrp)
 
@@ -1673,26 +1715,33 @@ function SkillsModule.Doma(
 					local hitBySkill = hitTracker[char][skill] or {}
 					hitTracker[char][skill] = hitBySkill
 
-					local touchedConnection 
+					local touchedConnection
 					touchedConnection = hitbox.Touched:Connect(function(hit: BasePart)
 						if hit.Parent ~= char then
-							if not hit.Parent:IsA("Model") then return end
-							local opponentChar = hit.Parent :: Model
-							local opponentHum  = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
-							if not opponentHum then return end
-
-							for _, attribute in pairs(DOWNED_ATTRIBUTES) do
-								if opponentChar:GetAttribute(attribute) then return end
+							if not hit.Parent:IsA("Model") then
+								return
+							end
+							local opponentChar_Touched = hit.Parent :: Model
+							local opponentHum_Touched =
+								opponentChar_Touched:FindFirstChildOfClass("Humanoid") :: Humanoid?
+							if not opponentHum_Touched then
+								return
 							end
 
-							if not hitBySkill[opponentChar] then
-								hitBySkill[opponentChar] = true
+							for _, attribute in pairs(DOWNED_ATTRIBUTES) do
+								if opponentChar_Touched:GetAttribute(attribute) then
+									return
+								end
+							end
+
+							if not hitBySkill[opponentChar_Touched] then
+								hitBySkill[opponentChar_Touched] = true
 
 								--Preventing an attack when player isn't supposed to attack or opponent isn't supposed to be hit
 								for _ = 1, hitCount do
 									HitModule.Hit(
 										hum,
-										opponentHum,
+										opponentHum_Touched,
 										hitType,
 										DMG,
 										STUN_TIME,
@@ -1718,7 +1767,6 @@ function SkillsModule.Doma(
 						end
 					end)
 
-
 					task.delay(DURATION, function()
 						for _, v in pairs(hitBySkill) do
 							v = nil
@@ -1731,7 +1779,7 @@ function SkillsModule.Doma(
 							touchedConnection = nil
 						end
 					end)
-					
+
 					break
 				end
 			end
@@ -1740,48 +1788,49 @@ function SkillsModule.Doma(
 end
 -----| Breaths |-----
 --Moon (Skillset, Breathing)
-function SkillsModule.Moon(
-	player: Player, 
-	char: Model, 
-	hum: Humanoid, 
-	skill: string
-)
+function SkillsModule.Moon(player: Player, char: Model, hum: Humanoid, skill: string)
 	-- Early exit if already using an attack
 	for _, v in DOWNED_ATTRIBUTES do
-		if char:GetAttribute(v) then return end
+		if char:GetAttribute(v) then
+			return
+		end
 	end
-	if hum:GetState() == Enum.HumanoidStateType.Dead then return end
+	if hum:GetState() == Enum.HumanoidStateType.Dead then
+		return
+	end
 
 	--Checking skill
 	if skill == "Loathsome Moon, Chains" then
-
 		local Breath_NEEDED = 15
 
 		--STATS (Change as needed)
-		local hitType 	   = "Sharp"
-		local DMG 		   = 6 / 2 --Damage per hit / number of hits
-		local STUN_TIME    = 1
-		local PBable 	   = false
-		local KB 	       = true
-		local KBforce	   = 50
-		local KB_TIME 	   = 0.1
+		local hitType = "Sharp"
+		local DMG = 6 / 2 --Damage per hit / number of hits
+		local STUN_TIME = 1
+		local PBable = false
+		local KB = true
+		local KBforce = 50
+		local KB_TIME = 0.1
 		local KB_Direction = "Away"
-		local Ragdoll 	   = true
+		local Ragdoll = true
 		local Ragdoll_TIME = STUN_TIME --(2.5)
 
 		--COOLDOWN
 		local COOLDOWN = 12 --15s
-		local STARTUP  = 0.3
+		local STARTUP = 0.3
 		local ENDLAG = 0.75
-		local DURATION = ENDLAG - STARTUP
-		
-		
+		local _DURATION = ENDLAG - STARTUP
+
 		local enoughBreath: boolean, breathAmount: number = checkBreathingBar(Breath_NEEDED, char)
-		if not enoughBreath then return end
-		
+		if not enoughBreath then
+			return
+		end
+
 		local ok: boolean = skillAllowed(player, char, skill, COOLDOWN, true, ENDLAG)
-		if not ok then return end
-		
+		if not ok then
+			return
+		end
+
 		subtractBreathingBar(breathAmount, Breath_NEEDED, char)
 
 		--VFX--
@@ -1793,7 +1842,9 @@ function SkillsModule.Moon(
 
 		local function playVFX(hrp: BasePart, hrpPosition: Vector3, hrpLookVector: Vector3)
 			--If cannot play VFX, return
-			if not canPlayFX(char) then return end
+			if not canPlayFX(char) then
+				return
+			end
 
 			--Enable Particles
 			for _, child in Crescent1:GetChildren() do --Crescent1 VFX
@@ -1842,12 +1893,12 @@ function SkillsModule.Moon(
 			--Parenting to workspace (Trash)
 			Crescent1.Parent = Trash
 			Crescent2.Parent = Trash
-			hitbox.Parent	 = Trash
-			
+			hitbox.Parent = Trash
+
 			--CFrames
-			Crescent1.CFrame 	  = CFrame.lookAt(hrpPosition, hrpPosition + hrpLookVector) --* CFrame.Angles(-45, 180, 45)
-			Crescent2.CFrame 	  = CFrame.lookAt(hrpPosition, hrpPosition + hrpLookVector) --* CFrame.Angles(0, 0, 45)
-			hitbox.CFrame 		  = CFrame.lookAt(hrpPosition, hrpPosition + hrpLookVector) --* CFrame.Angles(0, 0, 45)
+			Crescent1.CFrame = CFrame.lookAt(hrpPosition, hrpPosition + hrpLookVector) --* CFrame.Angles(-45, 180, 45)
+			Crescent2.CFrame = CFrame.lookAt(hrpPosition, hrpPosition + hrpLookVector) --* CFrame.Angles(0, 0, 45)
+			hitbox.CFrame = CFrame.lookAt(hrpPosition, hrpPosition + hrpLookVector) --* CFrame.Angles(0, 0, 45)
 			Crescent1.Orientation = Crescent1.Orientation --+ Vector3.new(0, 0, 0)
 			Crescent2.Orientation = Crescent2.Orientation + Vector3.new(0, 180, -90)
 
@@ -1874,7 +1925,7 @@ function SkillsModule.Moon(
 			--tweenHITBOX_Pos
 			TweenService:Create(hitbox, tweenInfo_Position, { Position = Crescent2.Position + (hrpLookVector * 43) })
 				:Play()
-			
+
 			--tween1_Rot
 			TweenService
 				:Create(
@@ -1901,7 +1952,9 @@ function SkillsModule.Moon(
 		end
 		local function playSFX(hrp: BasePart)
 			--If cannot play VFX, return
-			if not canPlayFX(char) then return end
+			if not canPlayFX(char) then
+				return
+			end
 
 			local SFX = ReplicatedStorage.FX.SFX.Combat.Skillsets.Breaths.Moon.LoathsomeMoon:Clone()
 			--^^^change to actual sound
@@ -1917,7 +1970,9 @@ function SkillsModule.Moon(
 
 			--Getting RootPart info
 			local hrp = char:FindFirstChild("HumanoidRootPart") :: BasePart?
-			if not hrp then return end
+			if not hrp then
+				return
+			end
 
 			local hrpPosition = hrp.Position
 			local hrpLookVector = hrp.CFrame.LookVector
@@ -1929,22 +1984,28 @@ function SkillsModule.Moon(
 			hitTracker[char] = hitTracker[char] or {}
 			local hitBySkill = hitTracker[char][skill] or {}
 			hitTracker[char][skill] = hitBySkill
-			
+
 			local touchedConnection
 			touchedConnection = hitbox.Touched:Connect(function(hit: BasePart)
 				if hit.Parent ~= char then
-					if not hit.Parent:IsA("Model") then return end
-					local opponentChar = hit.Parent :: Model
-					local opponentHum  = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
-					if not opponentHum then return end
-					
-					for _, attribute in pairs(DOWNED_ATTRIBUTES) do
-						if opponentChar:GetAttribute(attribute) then return end
+					if not hit.Parent:IsA("Model") then
+						return
 					end
-					
+					local opponentChar = hit.Parent :: Model
+					local opponentHum = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
+					if not opponentHum then
+						return
+					end
+
+					for _, attribute in pairs(DOWNED_ATTRIBUTES) do
+						if opponentChar:GetAttribute(attribute) then
+							return
+						end
+					end
+
 					if not hitBySkill[opponentChar] then
 						hitBySkill[opponentChar] = true
-						
+
 						for _ = 1, 2 do
 							--Preventing an attack when player isn't supposed to attack or opponent isn't supposed to be hit
 							HitModule.Hit(
@@ -1972,7 +2033,7 @@ function SkillsModule.Moon(
 				end
 				hitBySkill = nil
 				hitTracker[char] = nil
-				
+
 				if touchedConnection then
 					touchedConnection:Disconnect()
 					touchedConnection = nil
@@ -1986,33 +2047,34 @@ function SkillsModule.Moon(
 	end
 
 	if skill == "Moon Spirit Calamitous Eddy" then
-		
 		local Breath_NEEDED = 20
 
 		--STATS
-		local hitCount  = 3
-		local hitType   = "Sharp"
-		local DMG 		= 7.5 / hitCount -- Damage dealt to the target
+		local hitCount = 3
+		local hitType = "Sharp"
+		local DMG = 7.5 / hitCount -- Damage dealt to the target
 		local STUN_TIME = 0.6
-		local PBable 	= false
-		local KB 	    = true
-		local KBforce   = 5
-		local KB_TIME   = 0.1
+		local PBable = false
+		local KB = true
+		local KBforce = 5
+		local KB_TIME = 0.1
 		local KB_Direction = "Look"
 
 		--COOLDOWN
 		local COOLDOWN = 14 -- REAL CD IS 12s
-		local STARTUP  = 0.3
-
+		local STARTUP = 0.3
 
 		local enoughBreath: boolean, breathAmount: number = checkBreathingBar(Breath_NEEDED, char)
-		if not enoughBreath then return end
+		if not enoughBreath then
+			return
+		end
 
 		local ok: boolean = skillAllowed(player, char, skill, COOLDOWN, true, 1)
-		if not ok then return end
+		if not ok then
+			return
+		end
 
 		subtractBreathingBar(breathAmount, Breath_NEEDED, char)
-		
 
 		animRemote:FireAllClients(hum, skill)
 
@@ -2033,10 +2095,12 @@ function SkillsModule.Moon(
 				else
 					PBable = false
 				end
-				
+
 				--Getting RootPart info
 				local hrp = char:FindFirstChild("HumanoidRootPart") :: BasePart?
-				if not hrp then return end
+				if not hrp then
+					return
+				end
 
 				vfxRemote:FireAllClients(hrp, skill)
 
@@ -2049,23 +2113,26 @@ function SkillsModule.Moon(
 					for _, v in pairs(partsInBox) do
 						if v.Name == "HumanoidRootPart" then
 							local opponentChar = v.Parent :: Model?
-							if not opponentChar then return end
-							local opponentHum  = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
-							if not opponentHum then return end
-							local opponentHrp = v
+							if not opponentChar then
+								return
+							end
+							local opponentHum = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
+							if not opponentHum then
+								return
+							end
 
 							--print('HRP Found!')
 
 							--Preventing an attack when player isn't supposed to attack or opponent isn't supposed to be hit
 							HitModule.Hit(
-								hum, 
-								opponentHum, 
-								hitType, 
-								DMG, 
-								STUN_TIME, 
-								PBable, 
-								KB, 
-								KBforce, 
+								hum,
+								opponentHum,
+								hitType,
+								DMG,
+								STUN_TIME,
+								PBable,
+								KB,
+								KBforce,
 								KB_TIME,
 								KB_Direction,
 								0
@@ -2080,33 +2147,34 @@ function SkillsModule.Moon(
 	end
 
 	if skill == "Catastrophe, Tenman Crescent Moon" then
-		
 		local Breath_NEEDED = 35
 
 		--STATS
-		local hitCount 	= 10
-		local hitType 	= "Sharp"
-		local DMG 		= 10 / hitCount -- Damage dealt to the target per hit
+		local hitCount = 10
+		local hitType = "Sharp"
+		local DMG = 10 / hitCount -- Damage dealt to the target per hit
 		local STUN_TIME = 0.6
-		local PBable 	= false
-		local KB 		= true
-		local KBforce   = 10
-		local KB_TIME   = 0.1
+		local PBable = false
+		local KB = true
+		local KBforce = 10
+		local KB_TIME = 0.1
 		local KB_Direction = "Away"
 
 		--COOLDOWN
 		local COOLDOWN = 20 -- REAL COOLDOWN IS 20s, SET TO 5 FOR TESTING
-		local STARTUP  = 0.6
-
+		local STARTUP = 0.6
 
 		local enoughBreath: boolean, breathAmount: number = checkBreathingBar(Breath_NEEDED, char)
-		if not enoughBreath then return end
+		if not enoughBreath then
+			return
+		end
 
 		local ok: boolean = skillAllowed(player, char, skill, COOLDOWN, true, 1.8)
-		if not ok then return end
+		if not ok then
+			return
+		end
 
 		subtractBreathingBar(breathAmount, Breath_NEEDED, char)
-
 
 		animRemote:FireAllClients(hum, skill)
 
@@ -2122,7 +2190,7 @@ function SkillsModule.Moon(
 			local length = 22.5
 			local height = 25
 			--Hit loop
-			for i = 1, hitCount do				
+			for i = 1, hitCount do
 				if i <= 2 then
 					PBable = true
 				else
@@ -2135,7 +2203,9 @@ function SkillsModule.Moon(
 
 				--Getting RootPart info
 				local hrp = char:FindFirstChild("HumanoidRootPart") :: BasePart?
-				if not hrp then return end
+				if not hrp then
+					return
+				end
 
 				vfxRemote:FireAllClients(hrp, skill)
 
@@ -2145,20 +2215,23 @@ function SkillsModule.Moon(
 					for _, v in pairs(partsInBox) do
 						if v.Name == "HumanoidRootPart" then
 							local opponentChar = v.Parent :: Model?
-							if not opponentChar then return end
-							local opponentHum  = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
-							if not opponentHum then return end
-							local opponentHrp = v
+							if not opponentChar then
+								return
+							end
+							local opponentHum = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
+							if not opponentHum then
+								return
+							end
 
 							HitModule.Hit(
-								hum, 
-								opponentHum, 
-								hitType, 
-								DMG, 
-								STUN_TIME, 
-								PBable, 
-								KB, 
-								KBforce, 
+								hum,
+								opponentHum,
+								hitType,
+								DMG,
+								STUN_TIME,
+								PBable,
+								KB,
+								KBforce,
 								KB_TIME,
 								KB_Direction,
 								0
@@ -2173,33 +2246,34 @@ function SkillsModule.Moon(
 	end
 
 	if skill == "Moonbow, Half Moon" then
-		
 		local Breath_NEEDED = 25
 
 		--STATS
-		local hitCount 	= 6
-		local hitType 	= "Sharp"
-		local DMG 		= 6 / hitCount -- Damage dealt to the target
+		local hitCount = 6
+		local hitType = "Sharp"
+		local DMG = 6 / hitCount -- Damage dealt to the target
 		local STUN_TIME = 0.6
-		local PBable 	= false
-		local KB 		= true
-		local KBforce	= 7.5
-		local KB_TIME 	= 0.1
+		local PBable = false
+		local KB = true
+		local KBforce = 7.5
+		local KB_TIME = 0.1
 		local KB_Direction = "Away"
 
 		--COOLDOWN
 		local COOLDOWN = 16 --20s
-		local STARTUP  = 0.4
+		local STARTUP = 0.4
 
-		
 		local enoughBreath: boolean, breathAmount: number = checkBreathingBar(Breath_NEEDED, char)
-		if not enoughBreath then return end
+		if not enoughBreath then
+			return
+		end
 
 		local ok: boolean = skillAllowed(player, char, skill, COOLDOWN, true, 1.25)
-		if not ok then return end
+		if not ok then
+			return
+		end
 
 		subtractBreathingBar(breathAmount, Breath_NEEDED, char)
-
 
 		animRemote:FireAllClients(hum, skill)
 
@@ -2220,7 +2294,9 @@ function SkillsModule.Moon(
 			for _ = 1, hitCount do
 				--Getting RootPart info
 				local hrp = char:FindFirstChild("HumanoidRootPart") :: BasePart?
-				if not hrp then return end
+				if not hrp then
+					return
+				end
 
 				vfxRemote:FireAllClients(hrp, skill)
 
@@ -2231,20 +2307,23 @@ function SkillsModule.Moon(
 					for _, v in pairs(partsInBox) do
 						if v.Name == "HumanoidRootPart" then
 							local opponentChar = v.Parent :: Model?
-							if not opponentChar then return end
-							local opponentHum  = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
-							if not opponentHum then return end
-							local opponentHrp = v
+							if not opponentChar then
+								return
+							end
+							local opponentHum = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
+							if not opponentHum then
+								return
+							end
 
 							HitModule.Hit(
-								hum, 
-								opponentHum, 
-								hitType, 
-								DMG, 
-								STUN_TIME, 
-								PBable, 
-								KB, 
-								KBforce, 
+								hum,
+								opponentHum,
+								hitType,
+								DMG,
+								STUN_TIME,
+								PBable,
+								KB,
+								KBforce,
 								KB_TIME,
 								KB_Direction,
 								0
@@ -2259,54 +2338,55 @@ function SkillsModule.Moon(
 	end
 end
 
-function SkillsModule.Sun(
-	player: Player,
-	char: Model,
-	hum: Humanoid,
-	skill: string
-)
-
+function SkillsModule.Sun(player: Player, char: Model, hum: Humanoid, skill: string)
 	for _, v in DOWNED_ATTRIBUTES do
-		if char:GetAttribute(v) then return end
+		if char:GetAttribute(v) then
+			return
+		end
 	end
-	if hum:GetState() == Enum.HumanoidStateType.Dead then return end
+	if hum:GetState() == Enum.HumanoidStateType.Dead then
+		return
+	end
 
 	if skill == "Dance" then
-		
 		local Breath_NEEDED = 15
-		
+
 		--STATS (Change as needed)
-		local hitType 	   = "Sharp"
-		local DMG 		   = 5
-		local STUN_TIME    = 2.5
-		local PBable 	   = true
-		local KB 	       = true
-		local KB_FORCE	   = 50
-		local KB_TIME 	   = 0.1
+		local hitType = "Sharp"
+		local DMG = 5
+		local STUN_TIME = 2.5
+		local PBable = true
+		local KB = true
+		local KB_FORCE = 50
+		local KB_TIME = 0.1
 		local KB_Direction = "Look"
-		local Ragdoll 	   = true
+		local Ragdoll = true
 		local Ragdoll_TIME = STUN_TIME
-		local Effect	   = true
+		local Effect = true
 		local StatusEffect = "Burn"
 
 		--COOLDOWN
 		local COOLDOWN = 12 --12s
-		local STARTUP  = 0.3
-
+		local STARTUP = 0.3
 
 		local enoughBreath: boolean, breathAmount: number = checkBreathingBar(Breath_NEEDED, char)
-		if not enoughBreath then return end
+		if not enoughBreath then
+			return
+		end
 
-		local ok: boolean = skillAllowed(player, char, skill, COOLDOWN, true, .9)
-		if not ok then return end
+		local ok: boolean = skillAllowed(player, char, skill, COOLDOWN, true, 0.9)
+		if not ok then
+			return
+		end
 
 		subtractBreathingBar(breathAmount, Breath_NEEDED, char)
-		
 
 		animRemote:FireAllClients(hum, skill)
 
 		local hrp = char:FindFirstChild("HumanoidRootPart") :: BasePart?
-		if not hrp then return end
+		if not hrp then
+			return
+		end
 
 		local function forwardVelocity()
 			--preventing velocity if ragdolled, stunned, or blocking
@@ -2320,11 +2400,11 @@ function SkillsModule.Sun(
 			local bv: BodyVelocity = Instance.new("BodyVelocity")
 			bv.MaxForce = Vector3.new(100000, 100000, 100000)
 			bv.Velocity = hrp.CFrame.LookVector * 60
-			bv.Parent 	= hrp
+			bv.Parent = hrp
 			Debris:AddItem(bv, 0.2)
 		end
 
-		task.delay(STARTUP - 0.1 , forwardVelocity)
+		task.delay(STARTUP - 0.1, forwardVelocity)
 		task.delay(STARTUP, function()
 			vfxRemote:FireAllClients(hrp, skill)
 
@@ -2340,7 +2420,9 @@ function SkillsModule.Sun(
 
 			--Getting RootPart info
 			hrp = char:FindFirstChild("HumanoidRootPart") :: BasePart?
-			if not hrp then return end
+			if not hrp then
+				return
+			end
 
 			local hitboxCFrame = hrp.CFrame * CFrame.new(0, 0, -depth / 2) --Position of hitbox
 			local partsInBox = workspace:GetPartBoundsInBox(hitboxCFrame, hitboxSize, params)
@@ -2349,23 +2431,24 @@ function SkillsModule.Sun(
 				for _, v in pairs(partsInBox) do
 					if v.Name == "HumanoidRootPart" then
 						local opponentChar = v.Parent :: Model?
-						if not opponentChar then return end
-						local opponentHum  = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
-						if not opponentHum then return end
-						local opponentHrp = v
-
-						--print('HRP Found!')
+						if not opponentChar then
+							return
+						end
+						local opponentHum = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
+						if not opponentHum then
+							return
+						end
 
 						--Preventing an attack when player isn't supposed to attack or opponent isn't supposed to be hit
 						HitModule.Hit(
-							hum, 
-							opponentHum, 
-							hitType, 
-							DMG, 
-							STUN_TIME, 
-							PBable, 
-							KB, 
-							KB_FORCE, 
+							hum,
+							opponentHum,
+							hitType,
+							DMG,
+							STUN_TIME,
+							PBable,
+							KB,
+							KB_FORCE,
 							KB_TIME,
 							KB_Direction,
 							0,
@@ -2381,45 +2464,47 @@ function SkillsModule.Sun(
 	end
 
 	if skill == "Raging Sun" then
-		
 		local Breath_NEEDED = 15
 
 		--STATS (Change as needed)
 		local hitCount = 2
 
-		local hitType 	   = "Sharp"
-		local DMG 		   = 4 / hitCount --Damage / # of hits
-		local STUN_TIME    = 0.75
-		local PBable 	   = false
-		local KB 	       = true
-		local KB_FORCE	   = 7.5
-		local KB_TIME 	   = 0.1
+		local hitType = "Sharp"
+		local DMG = 4 / hitCount --Damage / # of hits
+		local STUN_TIME = 0.75
+		local PBable = false
+		local KB = true
+		local KB_FORCE = 7.5
+		local KB_TIME = 0.1
 		local KB_Direction = "Away"
-		local Ragdoll 	   = false
+		local Ragdoll = false
 		local Ragdoll_TIME = STUN_TIME
-		local Effect	   = true
+		local Effect = true
 		local StatusEffect = "Burn"
 
 		--COOLDOWN
 		local COOLDOWN = 12 --12s
-		local STARTUP  = 0.3
+		local STARTUP = 0.3
 		local TIME_BETWEEN_HITS = 0.3
 
-
 		local enoughBreath: boolean, breathAmount: number = checkBreathingBar(Breath_NEEDED, char)
-		if not enoughBreath then return end
+		if not enoughBreath then
+			return
+		end
 
-		local ok: boolean = skillAllowed(player, char, skill, COOLDOWN, true, .9)
-		if not ok then return end
+		local ok: boolean = skillAllowed(player, char, skill, COOLDOWN, true, 0.9)
+		if not ok then
+			return
+		end
 
 		subtractBreathingBar(breathAmount, Breath_NEEDED, char)
-
 
 		animRemote:FireAllClients(hum, skill)
 
 		local hrp = char:FindFirstChild("HumanoidRootPart") :: BasePart?
-		if not hrp then return end
-
+		if not hrp then
+			return
+		end
 
 		task.delay(STARTUP, function()
 			vfxRemote:FireAllClients(hrp, skill)
@@ -2437,8 +2522,10 @@ function SkillsModule.Sun(
 				local hitboxSize = Vector3.new(length, height, depth) -- width, height depth
 
 				--Getting RootPart info
-				local hrp = char:FindFirstChild("HumanoidRootPart") :: BasePart?
-				if not hrp then return end
+				hrp = char:FindFirstChild("HumanoidRootPart") :: BasePart?
+				if not hrp then
+					return
+				end
 
 				local hitboxCFrame = hrp.CFrame --Position of hitbox
 				--local hitboxCFrame = hrp.CFrame * CFrame.new(0, 0, -depth / 2) --Position of hitbox
@@ -2447,23 +2534,26 @@ function SkillsModule.Sun(
 					for _, v in pairs(partsInBox) do
 						if v.Name == "HumanoidRootPart" then
 							local opponentChar = v.Parent :: Model?
-							if not opponentChar then return end
-							local opponentHum  = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
-							if not opponentHum then return end
-							local opponentHrp = v
+							if not opponentChar then
+								return
+							end
+							local opponentHum = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
+							if not opponentHum then
+								return
+							end
 
 							--print('HRP Found!')
 
 							--Preventing an attack when player isn't supposed to attack or opponent isn't supposed to be hit
 							HitModule.Hit(
-								hum, 
-								opponentHum, 
-								hitType, 
-								DMG, 
-								STUN_TIME, 
-								PBable, 
-								KB, 
-								KB_FORCE, 
+								hum,
+								opponentHum,
+								hitType,
+								DMG,
+								STUN_TIME,
+								PBable,
+								KB,
+								KB_FORCE,
 								KB_TIME,
 								KB_Direction,
 								0,
@@ -2481,44 +2571,47 @@ function SkillsModule.Sun(
 	end
 
 	if skill == "Burning Bones, Summer Sun" then
-		
 		local Breath_NEEDED = 25
 
 		--STATS (Change as needed)
 		local hitCount = 6
 
-		local hitType 	   = "Sharp"
-		local DMG 		   = 5 / hitCount --Damage / # of hits
-		local STUN_TIME    = 0.6
-		local PBable 	   = false
-		local KB 	       = true
-		local KB_FORCE	   = 5
-		local KB_TIME 	   = 0.1
+		local hitType = "Sharp"
+		local DMG = 5 / hitCount --Damage / # of hits
+		local STUN_TIME = 0.6
+		local PBable = false
+		local KB = true
+		local KB_FORCE = 5
+		local KB_TIME = 0.1
 		local KB_Direction = "Away"
-		local Ragdoll 	   = false
+		local Ragdoll = false
 		local Ragdoll_TIME = STUN_TIME
-		local Effect	   = true
+		local Effect = true
 		local StatusEffect = "Burn"
 
 		--COOLDOWN
 		local COOLDOWN = 14 --18s
-		local STARTUP  = 0.4
+		local STARTUP = 0.4
 		local TIME_BETWEEN_HITS = 0.1
 
-
 		local enoughBreath: boolean, breathAmount: number = checkBreathingBar(Breath_NEEDED, char)
-		if not enoughBreath then return end
+		if not enoughBreath then
+			return
+		end
 
 		local ok: boolean = skillAllowed(player, char, skill, COOLDOWN, true, 1)
-		if not ok then return end
+		if not ok then
+			return
+		end
 
 		subtractBreathingBar(breathAmount, Breath_NEEDED, char)
-
 
 		animRemote:FireAllClients(hum, skill)
 
 		local hrp = char:FindFirstChild("HumanoidRootPart") :: BasePart?
-		if not hrp then return end
+		if not hrp then
+			return
+		end
 
 		local function forwardVelocity()
 			--preventing velocity if ragdolled, stunned, or blocking
@@ -2532,13 +2625,12 @@ function SkillsModule.Sun(
 			local bv: BodyVelocity = Instance.new("BodyVelocity")
 			bv.MaxForce = Vector3.new(100000, 100000, 100000)
 			bv.Velocity = hrp.CFrame.LookVector * 85
-			bv.Parent 	= hrp
+			bv.Parent = hrp
 			Debris:AddItem(bv, 0.35)
 		end
 
-
 		task.delay(STARTUP, function()
-			setIsAttacking(char, hitType, .65)
+			setIsAttacking(char, hitType, 0.65)
 			forwardVelocity()
 			vfxRemote:FireAllClients(hrp, skill)
 
@@ -2557,21 +2649,24 @@ function SkillsModule.Sun(
 					for _, v in pairs(partsInBox) do
 						if v.Name == "HumanoidRootPart" then
 							local opponentChar = v.Parent :: Model?
-							if not opponentChar then return end
-							local opponentHum  = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
-							if not opponentHum then return end
-							local opponentHrp = v
+							if not opponentChar then
+								return
+							end
+							local opponentHum = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
+							if not opponentHum then
+								return
+							end
 
 							--Preventing an attack when player isn't supposed to attack or opponent isn't supposed to be hit
 							HitModule.Hit(
-								hum, 
-								opponentHum, 
-								hitType, 
-								DMG, 
-								STUN_TIME, 
-								PBable, 
-								KB, 
-								KB_FORCE, 
+								hum,
+								opponentHum,
+								hitType,
+								DMG,
+								STUN_TIME,
+								PBable,
+								KB,
+								KB_FORCE,
 								KB_TIME,
 								KB_Direction,
 								0,
@@ -2589,41 +2684,44 @@ function SkillsModule.Sun(
 	end
 
 	if skill == "Setting Sun Transformation" then
-		
 		local Breath_NEEDED = 20
-		
+
 		--STATS (Change as needed)
-		local hitType 	   = "Sharp"
-		local DMG 		   = 7  --Damage / # of hits
-		local STUN_TIME    = 1.5
-		local PBable 	   = true
-		local KB 	       = true
-		local KB_FORCE	   = 30
-		local KB_TIME 	   = 0.1
+		local hitType = "Sharp"
+		local DMG = 7 --Damage / # of hits
+		local STUN_TIME = 1.5
+		local PBable = true
+		local KB = true
+		local KB_FORCE = 30
+		local KB_TIME = 0.1
 		local KB_Direction = "Away"
-		local Ragdoll 	   = true
+		local Ragdoll = true
 		local Ragdoll_TIME = STUN_TIME
-		local Effect	   = true
+		local Effect = true
 		local StatusEffect = "Burn"
 
 		--COOLDOWN
 		local COOLDOWN = 10 --15s
-		local STARTUP  = 0.35
-
+		local STARTUP = 0.35
 
 		local enoughBreath: boolean, breathAmount: number = checkBreathingBar(Breath_NEEDED, char)
-		if not enoughBreath then return end
+		if not enoughBreath then
+			return
+		end
 
-		local ok: boolean = skillAllowed(player, char, skill, COOLDOWN, true, .9)
-		if not ok then return end
+		local ok: boolean = skillAllowed(player, char, skill, COOLDOWN, true, 0.9)
+		if not ok then
+			return
+		end
 
 		subtractBreathingBar(breathAmount, Breath_NEEDED, char)
-
 
 		animRemote:FireAllClients(hum, skill)
 
 		local hrp = char:FindFirstChild("HumanoidRootPart") :: BasePart?
-		if not hrp then return end
+		if not hrp then
+			return
+		end
 
 		local function forwardVelocity()
 			--preventing velocity if ragdolled, stunned, or blocking
@@ -2637,7 +2735,7 @@ function SkillsModule.Sun(
 			local bv: BodyVelocity = Instance.new("BodyVelocity")
 			bv.MaxForce = Vector3.new(100000, 100000, 100000)
 			bv.Velocity = hrp.CFrame.RightVector * 50
-			bv.Parent 	= hrp
+			bv.Parent = hrp
 			Debris:AddItem(bv, 0.1)
 		end
 
@@ -2660,23 +2758,24 @@ function SkillsModule.Sun(
 				for _, v in pairs(partsInBox) do
 					if v.Name == "HumanoidRootPart" then
 						local opponentChar = v.Parent :: Model?
-						if not opponentChar then return end
-						local opponentHum  = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
-						if not opponentHum then return end
-						local opponentHrp = v
-
-						--print('HRP Found!')
+						if not opponentChar then
+							return
+						end
+						local opponentHum = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
+						if not opponentHum then
+							return
+						end
 
 						--Preventing an attack when player isn't supposed to attack or opponent isn't supposed to be hit
 						HitModule.Hit(
-							hum, 
-							opponentHum, 
-							hitType, 
-							DMG, 
-							STUN_TIME, 
-							PBable, 
-							KB, 
-							KB_FORCE, 
+							hum,
+							opponentHum,
+							hitType,
+							DMG,
+							STUN_TIME,
+							PBable,
+							KB,
+							KB_FORCE,
 							KB_TIME,
 							KB_Direction,
 							0,
@@ -2692,21 +2791,19 @@ function SkillsModule.Sun(
 	end
 end
 
-function SkillsModule.Thunder(
-	player: Player,
-	char: Model,
-	hum: Humanoid,
-	skill: string
-)
-	
-	for _, v in DOWNED_ATTRIBUTES do
-		if char:GetAttribute(v) then return end
-	end
-	if hum:GetState() == Enum.HumanoidStateType.Dead then return end
-	
-end
+-- function SkillsModule.Thunder(
+-- 	player: Player,
+-- 	char: Model,
+-- 	hum: Humanoid,
+-- 	skill: string
+-- )
+
+-- 	for _, v in DOWNED_ATTRIBUTES do
+-- 		if char:GetAttribute(v) then return end
+-- 	end
+-- 	if hum:GetState() == Enum.HumanoidStateType.Dead then return end
+
+-- end
 ------------------
-
-
 
 return SkillsModule
