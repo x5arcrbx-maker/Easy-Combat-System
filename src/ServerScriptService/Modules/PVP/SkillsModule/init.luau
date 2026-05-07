@@ -2,123 +2,30 @@ local SkillsModule = {}
 
 --//:SERVICES//:--
 local Debris = game:GetService("Debris")
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local TweenService = game:GetService("TweenService")
 
 --//:MODULES//:--
 local AnimationService = require(ReplicatedStorage.Modules.Packages.AnimationService)
+local Attributes = require(script.Attributes)
 local BreathingHandler = require(script.BreathingHandler)
+local CooldownHandler = require(script.CooldownHandler)
 local HitModule = require(ServerScriptService.Modules.PVP.HitModule)
+local HitTracker = require(script.HitTracker)
+local SkillGuard = require(script.SkillGuard)
 
 --//:REMOTES//:--
 local vfxRemote: UnreliableRemoteEvent = ReplicatedStorage.Remotes_Bindables.Remotes.GeneralPlayer.SkillVFX
 local animRemote: UnreliableRemoteEvent = ReplicatedStorage.Remotes_Bindables.Remotes.GeneralPlayer.SkillAnimations
-local addCooldownRemote: RemoteEvent = ReplicatedStorage.Remotes_Bindables.Remotes.GeneralPlayer.CooldownGUI
 
 --//:VARIABLES//:--
 local Collection = workspace.Collection
 local Trash = Collection.Trash
 local SkillsetsVFX: Folder = ReplicatedStorage.FX.VFX.Actions.Combat.Skillsets
 
-local hitTracker = {} -- Tracks hits for skills that use touched events
-local playerCooldowns = {} --Table for Cooldowns
-local PREVENTION_ATTRIBUTES: { string } = { --//Attributes that prevent attacks
-	"Knocked",
-	"Gripped",
-	"Carried",
-	"Ragdolled",
-	"TrueStunned",
-	"Stunned",
-	"Blocking",
-}
-local DOWNED_ATTRIBUTES: { string } = {
-	"Knocked",
-	"Gripped",
-	"Carried",
-	"Ragdolled",
-}
-
 --//:FUNCTIONS//:-- (General)
-
--- Reset cooldowns on respawn
-local function resetCooldownsOnRespawn()
-	Players.PlayerAdded:Connect(function(player)
-		player.CharacterAdded:Connect(function()
-			playerCooldowns[player] = {} -- reset on respawn
-		end)
-	end)
-end
-resetCooldownsOnRespawn()
-
--- Get remaining cooldown for a skill (in seconds)
--- returns (number)
-local function getRemainingCooldown(player: Player, skill: string): number
-	local onCooldown = playerCooldowns[player]
-	if not onCooldown then
-		return 0
-	end
-	local expiresAt: number? = onCooldown[skill]
-	if not expiresAt then
-		return 0
-	end
-	local remaining = expiresAt - tick()
-	return (remaining > 0) and remaining or 0
-end
-
--- Atomically check cooldown + prevention + reserve + set UsingAttack
--- returns (ok, remaining)
-local function skillAllowed(
-	player: Player,
-	char: Model,
-	skill: string,
-	cooldown: number,
-	useEndlagSystem: boolean,
-	duration: number?
-): (boolean, number)
-	playerCooldowns[player] = playerCooldowns[player] or {}
-
-	-- Check cooldown
-	local remaining = getRemainingCooldown(player, skill)
-	if remaining > 0 then
-		return false, remaining
-	end
-
-	if char:GetAttribute("UsingAttack") then
-		return false, 0
-	end
-
-	if useEndlagSystem then
-		--Set UsingAttack and Slowed
-		char:SetAttribute("UsingAttack", true)
-		char:SetAttribute("Slowed", true)
-		task.delay(duration, function()
-			char:SetAttribute("UsingAttack", false)
-			char:SetAttribute("Slowed", false)
-		end)
-	else
-		--Set UsingAttack
-		char:SetAttribute("UsingAttack", true)
-		char:SetAttribute("Slowed", true)
-	end
-
-	-- Check prevention attributes (excluding UsingAttack since we just set it)
-	for _, attribute in ipairs(PREVENTION_ATTRIBUTES) do
-		if char:GetAttribute(attribute) then
-			char:SetAttribute("UsingAttack", false)
-			return false, 0
-		end
-	end
-
-	-- Reserve cooldown (set expiresAt)
-	playerCooldowns[player][skill] = tick() + (cooldown or 0)
-
-	-- Send cooldown to player's GUI
-	addCooldownRemote:FireClient(player, skill, cooldown)
-
-	return true, 0
-end
+CooldownHandler:Init()
 
 -- Sets the "IsAttacking" attribute
 local function setIsAttacking(char: Model, hitType: string, durationOfAttacking: number)
@@ -130,25 +37,6 @@ local function setIsAttacking(char: Model, hitType: string, durationOfAttacking:
 		char:SetAttribute("IsAttacking", false)
 	end)
 end
-
--------------------------
-
--- Cleanup on player leave to prevent memory leaks
-Players.PlayerRemoving:Connect(function(player)
-	playerCooldowns[player] = nil
-end)
-
--- Checks if character can player VFX
-local function canPlayFX(char: Model): boolean
-	-- Check if char  can play FX (not stunned, ragdolled, etc.)
-	for _, attribute in ipairs(PREVENTION_ATTRIBUTES) do
-		if char:GetAttribute(attribute) then
-			return false
-		end
-	end
-	return true
-end
------------------------
 
 -- VisualizeHitbox function (for debugging)
 local function _visualizeHitbox(hitboxCFrame: CFrame, hitboxSize: Vector3, TIME: number)
@@ -169,7 +57,7 @@ end
 
 --M1 / Normal Attack
 function SkillsModule.NormalAttack(char: Model, hum: Humanoid, hrp: BasePart, combo: number, hitType: string)
-	for _, v in DOWNED_ATTRIBUTES do
+	for _, v in Attributes.DOWNED_ATTRIBUTES do
 		if char:GetAttribute(v) then
 			return
 		end
@@ -464,7 +352,7 @@ end
 
 --M2 / Heavy Attack
 function SkillsModule.HeavyAttack(char: Model, hum: Humanoid, hrp: BasePart, hitType: string)
-	for _, v in DOWNED_ATTRIBUTES do
+	for _, v in Attributes.DOWNED_ATTRIBUTES do
 		if char:GetAttribute(v) then
 			return
 		end
@@ -507,7 +395,7 @@ function SkillsModule.HeavyAttack(char: Model, hum: Humanoid, hrp: BasePart, hit
 		--end
 
 		--preventing velocity if ragdolled, stunned, or blocking
-		for _, attribute in pairs(PREVENTION_ATTRIBUTES) do
+		for _, attribute in pairs(Attributes.PREVENTION_ATTRIBUTES) do
 			if char:GetAttribute(attribute) then
 				return
 			end
@@ -681,7 +569,7 @@ end
 --[ SUBSKILLS ]--
 SkillsModule.Subskills = {
 	["Hunter Step"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
-		for _, v in DOWNED_ATTRIBUTES do
+		for _, v in Attributes.DOWNED_ATTRIBUTES do
 			if char:GetAttribute(v) then
 				return
 			end
@@ -708,7 +596,7 @@ SkillsModule.Subskills = {
 		local COOLDOWN = 20 --real is (20s)
 		local STARTUP = 0.25
 
-		local ok = skillAllowed(player, char, skill, COOLDOWN, true, STARTUP + 0.1)
+		local ok = SkillGuard:CheckSkillAllowed(player, char, skill, COOLDOWN, true, STARTUP + 0.1)
 		if not ok then
 			return
 		end
@@ -845,7 +733,7 @@ SkillsModule.Subskills = {
 	end,
 
 	["Sting & Send"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
-		for _, v in DOWNED_ATTRIBUTES do
+		for _, v in Attributes.DOWNED_ATTRIBUTES do
 			if char:GetAttribute(v) then
 				return
 			end
@@ -861,7 +749,7 @@ SkillsModule.Subskills = {
 -----| BDAs |-----
 SkillsModule.Akaza = {
 	["Annihilation Type: Punch"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
-		for _, v in DOWNED_ATTRIBUTES do
+		for _, v in Attributes.DOWNED_ATTRIBUTES do
 			if char:GetAttribute(v) then
 				return
 			end
@@ -886,7 +774,7 @@ SkillsModule.Akaza = {
 		local COOLDOWN = 15 --(15s)
 		local STARTUP = 0.7
 
-		local ok = skillAllowed(player, char, skill, COOLDOWN, true, 1.2)
+		local ok = SkillGuard:CheckSkillAllowed(player, char, skill, COOLDOWN, true, 1.2)
 		if not ok then
 			return
 		end
@@ -944,7 +832,7 @@ SkillsModule.Akaza = {
 	end,
 
 	["Chaotic Blue Metal Afterglow"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
-		for _, v in DOWNED_ATTRIBUTES do
+		for _, v in Attributes.DOWNED_ATTRIBUTES do
 			if char:GetAttribute(v) then
 				return
 			end
@@ -971,7 +859,7 @@ SkillsModule.Akaza = {
 		local COOLDOWN = 13 --(15s)
 		local STARTUP = 0.4
 
-		local ok = skillAllowed(player, char, skill, COOLDOWN, true, 1.25)
+		local ok = SkillGuard:CheckSkillAllowed(player, char, skill, COOLDOWN, true, 1.25)
 		if not ok then
 			return
 		end
@@ -1037,7 +925,7 @@ SkillsModule.Akaza = {
 	end,
 
 	["Flying Planet"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
-		for _, v in DOWNED_ATTRIBUTES do
+		for _, v in Attributes.DOWNED_ATTRIBUTES do
 			if char:GetAttribute(v) then
 				return
 			end
@@ -1063,7 +951,7 @@ SkillsModule.Akaza = {
 		local COOLDOWN = 10 -- 13s
 		local STARTUP = 0.2
 
-		local ok = skillAllowed(player, char, skill, COOLDOWN, true, 0.5)
+		local ok = SkillGuard:CheckSkillAllowed(player, char, skill, COOLDOWN, true, 0.5)
 		if not ok then
 			return
 		end
@@ -1139,7 +1027,7 @@ SkillsModule.Akaza = {
 	end,
 
 	["Crush Type"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
-		for _, v in DOWNED_ATTRIBUTES do
+		for _, v in Attributes.DOWNED_ATTRIBUTES do
 			if char:GetAttribute(v) then
 				return
 			end
@@ -1164,7 +1052,7 @@ SkillsModule.Akaza = {
 		local COOLDOWN = 12 -- 13s
 		local STARTUP = 0.35
 
-		local ok = skillAllowed(player, char, skill, COOLDOWN, false)
+		local ok = SkillGuard:CheckSkillAllowed(player, char, skill, COOLDOWN, false)
 		if not ok then
 			return
 		end
@@ -1258,7 +1146,7 @@ SkillsModule.Akaza = {
 
 SkillsModule.Doma = {
 	["Freezing Clouds"] = function(player: Player, char: Model, hum: Humanoid, skill: string, _mousePos: Vector3?)
-		for _, v in DOWNED_ATTRIBUTES do
+		for _, v in Attributes.DOWNED_ATTRIBUTES do
 			if char:GetAttribute(v) then
 				return
 			end
@@ -1282,7 +1170,7 @@ SkillsModule.Doma = {
 		local COOLDOWN = 13 -- REAL CD IS 15s
 		local STARTUP = 0.25
 
-		local ok = skillAllowed(player, char, skill, COOLDOWN, true, 1.15)
+		local ok = SkillGuard:CheckSkillAllowed(player, char, skill, COOLDOWN, true, 1.15)
 		if not ok then
 			return
 		end
@@ -1360,7 +1248,7 @@ SkillsModule.Doma = {
 		skill: string,
 		_mousePos: Vector3?
 	)
-		for _, v in DOWNED_ATTRIBUTES do
+		for _, v in Attributes.DOWNED_ATTRIBUTES do
 			if char:GetAttribute(v) then
 				return
 			end
@@ -1384,7 +1272,7 @@ SkillsModule.Doma = {
 		local COOLDOWN = 13 -- REAL CD IS 15s
 		local STARTUP = 0.3
 
-		local ok = skillAllowed(player, char, skill, COOLDOWN, true, 1.6)
+		local ok = SkillGuard:CheckSkillAllowed(player, char, skill, COOLDOWN, true, 1.6)
 		if not ok then
 			return
 		end
@@ -1468,7 +1356,7 @@ SkillsModule.Doma = {
 	end,
 
 	["Frozen Lotus"] = function(player: Player, char: Model, hum: Humanoid, skill: string, _mousePos: Vector3?)
-		for _, v in DOWNED_ATTRIBUTES do
+		for _, v in Attributes.DOWNED_ATTRIBUTES do
 			if char:GetAttribute(v) then
 				return
 			end
@@ -1492,7 +1380,7 @@ SkillsModule.Doma = {
 		local ENDLAG = 0.75
 		local DURATION = 3
 
-		local ok = skillAllowed(player, char, skill, COOLDOWN, true, ENDLAG)
+		local ok = SkillGuard:CheckSkillAllowed(player, char, skill, COOLDOWN, true, ENDLAG)
 		if not ok then
 			return
 		end
@@ -1506,7 +1394,7 @@ SkillsModule.Doma = {
 
 		local function backwardVelocity()
 			--preventing velocity if ragdolled, stunned, or blocking
-			for _, attribute in pairs(PREVENTION_ATTRIBUTES) do
+			for _, attribute in pairs(Attributes.PREVENTION_ATTRIBUTES) do
 				if char:GetAttribute(attribute) then
 					return
 				end
@@ -1521,7 +1409,7 @@ SkillsModule.Doma = {
 		end
 
 		local function playVFX(): BasePart
-			if not canPlayFX(char) then
+			if not SkillGuard:CanPlayFX(char) then
 				return
 			end
 
@@ -1563,9 +1451,9 @@ SkillsModule.Doma = {
 
 			local hitbox: BasePart = playVFX()
 			--Setup
-			hitTracker[char] = hitTracker[char] or {}
-			local hitBySkill = hitTracker[char][skill] or {}
-			hitTracker[char][skill] = hitBySkill
+			HitTracker[char] = HitTracker[char] or {}
+			local hitBySkill = HitTracker[char][skill] or {}
+			HitTracker[char][skill] = hitBySkill
 
 			local touchedConnection
 			touchedConnection = hitbox.Touched:Connect(function(hit: BasePart)
@@ -1579,7 +1467,7 @@ SkillsModule.Doma = {
 						return
 					end
 
-					for _, attribute in pairs(DOWNED_ATTRIBUTES) do
+					for _, attribute in pairs(Attributes.DOWNED_ATTRIBUTES) do
 						if opponentChar:GetAttribute(attribute) then
 							return
 						end
@@ -1615,7 +1503,7 @@ SkillsModule.Doma = {
 					v = nil
 				end
 				hitBySkill = nil
-				hitTracker[char] = nil
+				HitTracker[char] = nil
 
 				if touchedConnection then
 					touchedConnection:Disconnect()
@@ -1626,7 +1514,7 @@ SkillsModule.Doma = {
 	end,
 
 	["Wintry Icicles"] = function(player: Player, char: Model, hum: Humanoid, skill: string, _mousePos: Vector3?)
-		for _, v in DOWNED_ATTRIBUTES do
+		for _, v in Attributes.DOWNED_ATTRIBUTES do
 			if char:GetAttribute(v) then
 				return
 			end
@@ -1656,7 +1544,7 @@ SkillsModule.Doma = {
 		local DURATION = 0.4
 		local MAX_DISTANCE = 50 -- Max distance the projectile can be spawned
 
-		local ok = skillAllowed(player, char, skill, COOLDOWN, true, DURATION)
+		local ok = SkillGuard:CheckSkillAllowed(player, char, skill, COOLDOWN, true, DURATION)
 		if not ok then
 			return
 		end
@@ -1752,9 +1640,9 @@ SkillsModule.Doma = {
 					local hitbox: BasePart = playVFX(hrp, opponentHrp)
 
 					--Setup
-					hitTracker[char] = hitTracker[char] or {}
-					local hitBySkill = hitTracker[char][skill] or {}
-					hitTracker[char][skill] = hitBySkill
+					HitTracker[char] = HitTracker[char] or {}
+					local hitBySkill = HitTracker[char][skill] or {}
+					HitTracker[char][skill] = hitBySkill
 
 					local touchedConnection
 					touchedConnection = hitbox.Touched:Connect(function(hit: BasePart)
@@ -1769,7 +1657,7 @@ SkillsModule.Doma = {
 								return
 							end
 
-							for _, attribute in pairs(DOWNED_ATTRIBUTES) do
+							for _, attribute in pairs(Attributes.DOWNED_ATTRIBUTES) do
 								if opponentChar_Touched:GetAttribute(attribute) then
 									return
 								end
@@ -1813,7 +1701,7 @@ SkillsModule.Doma = {
 							v = nil
 						end
 						hitBySkill = nil
-						hitTracker[char] = nil
+						HitTracker[char] = nil
 
 						if touchedConnection then
 							touchedConnection:Disconnect()
@@ -1831,7 +1719,7 @@ SkillsModule.Doma = {
 -----| Breaths |-----
 SkillsModule.Moon = {
 	["Loathsome Moon, Chains"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
-		for _, v in DOWNED_ATTRIBUTES do
+		for _, v in Attributes.DOWNED_ATTRIBUTES do
 			if char:GetAttribute(v) then
 				return
 			end
@@ -1865,7 +1753,7 @@ SkillsModule.Moon = {
 			return
 		end
 
-		local ok: boolean = skillAllowed(player, char, skill, COOLDOWN, true, ENDLAG)
+		local ok: boolean = SkillGuard:CheckSkillAllowed(player, char, skill, COOLDOWN, true, ENDLAG)
 		if not ok then
 			return
 		end
@@ -1881,7 +1769,7 @@ SkillsModule.Moon = {
 
 		local function playVFX(hrp: BasePart, hrpPosition: Vector3, hrpLookVector: Vector3)
 			--If cannot play VFX, return
-			if not canPlayFX(char) then
+			if not SkillGuard:CanPlayFX(char) then
 				return
 			end
 
@@ -1991,7 +1879,7 @@ SkillsModule.Moon = {
 		end
 		local function playSFX(hrp: BasePart)
 			--If cannot play VFX, return
-			if not canPlayFX(char) then
+			if not SkillGuard:CanPlayFX(char) then
 				return
 			end
 
@@ -2020,9 +1908,9 @@ SkillsModule.Moon = {
 			playSFX(hrp)
 
 			--Setup
-			hitTracker[char] = hitTracker[char] or {}
-			local hitBySkill = hitTracker[char][skill] or {}
-			hitTracker[char][skill] = hitBySkill
+			HitTracker[char] = HitTracker[char] or {}
+			local hitBySkill = HitTracker[char][skill] or {}
+			HitTracker[char][skill] = hitBySkill
 
 			local touchedConnection
 			touchedConnection = hitbox.Touched:Connect(function(hit: BasePart)
@@ -2036,7 +1924,7 @@ SkillsModule.Moon = {
 						return
 					end
 
-					for _, attribute in pairs(DOWNED_ATTRIBUTES) do
+					for _, attribute in pairs(Attributes.DOWNED_ATTRIBUTES) do
 						if opponentChar:GetAttribute(attribute) then
 							return
 						end
@@ -2071,7 +1959,7 @@ SkillsModule.Moon = {
 					v = nil
 				end
 				hitBySkill = nil
-				hitTracker[char] = nil
+				HitTracker[char] = nil
 
 				if touchedConnection then
 					touchedConnection:Disconnect()
@@ -2086,7 +1974,7 @@ SkillsModule.Moon = {
 	end,
 
 	["Moon Spirit Calamitous Eddy"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
-		for _, v in DOWNED_ATTRIBUTES do
+		for _, v in Attributes.DOWNED_ATTRIBUTES do
 			if char:GetAttribute(v) then
 				return
 			end
@@ -2117,7 +2005,7 @@ SkillsModule.Moon = {
 			return
 		end
 
-		local ok: boolean = skillAllowed(player, char, skill, COOLDOWN, true, 1)
+		local ok: boolean = SkillGuard:CheckSkillAllowed(player, char, skill, COOLDOWN, true, 1)
 		if not ok then
 			return
 		end
@@ -2195,7 +2083,7 @@ SkillsModule.Moon = {
 	end,
 
 	["Catastrophe, Tenman Crescent Moon"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
-		for _, v in DOWNED_ATTRIBUTES do
+		for _, v in Attributes.DOWNED_ATTRIBUTES do
 			if char:GetAttribute(v) then
 				return
 			end
@@ -2226,7 +2114,7 @@ SkillsModule.Moon = {
 			return
 		end
 
-		local ok: boolean = skillAllowed(player, char, skill, COOLDOWN, true, 1.8)
+		local ok: boolean = SkillGuard:CheckSkillAllowed(player, char, skill, COOLDOWN, true, 1.8)
 		if not ok then
 			return
 		end
@@ -2303,7 +2191,7 @@ SkillsModule.Moon = {
 	end,
 
 	["Moonbow, Half Moon"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
-		for _, v in DOWNED_ATTRIBUTES do
+		for _, v in Attributes.DOWNED_ATTRIBUTES do
 			if char:GetAttribute(v) then
 				return
 			end
@@ -2334,7 +2222,7 @@ SkillsModule.Moon = {
 			return
 		end
 
-		local ok: boolean = skillAllowed(player, char, skill, COOLDOWN, true, 1.25)
+		local ok: boolean = SkillGuard:CheckSkillAllowed(player, char, skill, COOLDOWN, true, 1.25)
 		if not ok then
 			return
 		end
@@ -2406,7 +2294,7 @@ SkillsModule.Moon = {
 
 SkillsModule.Sun = {
 	["Dance"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
-		for _, v in DOWNED_ATTRIBUTES do
+		for _, v in Attributes.DOWNED_ATTRIBUTES do
 			if char:GetAttribute(v) then
 				return
 			end
@@ -2440,7 +2328,7 @@ SkillsModule.Sun = {
 			return
 		end
 
-		local ok: boolean = skillAllowed(player, char, skill, COOLDOWN, true, 0.9)
+		local ok: boolean = SkillGuard:CheckSkillAllowed(player, char, skill, COOLDOWN, true, 0.9)
 		if not ok then
 			return
 		end
@@ -2456,7 +2344,7 @@ SkillsModule.Sun = {
 
 		local function forwardVelocity()
 			--preventing velocity if ragdolled, stunned, or blocking
-			for _, attribute in pairs(PREVENTION_ATTRIBUTES) do
+			for _, attribute in pairs(Attributes.PREVENTION_ATTRIBUTES) do
 				if char:GetAttribute(attribute) then
 					return
 				end
@@ -2530,7 +2418,7 @@ SkillsModule.Sun = {
 	end,
 
 	["Raging Sun"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
-		for _, v in DOWNED_ATTRIBUTES do
+		for _, v in Attributes.DOWNED_ATTRIBUTES do
 			if char:GetAttribute(v) then
 				return
 			end
@@ -2567,7 +2455,7 @@ SkillsModule.Sun = {
 			return
 		end
 
-		local ok: boolean = skillAllowed(player, char, skill, COOLDOWN, true, 0.9)
+		local ok: boolean = SkillGuard:CheckSkillAllowed(player, char, skill, COOLDOWN, true, 0.9)
 		if not ok then
 			return
 		end
@@ -2646,7 +2534,7 @@ SkillsModule.Sun = {
 	end,
 
 	["Burning Bones, Summer Sun"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
-		for _, v in DOWNED_ATTRIBUTES do
+		for _, v in Attributes.DOWNED_ATTRIBUTES do
 			if char:GetAttribute(v) then
 				return
 			end
@@ -2683,7 +2571,7 @@ SkillsModule.Sun = {
 			return
 		end
 
-		local ok: boolean = skillAllowed(player, char, skill, COOLDOWN, true, 1)
+		local ok: boolean = SkillGuard:CheckSkillAllowed(player, char, skill, COOLDOWN, true, 1)
 		if not ok then
 			return
 		end
@@ -2699,7 +2587,7 @@ SkillsModule.Sun = {
 
 		local function forwardVelocity()
 			--preventing velocity if ragdolled, stunned, or blocking
-			for _, attribute in pairs(PREVENTION_ATTRIBUTES) do
+			for _, attribute in pairs(Attributes.PREVENTION_ATTRIBUTES) do
 				if char:GetAttribute(attribute) then
 					return
 				end
@@ -2768,7 +2656,7 @@ SkillsModule.Sun = {
 	end,
 
 	["Setting Sun Transformation"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
-		for _, v in DOWNED_ATTRIBUTES do
+		for _, v in Attributes.DOWNED_ATTRIBUTES do
 			if char:GetAttribute(v) then
 				return
 			end
@@ -2802,7 +2690,7 @@ SkillsModule.Sun = {
 			return
 		end
 
-		local ok: boolean = skillAllowed(player, char, skill, COOLDOWN, true, 0.9)
+		local ok: boolean = SkillGuard:CheckSkillAllowed(player, char, skill, COOLDOWN, true, 0.9)
 		if not ok then
 			return
 		end
@@ -2818,7 +2706,7 @@ SkillsModule.Sun = {
 
 		local function forwardVelocity()
 			--preventing velocity if ragdolled, stunned, or blocking
-			for _, attribute in pairs(PREVENTION_ATTRIBUTES) do
+			for _, attribute in pairs(Attributes.PREVENTION_ATTRIBUTES) do
 				if char:GetAttribute(attribute) then
 					return
 				end
