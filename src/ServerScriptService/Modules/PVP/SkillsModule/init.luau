@@ -9,6 +9,7 @@ local TweenService = game:GetService("TweenService")
 
 --//:MODULES//:--
 local AnimationService = require(ReplicatedStorage.Modules.Packages.AnimationService)
+local BreathingHandler = require(script.BreathingHandler)
 local HitModule = require(ServerScriptService.Modules.PVP.HitModule)
 
 --//:REMOTES//:--
@@ -130,23 +131,6 @@ local function setIsAttacking(char: Model, hitType: string, durationOfAttacking:
 	end)
 end
 
---Breathing functions--
-local function subtractBreathingBar(breathing_AMOUNT: number, breathing_NEEDED: number, character: Model)
-	character:SetAttribute("BreathingBar", breathing_AMOUNT - breathing_NEEDED)
-end
-
---Checks if player has enough breathing to use a skill
-local function checkBreathingBar(breathing_NEEDED: number, character: Model): (boolean, number)
-	local breathing_AMOUNT: number = character:GetAttribute("BreathingBar")
-	if not breathing_AMOUNT then
-		return false, 0
-	end
-	if breathing_AMOUNT < breathing_NEEDED then
-		return false, 0
-	end
-
-	return true, breathing_AMOUNT
-end
 -------------------------
 
 -- Cleanup on player leave to prevent memory leaks
@@ -1876,7 +1860,7 @@ SkillsModule.Moon = {
 		local ENDLAG = 0.75
 		local _DURATION = ENDLAG - STARTUP
 
-		local enoughBreath: boolean, breathAmount: number = checkBreathingBar(Breath_NEEDED, char)
+		local enoughBreath: boolean, breathAmount: number = BreathingHandler:CheckBreathingBar(Breath_NEEDED, char)
 		if not enoughBreath then
 			return
 		end
@@ -1886,7 +1870,7 @@ SkillsModule.Moon = {
 			return
 		end
 
-		subtractBreathingBar(breathAmount, Breath_NEEDED, char)
+		BreathingHandler:SubtractBreathingBar(breathAmount, Breath_NEEDED, char)
 
 		--VFX--
 		--Creating variables
@@ -2128,7 +2112,7 @@ SkillsModule.Moon = {
 		local COOLDOWN = 14 -- REAL CD IS 12s
 		local STARTUP = 0.3
 
-		local enoughBreath: boolean, breathAmount: number = checkBreathingBar(Breath_NEEDED, char)
+		local enoughBreath: boolean, breathAmount: number = BreathingHandler:CheckBreathingBar(Breath_NEEDED, char)
 		if not enoughBreath then
 			return
 		end
@@ -2138,7 +2122,7 @@ SkillsModule.Moon = {
 			return
 		end
 
-		subtractBreathingBar(breathAmount, Breath_NEEDED, char)
+		BreathingHandler:SubtractBreathingBar(breathAmount, Breath_NEEDED, char)
 
 		animRemote:FireAllClients(hum, skill)
 
@@ -2237,7 +2221,7 @@ SkillsModule.Moon = {
 		local COOLDOWN = 20 -- REAL COOLDOWN IS 20s, SET TO 5 FOR TESTING
 		local STARTUP = 0.6
 
-		local enoughBreath: boolean, breathAmount: number = checkBreathingBar(Breath_NEEDED, char)
+		local enoughBreath: boolean, breathAmount: number = BreathingHandler:CheckBreathingBar(Breath_NEEDED, char)
 		if not enoughBreath then
 			return
 		end
@@ -2247,7 +2231,7 @@ SkillsModule.Moon = {
 			return
 		end
 
-		subtractBreathingBar(breathAmount, Breath_NEEDED, char)
+		BreathingHandler:SubtractBreathingBar(breathAmount, Breath_NEEDED, char)
 
 		animRemote:FireAllClients(hum, skill)
 
@@ -2345,7 +2329,7 @@ SkillsModule.Moon = {
 		local COOLDOWN = 16 --20s
 		local STARTUP = 0.4
 
-		local enoughBreath: boolean, breathAmount: number = checkBreathingBar(Breath_NEEDED, char)
+		local enoughBreath: boolean, breathAmount: number = BreathingHandler:CheckBreathingBar(Breath_NEEDED, char)
 		if not enoughBreath then
 			return
 		end
@@ -2355,7 +2339,7 @@ SkillsModule.Moon = {
 			return
 		end
 
-		subtractBreathingBar(breathAmount, Breath_NEEDED, char)
+		BreathingHandler:SubtractBreathingBar(breathAmount, Breath_NEEDED, char)
 
 		animRemote:FireAllClients(hum, skill)
 
@@ -2451,7 +2435,7 @@ SkillsModule.Sun = {
 		local COOLDOWN = 12 --12s
 		local STARTUP = 0.3
 
-		local enoughBreath: boolean, breathAmount: number = checkBreathingBar(Breath_NEEDED, char)
+		local enoughBreath: boolean, breathAmount: number = BreathingHandler:CheckBreathingBar(Breath_NEEDED, char)
 		if not enoughBreath then
 			return
 		end
@@ -2461,7 +2445,7 @@ SkillsModule.Sun = {
 			return
 		end
 
-		subtractBreathingBar(breathAmount, Breath_NEEDED, char)
+		BreathingHandler:SubtractBreathingBar(breathAmount, Breath_NEEDED, char)
 
 		animRemote:FireAllClients(hum, skill)
 
@@ -2578,7 +2562,7 @@ SkillsModule.Sun = {
 		local STARTUP = 0.3
 		local TIME_BETWEEN_HITS = 0.3
 
-		local enoughBreath: boolean, breathAmount: number = checkBreathingBar(Breath_NEEDED, char)
+		local enoughBreath: boolean, breathAmount: number = BreathingHandler:CheckBreathingBar(Breath_NEEDED, char)
 		if not enoughBreath then
 			return
 		end
@@ -2588,7 +2572,7 @@ SkillsModule.Sun = {
 			return
 		end
 
-		subtractBreathingBar(breathAmount, Breath_NEEDED, char)
+		BreathingHandler:SubtractBreathingBar(breathAmount, Breath_NEEDED, char)
 
 		animRemote:FireAllClients(hum, skill)
 
@@ -2694,7 +2678,7 @@ SkillsModule.Sun = {
 		local STARTUP = 0.4
 		local TIME_BETWEEN_HITS = 0.1
 
-		local enoughBreath: boolean, breathAmount: number = checkBreathingBar(Breath_NEEDED, char)
+		local enoughBreath: boolean, breathAmount: number = BreathingHandler:CheckBreathingBar(Breath_NEEDED, char)
 		if not enoughBreath then
 			return
 		end
@@ -2704,7 +2688,7 @@ SkillsModule.Sun = {
 			return
 		end
 
-		subtractBreathingBar(breathAmount, Breath_NEEDED, char)
+		BreathingHandler:SubtractBreathingBar(breathAmount, Breath_NEEDED, char)
 
 		animRemote:FireAllClients(hum, skill)
 
@@ -2813,7 +2797,7 @@ SkillsModule.Sun = {
 		local COOLDOWN = 10 --15s
 		local STARTUP = 0.35
 
-		local enoughBreath: boolean, breathAmount: number = checkBreathingBar(Breath_NEEDED, char)
+		local enoughBreath: boolean, breathAmount: number = BreathingHandler:CheckBreathingBar(Breath_NEEDED, char)
 		if not enoughBreath then
 			return
 		end
@@ -2823,7 +2807,7 @@ SkillsModule.Sun = {
 			return
 		end
 
-		subtractBreathingBar(breathAmount, Breath_NEEDED, char)
+		BreathingHandler:SubtractBreathingBar(breathAmount, Breath_NEEDED, char)
 
 		animRemote:FireAllClients(hum, skill)
 
