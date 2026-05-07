@@ -695,21 +695,17 @@ end
 -------------------
 
 --[ SUBSKILLS ]--
-function SkillsModule.Subskill(player: Player, char: Model, hum: Humanoid, skill: string)
-	-- Early exit if already using an attack
-	for _, v in DOWNED_ATTRIBUTES do
-		if char:GetAttribute(v) then
+SkillsModule.Subskills = {
+	["Hunter Step"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
+		for _, v in DOWNED_ATTRIBUTES do
+			if char:GetAttribute(v) then
+				return
+			end
+		end
+		if hum:GetState() == Enum.HumanoidStateType.Dead then
 			return
 		end
-	end
-	if hum:GetState() == Enum.HumanoidStateType.Dead then
-		return
-	end
 
-	-----| BDAs |-----
-
-	-----| Breaths |-----
-	if skill == "Hunter Step" then
 		--STATS
 		local hitType = "Sharp"
 		local DMG = 5
@@ -862,32 +858,34 @@ function SkillsModule.Subskill(player: Player, char: Model, hum: Humanoid, skill
 				end
 			end
 		end)
-	end
+	end,
 
-	-----| General |-----
-	if skill == "Sting & Send" then
-	end
-end
-
+	["Sting & Send"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
+		for _, v in DOWNED_ATTRIBUTES do
+			if char:GetAttribute(v) then
+				return
+			end
+		end
+		if hum:GetState() == Enum.HumanoidStateType.Dead then
+			return
+		end
+	end,
+}
 -----------------
 
 --[ SKILLSETS ]--
-
 -----| BDAs |-----
---Akaza (Skillset, BDA)
-function SkillsModule.Akaza(player: Player, char: Model, hum: Humanoid, skill: string)
-	-- Early exit if already using an attack
-	for _, v in DOWNED_ATTRIBUTES do
-		if char:GetAttribute(v) then
+SkillsModule.Akaza = {
+	["Annihilation Type: Punch"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
+		for _, v in DOWNED_ATTRIBUTES do
+			if char:GetAttribute(v) then
+				return
+			end
+		end
+		if hum:GetState() == Enum.HumanoidStateType.Dead then
 			return
 		end
-	end
-	if hum:GetState() == Enum.HumanoidStateType.Dead then
-		return
-	end
 
-	--CHECKING WHAT SKILL WAS USED
-	if skill == "Annihilation Type: Punch" then
 		--STATS
 		local hitType = "Blunt"
 		local DMG = 10
@@ -959,9 +957,18 @@ function SkillsModule.Akaza(player: Player, char: Model, hum: Humanoid, skill: s
 				end
 			end
 		end)
-	end
+	end,
 
-	if skill == "Chaotic Blue Metal Afterglow" then
+	["Chaotic Blue Metal Afterglow"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
+		for _, v in DOWNED_ATTRIBUTES do
+			if char:GetAttribute(v) then
+				return
+			end
+		end
+		if hum:GetState() == Enum.HumanoidStateType.Dead then
+			return
+		end
+
 		--STATS
 		local hitCount = 8
 
@@ -1043,9 +1050,18 @@ function SkillsModule.Akaza(player: Player, char: Model, hum: Humanoid, skill: s
 				task.wait(0.075)
 			end
 		end)
-	end
+	end,
 
-	if skill == "Flying Planet" then
+	["Flying Planet"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
+		for _, v in DOWNED_ATTRIBUTES do
+			if char:GetAttribute(v) then
+				return
+			end
+		end
+		if hum:GetState() == Enum.HumanoidStateType.Dead then
+			return
+		end
+
 		--STATS
 		local hitType = "Blunt"
 		local DMG = 8.5 -- Damage dealt to the target
@@ -1136,9 +1152,18 @@ function SkillsModule.Akaza(player: Player, char: Model, hum: Humanoid, skill: s
 				end
 			end
 		end)
-	end
+	end,
 
-	if skill == "Crush Type" then
+	["Crush Type"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
+		for _, v in DOWNED_ATTRIBUTES do
+			if char:GetAttribute(v) then
+				return
+			end
+		end
+		if hum:GetState() == Enum.HumanoidStateType.Dead then
+			return
+		end
+
 		--STATS
 		local hitType = "Blunt"
 		local DMG = 6.5 -- Damage dealt to the target
@@ -1244,21 +1269,20 @@ function SkillsModule.Akaza(player: Player, char: Model, hum: Humanoid, skill: s
 				end)
 			end)
 		end)
-	end
-end
+	end,
+}
 
-function SkillsModule.Doma(player: Player, char: Model, hum: Humanoid, skill: string, _mousePos: Vector3?)
-	-- Early exit if already using an attack
-	for _, v in DOWNED_ATTRIBUTES do
-		if char:GetAttribute(v) then
+SkillsModule.Doma = {
+	["Freezing Clouds"] = function(player: Player, char: Model, hum: Humanoid, skill: string, _mousePos: Vector3?)
+		for _, v in DOWNED_ATTRIBUTES do
+			if char:GetAttribute(v) then
+				return
+			end
+		end
+		if hum:GetState() == Enum.HumanoidStateType.Dead then
 			return
 		end
-	end
-	if hum:GetState() == Enum.HumanoidStateType.Dead then
-		return
-	end
 
-	if skill == "Freezing Clouds" then
 		--STATS
 		local hitCount = 6
 		local hitType = "Sharp"
@@ -1343,9 +1367,24 @@ function SkillsModule.Doma(player: Player, char: Model, hum: Humanoid, skill: st
 				task.wait(0.125) -- Interval between hits
 			end
 		end)
-	end
+	end,
 
-	if skill == "Barren Hanging Garden" then
+	["Barren Hanging Garden"] = function(
+		player: Player,
+		char: Model,
+		hum: Humanoid,
+		skill: string,
+		_mousePos: Vector3?
+	)
+		for _, v in DOWNED_ATTRIBUTES do
+			if char:GetAttribute(v) then
+				return
+			end
+		end
+		if hum:GetState() == Enum.HumanoidStateType.Dead then
+			return
+		end
+
 		--STATS
 		local hitCount = 8
 		local hitType = "Sharp"
@@ -1442,9 +1481,18 @@ function SkillsModule.Doma(player: Player, char: Model, hum: Humanoid, skill: st
 				task.wait(0.15) -- Interval between hits
 			end
 		end)
-	end
+	end,
 
-	if skill == "Frozen Lotus" then
+	["Frozen Lotus"] = function(player: Player, char: Model, hum: Humanoid, skill: string, _mousePos: Vector3?)
+		for _, v in DOWNED_ATTRIBUTES do
+			if char:GetAttribute(v) then
+				return
+			end
+		end
+		if hum:GetState() == Enum.HumanoidStateType.Dead then
+			return
+		end
+
 		--STATS
 		local hitCount = 1
 		local hitType = "Sharp"
@@ -1591,9 +1639,18 @@ function SkillsModule.Doma(player: Player, char: Model, hum: Humanoid, skill: st
 				end
 			end)
 		end)
-	end
+	end,
 
-	if skill == "Wintry Icicles" then
+	["Wintry Icicles"] = function(player: Player, char: Model, hum: Humanoid, skill: string, _mousePos: Vector3?)
+		for _, v in DOWNED_ATTRIBUTES do
+			if char:GetAttribute(v) then
+				return
+			end
+		end
+		if hum:GetState() == Enum.HumanoidStateType.Dead then
+			return
+		end
+
 		--STATS
 		local hitCount = 4
 		local hitType = "Sharp"
@@ -1784,23 +1841,21 @@ function SkillsModule.Doma(player: Player, char: Model, hum: Humanoid, skill: st
 				end
 			end
 		end)
-	end
-end
+	end,
+}
+
 -----| Breaths |-----
---Moon (Skillset, Breathing)
-function SkillsModule.Moon(player: Player, char: Model, hum: Humanoid, skill: string)
-	-- Early exit if already using an attack
-	for _, v in DOWNED_ATTRIBUTES do
-		if char:GetAttribute(v) then
+SkillsModule.Moon = {
+	["Loathsome Moon, Chains"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
+		for _, v in DOWNED_ATTRIBUTES do
+			if char:GetAttribute(v) then
+				return
+			end
+		end
+		if hum:GetState() == Enum.HumanoidStateType.Dead then
 			return
 		end
-	end
-	if hum:GetState() == Enum.HumanoidStateType.Dead then
-		return
-	end
 
-	--Checking skill
-	if skill == "Loathsome Moon, Chains" then
 		local Breath_NEEDED = 15
 
 		--STATS (Change as needed)
@@ -2044,9 +2099,18 @@ function SkillsModule.Moon(player: Player, char: Model, hum: Humanoid, skill: st
 				hitbox.CanTouch = false
 			end)
 		end)
-	end
+	end,
 
-	if skill == "Moon Spirit Calamitous Eddy" then
+	["Moon Spirit Calamitous Eddy"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
+		for _, v in DOWNED_ATTRIBUTES do
+			if char:GetAttribute(v) then
+				return
+			end
+		end
+		if hum:GetState() == Enum.HumanoidStateType.Dead then
+			return
+		end
+
 		local Breath_NEEDED = 20
 
 		--STATS
@@ -2144,9 +2208,18 @@ function SkillsModule.Moon(player: Player, char: Model, hum: Humanoid, skill: st
 				task.wait(0.2) -- Interval between hits
 			end
 		end)
-	end
+	end,
 
-	if skill == "Catastrophe, Tenman Crescent Moon" then
+	["Catastrophe, Tenman Crescent Moon"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
+		for _, v in DOWNED_ATTRIBUTES do
+			if char:GetAttribute(v) then
+				return
+			end
+		end
+		if hum:GetState() == Enum.HumanoidStateType.Dead then
+			return
+		end
+
 		local Breath_NEEDED = 35
 
 		--STATS
@@ -2243,9 +2316,18 @@ function SkillsModule.Moon(player: Player, char: Model, hum: Humanoid, skill: st
 				task.wait(0.1) -- Interval between hits
 			end
 		end)
-	end
+	end,
 
-	if skill == "Moonbow, Half Moon" then
+	["Moonbow, Half Moon"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
+		for _, v in DOWNED_ATTRIBUTES do
+			if char:GetAttribute(v) then
+				return
+			end
+		end
+		if hum:GetState() == Enum.HumanoidStateType.Dead then
+			return
+		end
+
 		local Breath_NEEDED = 25
 
 		--STATS
@@ -2335,20 +2417,20 @@ function SkillsModule.Moon(player: Player, char: Model, hum: Humanoid, skill: st
 				task.wait(0.1) -- Interval between hits
 			end
 		end)
-	end
-end
+	end,
+}
 
-function SkillsModule.Sun(player: Player, char: Model, hum: Humanoid, skill: string)
-	for _, v in DOWNED_ATTRIBUTES do
-		if char:GetAttribute(v) then
+SkillsModule.Sun = {
+	["Dance"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
+		for _, v in DOWNED_ATTRIBUTES do
+			if char:GetAttribute(v) then
+				return
+			end
+		end
+		if hum:GetState() == Enum.HumanoidStateType.Dead then
 			return
 		end
-	end
-	if hum:GetState() == Enum.HumanoidStateType.Dead then
-		return
-	end
 
-	if skill == "Dance" then
 		local Breath_NEEDED = 15
 
 		--STATS (Change as needed)
@@ -2461,9 +2543,18 @@ function SkillsModule.Sun(player: Player, char: Model, hum: Humanoid, skill: str
 				end
 			end
 		end)
-	end
+	end,
 
-	if skill == "Raging Sun" then
+	["Raging Sun"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
+		for _, v in DOWNED_ATTRIBUTES do
+			if char:GetAttribute(v) then
+				return
+			end
+		end
+		if hum:GetState() == Enum.HumanoidStateType.Dead then
+			return
+		end
+
 		local Breath_NEEDED = 15
 
 		--STATS (Change as needed)
@@ -2568,9 +2659,18 @@ function SkillsModule.Sun(player: Player, char: Model, hum: Humanoid, skill: str
 				task.wait(TIME_BETWEEN_HITS)
 			end -- hit for loop
 		end)
-	end
+	end,
 
-	if skill == "Burning Bones, Summer Sun" then
+	["Burning Bones, Summer Sun"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
+		for _, v in DOWNED_ATTRIBUTES do
+			if char:GetAttribute(v) then
+				return
+			end
+		end
+		if hum:GetState() == Enum.HumanoidStateType.Dead then
+			return
+		end
+
 		local Breath_NEEDED = 25
 
 		--STATS (Change as needed)
@@ -2681,9 +2781,18 @@ function SkillsModule.Sun(player: Player, char: Model, hum: Humanoid, skill: str
 				task.wait(TIME_BETWEEN_HITS)
 			end -- hit for loop
 		end)
-	end
+	end,
 
-	if skill == "Setting Sun Transformation" then
+	["Setting Sun Transformation"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
+		for _, v in DOWNED_ATTRIBUTES do
+			if char:GetAttribute(v) then
+				return
+			end
+		end
+		if hum:GetState() == Enum.HumanoidStateType.Dead then
+			return
+		end
+
 		local Breath_NEEDED = 20
 
 		--STATS (Change as needed)
@@ -2788,22 +2897,13 @@ function SkillsModule.Sun(player: Player, char: Model, hum: Humanoid, skill: str
 				end
 			end
 		end)
-	end
-end
+	end,
+}
 
--- function SkillsModule.Thunder(
--- 	player: Player,
--- 	char: Model,
--- 	hum: Humanoid,
--- 	skill: string
--- )
+-- SkillsModule.Thunder = {
 
--- 	for _, v in DOWNED_ATTRIBUTES do
--- 		if char:GetAttribute(v) then return end
--- 	end
--- 	if hum:GetState() == Enum.HumanoidStateType.Dead then return end
+-- }
 
--- end
 ------------------
 
 return SkillsModule
