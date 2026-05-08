@@ -1,31 +1,28 @@
 --//:SERVICES
+local Debris = game:GetService("Debris")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Debris 			= game:GetService("Debris")
-local TweenService 		= game:GetService("TweenService")
-local Players 			= game:GetService("Players")
-
+local TweenService = game:GetService("TweenService")
 
 --//:REMOTE EVENTS
 local vfxRemote = ReplicatedStorage.Remotes_Bindables.Remotes.GeneralPlayer:WaitForChild("SkillVFX")
 local animRemote = ReplicatedStorage.Remotes_Bindables.Remotes.GeneralPlayer:WaitForChild("SkillAnimations")
 
-
 --//:MODULES
-local RockModule 	   = require(ReplicatedStorage.Modules.Packages.RockModule)
 local AnimationService = require(ReplicatedStorage.Modules.Packages.AnimationService)
-
+local RockModule = require(ReplicatedStorage.Modules.Packages.RockModule)
 
 --//VARIABLES
-local Camera = workspace.CurrentCamera
+local _Camera = workspace.CurrentCamera
 local player = Players.LocalPlayer
-local char   = player.Character or player.CharacterAdded:Wait()
+local _char = player.Character or player.CharacterAdded:Wait()
 
 local Collection = workspace:FindFirstChild("Collection") :: Folder
-local Trash 	 = Collection:FindFirstChild("Trash") :: Folder
+local Trash = Collection:FindFirstChild("Trash") :: Folder
 local SkillsetsVFX = ReplicatedStorage.FX.VFX.Actions.Combat.Skillsets
 local SkillsetsSFX = ReplicatedStorage.FX.SFX.Combat.Skillsets
 
-local PREVENTION_ATTRIBUTES = { --//Attributes that prevent attacks
+local PREVENTION_ATTRIBUTES = { --//Attributes that prevent attacks FX from occuring
 	"Knocked",
 	"Gripped",
 	"Carried",
@@ -35,11 +32,8 @@ local PREVENTION_ATTRIBUTES = { --//Attributes that prevent attacks
 	"Blocking",
 }
 
-
 --//:FUNCTIONS
-local function canPlayFX(
-	character: Model
-): (boolean)
+local function _canPlayFX(character: Model): boolean
 	-- Check if char  can play FX (not stunned, ragdolled, etc.)
 	for _, attribute in ipairs(PREVENTION_ATTRIBUTES) do
 		if character:GetAttribute(attribute) then
@@ -48,7 +42,6 @@ local function canPlayFX(
 	end
 	return true
 end
-
 
 local function SFX_Checker(hrp: BasePart?, Sound: Sound?, Pitch: number?)
 	if Sound then
@@ -74,7 +67,6 @@ local function SFX_Checker(hrp: BasePart?, Sound: Sound?, Pitch: number?)
 	end
 end
 
-
 -- Function to trigger all effects with their attributes.
 local function triggerEffects(parentObject: Instance?)
 	if not parentObject then
@@ -85,9 +77,10 @@ local function triggerEffects(parentObject: Instance?)
 	-- Find all effect instances within the parent object.
 	for _, instance in ipairs(parentObject:GetDescendants()) do
 		if instance:IsA("ParticleEmitter") or instance:IsA("Beam") or instance:IsA("Sound") then
-
 			task.spawn(function()
-				if not instance.Parent then return end -- Safety check
+				if not instance.Parent then
+					return
+				end -- Safety check
 
 				local delay = instance:GetAttribute("EmitDelay") or 0
 				local duration = instance:GetAttribute("EmitDuration")
@@ -96,24 +89,26 @@ local function triggerEffects(parentObject: Instance?)
 					task.wait(delay)
 				end
 
-				if not instance.Parent then return end -- Check again after delay
+				if not instance.Parent then
+					return
+				end -- Check again after delay
 
 				if instance:IsA("Sound") then
 					instance:Play()
-
 				elseif instance:IsA("ParticleEmitter") then
 					local count = instance:GetAttribute("EmitCount")
 					if duration and duration > 0 then
 						instance.Enabled = true
 						task.wait(duration)
-						if instance.Parent then instance.Enabled = false end
+						if instance.Parent then
+							instance.Enabled = false
+						end
 					elseif count and count > 0 then
 						instance:Emit(count)
 					else
 						-- If no duration or count, emit 1 particle as a default one-shot.
 						instance:Emit(1)
 					end
-
 				elseif instance:IsA("Beam") then
 					local beamClone = instance:Clone()
 					beamClone.Parent = instance.Parent
@@ -121,14 +116,15 @@ local function triggerEffects(parentObject: Instance?)
 
 					task.wait(if duration and duration > 0 then duration else 0.03)
 
-					if beamClone and beamClone.Parent then beamClone:Destroy() end
+					if beamClone and beamClone.Parent then
+						beamClone:Destroy()
+					end
 				end
 			end)
 		end
 	end
 end
 --------------
-
 
 --//:MAIN
 
@@ -142,10 +138,10 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 		warn("VFX name is missing")
 		return
 	end
-	
+
 	local character_instance = hrp.Parent
-	local humanoid_instance = character_instance:FindFirstChildOfClass("Humanoid") :: Humanoid
-	if not humanoid_instance then
+	local anim_hum = character_instance:FindFirstChildOfClass("Humanoid") :: Humanoid
+	if not anim_hum then
 		warn("Humanoid not found for character")
 		return
 	end
@@ -210,8 +206,12 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 		if hrp.Parent then
 			local hitType: string
 			local tool = hrp.Parent:FindFirstChildOfClass("Tool")
-			if tool and (tool.Name == "Katana" or tool:GetAttribute("Katana")) then hitType = "Sharp" else hitType = "Blunt" end
-			
+			if tool and (tool.Name == "Katana" or tool:GetAttribute("Katana")) then
+				hitType = "Sharp"
+			else
+				hitType = "Blunt"
+			end
+
 			local function playSFX() --SFX
 				--SFX logic
 				if hitType == "Sharp" then --Checking if player is using Katana
@@ -224,7 +224,7 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 					SFX_Checker(hrp, SFX, pitch)
 				end
 			end
-			
+
 			local function playVFX() --VFX
 				--VFX logic
 				if hitType == "Sharp" then
@@ -240,7 +240,7 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 					end
 				end
 			end
-			
+
 			playSFX()
 			playVFX()
 		end
@@ -251,8 +251,12 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 			local hitType: string
 			local character = hrp.Parent
 			local tool = character:FindFirstChildOfClass("Tool")
-			if tool and (tool.Name == "Katana" or tool:GetAttribute("Katana")) then hitType = "Sharp" else hitType = "Blunt" end
-			
+			if tool and (tool.Name == "Katana" or tool:GetAttribute("Katana")) then
+				hitType = "Sharp"
+			else
+				hitType = "Blunt"
+			end
+
 			local function playVFX() --VFX logic
 				--VFX logic
 				if hitType == "Sharp" then
@@ -268,7 +272,7 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 					end
 				end
 			end
-			
+
 			local function playSFX() --SFX logic
 				--SFX logic
 				if hitType == "Sharp" then --Checking if player is using Katana
@@ -281,7 +285,7 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 					SFX_Checker(hrp, SFX, pitch)
 				end
 			end
-			
+
 			local function playIndicator() --Indicator / Highlight VFX
 				-- local M2VFX1 = ReplicatedStorage.FX.VFX.Actions.Combat.M2Indicator.M2VFX1:Clone() :: ParticleEmitter
 				-- local M2VFX = Instance.new("Attachment")
@@ -292,12 +296,12 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 				-- Debris:AddItem(M2VFX, 0.6)
 
 				local highlight: Highlight = Instance.new("Highlight")
-				highlight.FillColor 		  = Color3.fromRGB(255, 115, 0)
-				highlight.FillTransparency    = 0.75
-				highlight.OutlineColor 		  = Color3.fromRGB(255, 115, 0)
+				highlight.FillColor = Color3.fromRGB(255, 115, 0)
+				highlight.FillTransparency = 0.75
+				highlight.OutlineColor = Color3.fromRGB(255, 115, 0)
 				highlight.OutlineTransparency = 0.5
-				highlight.DepthMode 		  = Enum.HighlightDepthMode.Occluded
-				highlight.Parent			  = character
+				highlight.DepthMode = Enum.HighlightDepthMode.Occluded
+				highlight.Parent = character
 				TweenService:Create(
 					highlight,
 					TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
@@ -309,67 +313,66 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 					playSFX()
 				end)
 			end
-			
+
 			playIndicator() --Play indicator immediately compared to the SFX/VFX
 		end
 	end
-	
+
 	-----------------
 	-- Skill VFX --
 	-----------------
-	
+
 	--	BDAs  --
 	--Akaza
 	if vfxToPlay == "Annihilation Type: Punch" then
-		
 		local function playVFX(hrpPosition: Vector3, hrpLookVector: Vector3)
 			--print('Played VFX!')
 
 			--Creating variables
 			local VFX: Folder = SkillsetsVFX.BDAs.Akaza.AnnihilationType --Folder of VFX
-			
-			local inwardShockwave: MeshPart  = VFX.InwardShockwave:Clone()
+
+			local inwardShockwave: MeshPart = VFX.InwardShockwave:Clone()
 			local outwardShockwave: MeshPart = VFX.OutwardShockwave:Clone()
-			local ring: MeshPart 			 = VFX.Ring:Clone()
-			local Shockwave: MeshPart 		 = VFX.Shockwave:Clone()
-			
+			local ring: MeshPart = VFX.Ring:Clone()
+			local Shockwave: MeshPart = VFX.Shockwave:Clone()
+
 			local energyFX: ParticleEmitter = Shockwave.VFX_Attachment.Energy
-			local ringFX: ParticleEmitter   = Shockwave.VFX_Attachment2.Ring
-			local burstFX: ParticleEmitter  = Shockwave.VFX_Attachment2.Burst
+			local ringFX: ParticleEmitter = Shockwave.VFX_Attachment2.Ring
+			local burstFX: ParticleEmitter = Shockwave.VFX_Attachment2.Burst
 
 			energyFX.Enabled = true
-			ringFX.Enabled   = false
-			burstFX.Enabled  = false
+			ringFX.Enabled = false
+			burstFX.Enabled = false
 
 			--Initial Transparency
-			inwardShockwave.Transparency  = 0
+			inwardShockwave.Transparency = 0
 			outwardShockwave.Transparency = 0
-			ring.Transparency 			  = 0
-			Shockwave.Transparency 		  = 0
+			ring.Transparency = 0
+			Shockwave.Transparency = 0
 
 			--Initial Size
-			inwardShockwave.Size  = Vector3.new(5, 7.5, 5) * 1.25
+			inwardShockwave.Size = Vector3.new(5, 7.5, 5) * 1.25
 			outwardShockwave.Size = Vector3.new(4.75, 15, 4.75) * 1.25
-			ring.Size 			  = Vector3.new(0, 0, 0)
-			Shockwave.Size 		  = Vector3.new(7, 7, 12.5) * 1.5
+			ring.Size = Vector3.new(0, 0, 0)
+			Shockwave.Size = Vector3.new(7, 7, 12.5) * 1.5
 
 			--Parenting to workspace
-			inwardShockwave.Parent  = Trash
+			inwardShockwave.Parent = Trash
 			outwardShockwave.Parent = Trash
-			ring.Parent 			= Trash
-			Shockwave.Parent 		= Trash
+			ring.Parent = Trash
+			Shockwave.Parent = Trash
 
 			local lookAtPos = hrpPosition + hrpLookVector
 
 			--CFrames
-			inwardShockwave.CFrame    = CFrame.lookAt(hrpPosition, lookAtPos) * CFrame.Angles(math.rad(90), 0, 0)
-			outwardShockwave.CFrame   = CFrame.lookAt(hrpPosition, lookAtPos) * CFrame.Angles(math.rad(90), 0, 0)
+			inwardShockwave.CFrame = CFrame.lookAt(hrpPosition, lookAtPos) * CFrame.Angles(math.rad(90), 0, 0)
+			outwardShockwave.CFrame = CFrame.lookAt(hrpPosition, lookAtPos) * CFrame.Angles(math.rad(90), 0, 0)
 			outwardShockwave.Position = hrpPosition + (hrpLookVector * 3)
-			ring.CFrame 			  = CFrame.lookAt(hrpPosition, lookAtPos)
-			Shockwave.CFrame 		  = CFrame.lookAt(hrpPosition, lookAtPos)
+			ring.CFrame = CFrame.lookAt(hrpPosition, lookAtPos)
+			Shockwave.CFrame = CFrame.lookAt(hrpPosition, lookAtPos)
 
 			--Tween info
-			local tweenInfo  = TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 5, false, 0) -- Rotation tween info
+			local tweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 5, false, 0) -- Rotation tween info
 			local tweenInfo2 = TweenInfo.new(0.5, Enum.EasingStyle.Circular, Enum.EasingDirection.Out, 0, false, 0) -- Size/Position tween
 			local tweenInfo3 = TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out, 0, false, 0) -- Transparency tween
 
@@ -470,58 +473,54 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 		end
 		playVFX(hrp.Position, hrp.CFrame.LookVector)
 
-		local function playSFX(hrp: BasePart)
-
+		local function playSFX()
 			local SFX: Sound = SkillsetsSFX.BDAs.Akaza.DestructionStyleStart:Clone()
 			SFX.Parent = hrp
 			SFX:Play()
 			Debris:AddItem(SFX, SFX.TimeLength)
 		end
-		playSFX(hrp)
-
+		playSFX()
 	end
-	
-	if vfxToPlay == "Chaotic Blue Metal Afterglow" then
-		
-		local function playVFX(hrpPosition: Vector3, hrpLookVector: Vector3)
 
+	if vfxToPlay == "Chaotic Blue Metal Afterglow" then
+		local function playVFX(hrpPosition: Vector3, hrpLookVector: Vector3)
 			-- Creating variables
 			local VFX: Folder = SkillsetsVFX.BDAs.Akaza.Afterglow
-			
-			local inwardShockwave: MeshPart  = VFX.InwardShockwave:Clone()
+
+			local inwardShockwave: MeshPart = VFX.InwardShockwave:Clone()
 			local outwardShockwave: MeshPart = VFX.OutwardShockwave:Clone()
-			local ring: MeshPart 			 = VFX.Ring:Clone()
-			local Shockwave: MeshPart 		 = VFX.Shockwave:Clone()
+			local ring: MeshPart = VFX.Ring:Clone()
+			local Shockwave: MeshPart = VFX.Shockwave:Clone()
 
 			local energyFX: ParticleEmitter = Shockwave.VFX_Attachment.Energy
-			local ringFX: ParticleEmitter   = Shockwave.VFX_Attachment2.Ring
-			local burstFX: ParticleEmitter  = Shockwave.VFX_Attachment2.Burst
+			local ringFX: ParticleEmitter = Shockwave.VFX_Attachment2.Ring
+			local burstFX: ParticleEmitter = Shockwave.VFX_Attachment2.Burst
 
 			energyFX.Enabled = true
 			ringFX.Enabled = false
 			burstFX.Enabled = false
-			
+
 			task.delay(0.25, function()
 				energyFX.Enabled = false
 			end)
 
 			-- Initial transparency
-			inwardShockwave.Transparency  = 0
+			inwardShockwave.Transparency = 0
 			outwardShockwave.Transparency = 0
-			ring.Transparency 			  = 0
-			Shockwave.Transparency 		  = 0
+			ring.Transparency = 0
+			Shockwave.Transparency = 0
 
 			-- Initial size
-			inwardShockwave.Size  = Vector3.new(5, 7.5, 5) * 1.25
+			inwardShockwave.Size = Vector3.new(5, 7.5, 5) * 1.25
 			outwardShockwave.Size = Vector3.new(4.75, 15, 4.75) * 1.25
-			ring.Size 			  = Vector3.new(0, 0, 0)
-			Shockwave.Size 		  = Vector3.new(7, 7, 12.5) * 1.5
+			ring.Size = Vector3.new(0, 0, 0)
+			Shockwave.Size = Vector3.new(7, 7, 12.5) * 1.5
 
 			-- Parent to workspace
-			inwardShockwave.Parent  = Trash
+			inwardShockwave.Parent = Trash
 			outwardShockwave.Parent = Trash
-			ring.Parent 			= Trash
-			Shockwave.Parent 		= Trash
+			ring.Parent = Trash
+			Shockwave.Parent = Trash
 
 			-- Calculate right and up vectors
 			local upVector = Vector3.new(0, 1, 0)
@@ -629,8 +628,7 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 			Debris:AddItem(ringFX, 0.6)
 			Debris:AddItem(burstFX, 0.6)
 		end
-		local function playSFX(hrp: BasePart)
-
+		local function playSFX()
 			local SFX: Sound = ReplicatedStorage.FX.SFX.Combat.Skillsets.BDAs.Akaza.Afterglow:Clone()
 			local pitch = math.random(50, 100) / 100
 			SFX.PitchShiftSoundEffect.Octave = pitch
@@ -638,30 +636,28 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 			SFX:Play()
 			Debris:AddItem(SFX, SFX.TimeLength)
 		end
-		playSFX(hrp)
+		playSFX()
 
 		for _ = 1, 2 do
 			playVFX(hrp.Position, hrp.CFrame.LookVector)
 		end
 	end
-	
-	if vfxToPlay == "Flying Planet" then
-		
-		local function playVFX(hrpPosition: Vector3, hrpLookVector: Vector3)
 
+	if vfxToPlay == "Flying Planet" then
+		local function playVFX(hrpPosition: Vector3, hrpLookVector: Vector3)
 			--Creating variables
 			local VFX: Folder = SkillsetsVFX.BDAs.Akaza.FlyingPlanet
-			
-			local insideSpiral: MeshPart  = VFX.InsideSpiral:Clone()
+
+			local insideSpiral: MeshPart = VFX.InsideSpiral:Clone()
 			local outsideSpiral: MeshPart = VFX.OutsideSpiral:Clone()
-			local ring: MeshPart 		  = VFX.Ring:Clone()
-			local Shockwave: MeshPart 	  = VFX.Shockwave:Clone()
+			local ring: MeshPart = VFX.Ring:Clone()
+			local Shockwave: MeshPart = VFX.Shockwave:Clone()
 
 			--Enable shockwave sub-effects
 			local sparklesFX: ParticleEmitter = Shockwave.VFX_Attachment1.Sparkles
-			local ringFX: ParticleEmitter     = Shockwave.VFX_Attachment2.Ring
-			local energyFX: ParticleEmitter   = Shockwave.VFX_Attachment1.Energy
-			
+			local ringFX: ParticleEmitter = Shockwave.VFX_Attachment2.Ring
+			local energyFX: ParticleEmitter = Shockwave.VFX_Attachment1.Energy
+
 			sparklesFX.Enabled = true
 			ringFX.Enabled = false
 			energyFX.Enabled = true
@@ -676,29 +672,29 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 			Shockwave.Transparency = 0
 
 			--Initial Sizes
-			insideSpiral.Size  = Vector3.new(25, 10, 20) * 1.25
+			insideSpiral.Size = Vector3.new(25, 10, 20) * 1.25
 			outsideSpiral.Size = Vector3.new(5, 0, 5) * 1.25
-			ring.Size 		   = Vector3.new(0, 0, 0)
-			Shockwave.Size 	   = Vector3.new(7, 7, 12.5) * 1.5
+			ring.Size = Vector3.new(0, 0, 0)
+			Shockwave.Size = Vector3.new(7, 7, 12.5) * 1.5
 
 			--Parenting
-			insideSpiral.Parent  = Trash
+			insideSpiral.Parent = Trash
 			outsideSpiral.Parent = Trash
-			ring.Parent 		 = Trash
-			Shockwave.Parent 	 = Trash
+			ring.Parent = Trash
+			Shockwave.Parent = Trash
 
 			--UPWARD DIRECTION
 			local up = Vector3.new(0, 1, 0)
 			local lookAtPos = hrpPosition + hrpLookVector
 
 			--CFrames (face upward)
-			insideSpiral.CFrame  = CFrame.lookAt(hrpPosition, hrpPosition)
+			insideSpiral.CFrame = CFrame.lookAt(hrpPosition, hrpPosition)
 			outsideSpiral.CFrame = CFrame.lookAt(hrpPosition, hrpPosition)
-			ring.CFrame 		 = CFrame.lookAt(hrpPosition, hrpPosition)
-			Shockwave.CFrame	 = CFrame.lookAt(hrpPosition, lookAtPos) * CFrame.Angles(math.rad(90), 0, 0)
+			ring.CFrame = CFrame.lookAt(hrpPosition, hrpPosition)
+			Shockwave.CFrame = CFrame.lookAt(hrpPosition, lookAtPos) * CFrame.Angles(math.rad(90), 0, 0)
 
 			--Initial Placement (Upward instead of forward)
-			insideSpiral.Position  = hrpPosition + up * 2.5
+			insideSpiral.Position = hrpPosition + up * 2.5
 			outsideSpiral.Position = hrpPosition + up * 9
 
 			--Tween info
@@ -799,21 +795,19 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 			Debris:AddItem(sparklesFX, 2)
 		end
 		playVFX(hrp.Position, hrp.CFrame.LookVector)
-
 	end
-	
-	if vfxToPlay == "Crush Type" then
-		local function playVFX(hrp: BasePart, hrpCFrame: CFrame)
 
+	if vfxToPlay == "Crush Type" then
+		local function playVFX(hrpCFrame: CFrame)
 			-- Create the attachment for VFX
 			local attachment: Attachment = Instance.new("Attachment")
-			attachment.Parent   = hrp
+			attachment.Parent = hrp
 			attachment.Position = Vector3.new(0, -2.5, 0) -- Move it down 2.5 studs
 			Debris:AddItem(attachment, 1)
-			
+
 			-- Clone and apply all particle emitters
 			local VFX: Folder = SkillsetsVFX.BDAs.Akaza.CrushType
-			
+
 			for _, obj in pairs(VFX:GetChildren()) do
 				if obj:IsA("ParticleEmitter") then
 					local clone = obj:Clone()
@@ -821,13 +815,13 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 					clone.Enabled = false
 					clone:Emit(1)
 				end
-				
+
 				if obj:IsA("Attachment") then
 					local clone = obj:Clone()
 					clone.Parent = hrp
 					clone.Position = Vector3.new(0, -2.5, 0) -- Move it down 2.5 studs
 					Debris:AddItem(clone, 1)
-					
+
 					for _, obj2 in pairs(clone:GetChildren()) do
 						if obj2:IsA("ParticleEmitter") then
 							obj2.Enabled = false
@@ -837,42 +831,38 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 				end
 			end
 
-
 			RockModule.Crater(hrpCFrame, 12.5, 20, 20, false)
 			task.delay(0.3, function()
 				RockModule.ClearDebris(true)
 			end)
 		end
-		playVFX(hrp, hrp.CFrame)
+		playVFX(hrp.CFrame)
 
-		local function playSFX(hrp: BasePart)
-
+		local function playSFX()
 			local SFX: Sound = ReplicatedStorage.FX.SFX.Combat.Skillsets.BDAs.Akaza.CrushType:Clone()
 			SFX.Parent = hrp
 			SFX:Play()
 			Debris:AddItem(SFX, SFX.TimeLength)
 		end
-		playSFX(hrp)
-
+		playSFX()
 	end
-	
+
 	--Doma
 	if vfxToPlay == "Freezing Clouds" then
-		local function playVFX(hrp: BasePart, hrpPosition: Vector3, hrpLookVector: Vector3)
-			
+		local function playVFX(hrpPosition: Vector3, hrpLookVector: Vector3)
 			--Creating variables
 			local VFX: Part = SkillsetsVFX.BDAs.Doma["Freezing Clouds"]
 
 			VFX = VFX:Clone()
 			VFX.Parent = Trash
-			VFX.CFrame = CFrame.lookAlong( hrpPosition + (hrpLookVector * 6), hrpLookVector ) 
+			VFX.CFrame = CFrame.lookAlong(hrpPosition + (hrpLookVector * 6), hrpLookVector)
 			VFX.Orientation = VFX.Orientation + Vector3.new(0, -90, 0)
-			
+
 			local weld = Instance.new("WeldConstraint")
 			weld.Part0 = VFX
 			weld.Part1 = hrp
 			weld.Parent = VFX
-			
+
 			local Vfx_descendants = VFX:GetDescendants()
 			for _, v in pairs(Vfx_descendants) do
 				if v:IsA("ParticleEmitter") then
@@ -885,59 +875,60 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 					end)
 				end
 			end
-			
+
 			Debris:AddItem(VFX, 4)
 		end
-		playVFX(hrp, hrp.Position, hrp.CFrame.LookVector)
+		playVFX(hrp.Position, hrp.CFrame.LookVector)
 
-		local function playSFX(hrp: BasePart)
+		local function playSFX()
 			local SFX = SkillsetsSFX.BDAs.Doma["Freezing Clouds"]
 			SFX = SFX:Clone()
 			SFX.Parent = hrp
 			SFX:Play()
 			Debris:AddItem(SFX, SFX.TimeLength)
 		end
-		playSFX(hrp)
+		playSFX()
+	end
 
-	end	
-	
 	if vfxToPlay == "Barren Hanging Garden" then
-		local function playSFX(hrp: BasePart)
-
+		local function playSFX()
 			local SFX: Sound = ReplicatedStorage.FX.SFX.Combat.Skillsets.BDAs.Doma[vfxToPlay]:Clone()
 			SFX.Parent = hrp
 			SFX:Play()
 			Debris:AddItem(SFX, SFX.TimeLength)
 		end
-		
-		local function playVFX(hrp: BasePart)
+
+		local function playVFX()
 			local mesh = SkillsetsVFX.BDAs.Doma.BarrenHangingGarden
 
 			for _ = 1, 8 do
-				if not hrp then break end
-				playSFX(hrp)
+				if not hrp then
+					break
+				end
+				playSFX()
 
 				mesh = mesh:Clone()
 				mesh.Parent = Trash
-				mesh.CFrame = CFrame.lookAlong(hrp.Position + ((hrp.CFrame.UpVector * 2)) , hrp.CFrame.LookVector)
-				mesh.Orientation = mesh.Orientation + Vector3.new( math.random(-45, 45) , math.random(-100, -70) , math.random(-150, -125) )
+				mesh.CFrame = CFrame.lookAlong(hrp.Position + (hrp.CFrame.UpVector * 2), hrp.CFrame.LookVector)
+				mesh.Orientation = mesh.Orientation
+					+ Vector3.new(math.random(-45, 45), math.random(-100, -70), math.random(-150, -125))
 				Debris:AddItem(mesh, 1)
 
 				--Tweens
 				TweenService:Create( --Orientation
 					mesh,
-					TweenInfo.new(.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
-					{Orientation = mesh.Orientation + Vector3.new(0, 0, math.random(70, 100))}
+					TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
+					{ Orientation = mesh.Orientation + Vector3.new(0, 0, math.random(70, 100)) }
 				):Play()
 				TweenService:Create( --Transparency
 					mesh,
-					TweenInfo.new(.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut, 0, false, 0),
-					{Transparency = 1}
+					TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut, 0, false, 0),
+					{ Transparency = 1 }
 				):Play()
 				TweenService:Create( --Size
 					mesh,
-					TweenInfo.new(.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
-					{Size = mesh.Size + Vector3.new(1,1,0)}
+					TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
+					{ Size = mesh.Size + Vector3.new(1, 1, 0) }
 				):Play()
 
 				--Particles
@@ -966,32 +957,25 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 				task.wait(0.15)
 			end
 		end
-		playVFX(hrp) --playSFX is called inside playVFX's forloop
-		
-		
+		playVFX() --playSFX is called inside playVFX's forloop
 	end
-	
+
 	if vfxToPlay == "Frozen Lotus" then
-		local function playVFX(hrp: BasePart)
-			
+		local function playVFX()
 			local part: BasePart = SkillsetsVFX.BDAs.Doma["Frozen Lotus"]
-			
+
 			--//MAIN
 			part = part:Clone()
 			part.Parent = Trash
 			part.CFrame = CFrame.lookAlong(
-				hrp.Position + (
-					(hrp.CFrame.UpVector * (part.Size.Y / 3.75) ) 
-						+ (hrp.CFrame.LookVector * (part.Size.Z / 2) ) 
-				) , 
+				hrp.Position
+					+ ((hrp.CFrame.UpVector * (part.Size.Y / 3.75)) + (hrp.CFrame.LookVector * (part.Size.Z / 2))),
 				hrp.CFrame.LookVector
 			)
 			Debris:AddItem(part, 5)
 
-
 			--Particles
 			for _, v: Instance in pairs(part:GetDescendants()) do
-
 				if v:IsA("ParticleEmitter") then
 					v.Enabled = false
 
@@ -1008,37 +992,33 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 							end
 						end
 					end)
-
 				end
-
 			end
 		end
-		playVFX(hrp)
-		
-		local function playSFX(hrp: BasePart)
+		playVFX()
 
+		local function playSFX()
 			local SFX: Sound = ReplicatedStorage.FX.SFX.Combat.Skillsets.BDAs.Doma[vfxToPlay]:Clone()
 			SFX.Parent = hrp
 			SFX:Play()
 			Debris:AddItem(SFX, SFX.TimeLength)
 		end
-		playSFX(hrp)
+		playSFX()
 	end
 	--	Breaths	 --
 	--Moon
 	if vfxToPlay == "Moon Spirit Calamitous Eddy" then
-		local function playVFX(hrp: BasePart, hrpPosition: Vector3, hrpLookVector: Vector3)
-
+		local function playVFX(hrpPosition: Vector3, hrpLookVector: Vector3)
 			--Creating variables
 			local VFX: Folder = SkillsetsVFX.Breaths.Moon[vfxToPlay]
 			local Crescent: MeshPart = VFX:FindFirstChildOfClass("MeshPart"):Clone()
 			local ShockWaveFX: Folder = VFX:FindFirstChild("ShockwaveFX"):Clone()
-			
+
 			--Parenting
-			Crescent.Parent    = Trash
+			Crescent.Parent = Trash
 			ShockWaveFX.Parent = hrp
 			--CFrame
-			Crescent.CFrame   = CFrame.lookAt(hrpPosition, hrpPosition + hrpLookVector)
+			Crescent.CFrame = CFrame.lookAt(hrpPosition, hrpPosition + hrpLookVector)
 			Crescent.Position = Crescent.Position
 				+ (hrp.CFrame.UpVector * math.random(0, 5))
 				+ (hrp.CFrame.RightVector * math.random(-5, 5))
@@ -1055,7 +1035,7 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 					end)
 				end
 			end
-			
+
 			for _, obj in ShockWaveFX:GetChildren() do
 				if obj:IsA("Attachment") then
 					for _, obj2 in pairs(obj:GetChildren()) do
@@ -1093,22 +1073,19 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 			Debris:AddItem(Crescent, 2)
 			Debris:AddItem(ShockWaveFX, 1)
 		end
-		playVFX(hrp, hrp.Position, hrp.CFrame.LookVector)
+		playVFX(hrp.Position, hrp.CFrame.LookVector)
 
-		local function playSFX(hrp: BasePart)
-
+		local function playSFX()
 			local SFX: Sound = ReplicatedStorage.FX.SFX.Combat.Skillsets.Breaths.Moon.CalamitousEddy:Clone()
 			SFX.Parent = hrp
 			SFX:Play()
 			Debris:AddItem(SFX, SFX.TimeLength)
 		end
-		playSFX(hrp)
-
+		playSFX()
 	end
-	
-	if vfxToPlay == "Catastrophe, Tenman Crescent Moon" then
-		local function playVFX(hrp: BasePart, hrpPosition: Vector3, hrpLookVector: Vector3)
 
+	if vfxToPlay == "Catastrophe, Tenman Crescent Moon" then
+		local function playVFX(hrpPosition: Vector3, hrpLookVector: Vector3)
 			local VFX = SkillsetsVFX.Breaths.Moon[vfxToPlay]
 			local Crescent = VFX.Crescent:Clone()
 
@@ -1155,10 +1132,9 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 
 			Debris:AddItem(Crescent, 2)
 		end
-		playVFX(hrp, hrp.Position, hrp.CFrame.LookVector)
+		playVFX(hrp.Position, hrp.CFrame.LookVector)
 
-		local function playSFX(hrp: BasePart)
-
+		local function playSFX()
 			local SFX: Sound = ReplicatedStorage.FX.SFX.Combat.Skillsets.Breaths.Moon.CatastropheTenman:Clone()
 			local pitch = math.random(75, 125) / 100
 			SFX:FindFirstChildOfClass("PitchShiftSoundEffect").Octave = pitch
@@ -1168,13 +1144,11 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 			SFX:Play()
 			Debris:AddItem(SFX, SFX.TimeLength)
 		end
-		playSFX(hrp)
-
+		playSFX()
 	end
 
 	if vfxToPlay == "Moonbow, Half Moon" then
 		local function playVFX(hrpPosition: Vector3, hrpLookVector: Vector3, hrpRightVector: Vector3)
-			
 			--Creating variables
 			local VFX: Folder = SkillsetsVFX.Breaths.Moon[vfxToPlay]
 			local Crescent: MeshPart = VFX.Crescent:Clone()
@@ -1183,15 +1157,15 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 			local GroundCircle: MeshPart = VFX.GroundCircle:Clone()
 
 			--Parenting
-			Crescent.Parent 	= Trash
-			Shockwave.Parent 	= Trash
+			Crescent.Parent = Trash
+			Shockwave.Parent = Trash
 			GroundCircle.Parent = Trash
 			--Position
 			local PositionX = hrpRightVector * math.random(math.random(-10, -5), math.random(5, 10))
 			local PositionZ = hrpLookVector * math.random(5, 15)
 			local randomPosition = hrpPosition + PositionX + PositionZ
-			Crescent.Position 	  = randomPosition + Vector3.new(0, 17.5, 0)
-			Shockwave.Position 	  = randomPosition + Vector3.new(0, -2.5, 0)
+			Crescent.Position = randomPosition + Vector3.new(0, 17.5, 0)
+			Shockwave.Position = randomPosition + Vector3.new(0, -2.5, 0)
 			GroundCircle.Position = randomPosition + Vector3.new(0, -2.5, 0)
 			--CFrame
 			Crescent.CFrame = CFrame.lookAt(Crescent.Position, Crescent.Position + hrpLookVector)
@@ -1260,8 +1234,7 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 		end
 		playVFX(hrp.Position, hrp.CFrame.LookVector, hrp.CFrame.RightVector) --VFX
 
-		local function playSFX(hrp: BasePart) --CHANGE THIS LATER
-
+		local function playSFX() --CHANGE THIS LATER
 			local SFX: Sound = ReplicatedStorage.FX.SFX.Combat.Skillsets.Breaths.Moon.MoonbowHalfmoon:Clone()
 			local playBackSpeed = math.random(100, 130) / 100
 			SFX.PlaybackSpeed = playBackSpeed
@@ -1271,10 +1244,9 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 			SFX:Play()
 			Debris:AddItem(SFX, SFX.TimeLength)
 		end
-		playSFX(hrp) --SFX
-
+		playSFX() --SFX
 	end
-	
+
 	--Sun
 	if vfxToPlay == "Dance" then
 		--[[
@@ -1327,18 +1299,15 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 		end
 		playVFX()
 		
-		local function playSFX(hrp: BasePart)
+		local function playSFX()
 
 			local SFX: Sound = ReplicatedStorage.FX.SFX.Combat.Skillsets.Breaths.Sun[vfxToPlay]:Clone()
 			SFX.Parent = hrp
 			SFX:Play()
 			Debris:AddItem(SFX, SFX.TimeLength)
 		end
-		playSFX(hrp)
+		playSFX()
 		]]
-		
-
-		
 	end
 
 	if vfxToPlay == "Raging Sun" then
@@ -1408,7 +1377,7 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 			Debris:AddItem(model, 2)
 		end
 		
-		local function playSFX(hrp: BasePart)
+		local function playSFX()
 			local SFX: Sound = ReplicatedStorage.FX.SFX.Combat.Skillsets.Breaths.Sun[vfxToPlay]:Clone()
 			SFX.Parent = hrp
 			SFX:Play()
@@ -1417,18 +1386,14 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 		
 		for i = 1, 2 do
 			playVFX(i)
-			playSFX(hrp)
+			playSFX()
 			task.wait(0.3)
 		end
 		]]
-		
-		
-		
 	end
 
 	if vfxToPlay == "Burning Bones, Summer Sun" then
 		local function playVFX()
-
 			local mesh = SkillsetsVFX.Breaths.Sun[vfxToPlay] :: MeshPart
 			if not mesh then
 				warn("VFX for [" .. vfxToPlay .. "] not found!")
@@ -1437,12 +1402,9 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 
 			--Properties
 			mesh = mesh:Clone()
-			mesh.Parent 	 = Trash
-			mesh.CFrame 	 = CFrame.lookAlong(
-				hrp.Position + (
-					(hrp.CFrame.UpVector * 2) 
-						+ (hrp.CFrame.LookVector * 10)
-				),
+			mesh.Parent = Trash
+			mesh.CFrame = CFrame.lookAlong(
+				hrp.Position + ((hrp.CFrame.UpVector * 2) + (hrp.CFrame.LookVector * 10)),
 				hrp.CFrame.LookVector
 			)
 			mesh.Orientation = mesh.Orientation + Vector3.new(0, 90, -90)
@@ -1451,27 +1413,25 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 			--Tweening
 			TweenService:Create(
 				mesh,
-				TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
-				{Transparency = 0}
+				TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
+				{ Transparency = 0 }
 			):Play()
-			TweenService:Create(
-				mesh,
-				TweenInfo.new(.75, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
-				{
+			TweenService
+				:Create(mesh, TweenInfo.new(0.75, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0), {
 					Orientation = mesh.Orientation + Vector3.new(720, 0, 0),
-					Size = mesh.Size + Vector3.new(2, 0, 2)
-				}
-			):Play()
+					Size = mesh.Size + Vector3.new(2, 0, 2),
+				})
+				:Play()
 			task.delay(0.5, function()
 				TweenService:Create(
 					mesh,
-					TweenInfo.new(.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
-					{Transparency = 1}
+					TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
+					{ Transparency = 1 }
 				):Play()
 			end)
 
 			--Emit particles
-			for _, v in pairs (mesh:GetDescendants()) do
+			for _, v in pairs(mesh:GetDescendants()) do
 				if v:IsA("ParticleEmitter") then
 					--Emits particles
 					task.spawn(function()
@@ -1492,19 +1452,17 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 		end
 		playVFX()
 
-		local function playSFX(hrp: BasePart)
-
+		local function playSFX()
 			local SFX: Sound = ReplicatedStorage.FX.SFX.Combat.Skillsets.Breaths.Sun[vfxToPlay]:Clone()
 			SFX.Parent = hrp
 			SFX:Play()
 			Debris:AddItem(SFX, SFX.TimeLength)
 		end
-		playSFX(hrp)
-
+		playSFX()
 	end
 
 	if vfxToPlay == "Setting Sun Transformation" then
-		
+
 		--[[
 		local function playVFX()
 			local model = SkillsetsVFX.Breaths.Sun[vfxToPlay] :: Model
@@ -1571,86 +1529,60 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 		end
 		playVFX()
 		
-		local function playSFX(hrp: BasePart)
+		local function playSFX()
 
 			local SFX: Sound = ReplicatedStorage.FX.SFX.Combat.Skillsets.Breaths.Sun[vfxToPlay]:Clone()
 			SFX.Parent = hrp
 			SFX:Play()
 			Debris:AddItem(SFX, SFX.TimeLength)
 		end
-		playSFX(hrp)
+		playSFX()
 		]]
-		
-
 	end
 end) -- End of OnClientEvent connection
 
+local skillAnims = {
 
-
-
-
---	Plays animations on the client
-animRemote.OnClientEvent:Connect(function(humanoid_instance: Humanoid, animToPlay: string)
-	if not humanoid_instance then
-		warn("No humanoid instance!")
-		return
-	end
-	if not animToPlay then
-		warn("No animation to play!")
-		return
-	end	
-
-	local animator = humanoid_instance:FindFirstChildOfClass("Animator") :: Animator
-	
-	
-	-----------------
-	-- Skill Anims --
-	-----------------
 	--	BDAs	--
 	--Akaza
-	if animToPlay == "Annihilation Type: Punch" then
-		local anim = ReplicatedStorage.Animations.Skills.BDAs.Akaza.AnnihilationType
-		AnimationService:Play(
-			anim,
-			animator,
-			0,
-			0,
-			1,
-			1,
-			1
-		)
-	end
-
-	if animToPlay == "Chaotic Blue Metal Afterglow" then
-		local anim = ReplicatedStorage.Animations.Skills.BDAs.Akaza.Afterglow
-		AnimationService:Play(
-			anim,
-			animator,
-			0,
-			0,
-			1,
-			1,
-			1
-		)
-	end
-
-	if animToPlay == "Flying Planet" then
-		local anim = ReplicatedStorage.Animations.Skills.BDAs.Akaza.FlyingPlanet
-		AnimationService:Play(
-			anim,
-			animator,
-			0,
-			0,
-			1,
-			1,
-			1
-		)
-
-	end
-
-	if animToPlay == "Crush Type" then
-		
-		local anim = ReplicatedStorage.Animations.Skills.BDAs.Akaza.CrushType
+	["Annihilation Type: Punch"] = function(
+		anim_char: Model,
+		anim_hrp: BasePart,
+		anim_hum: Humanoid,
+		animator: Animator,
+		animToPlay: string
+	)
+		local anim = ReplicatedStorage.Animations.Skills.BDAs.Akaza[animToPlay]
+		AnimationService:Play(anim, animator, 0, 0, 1, 1, 1)
+	end,
+	["Chaotic Blue Metal Afterglow"] = function(
+		anim_char: Model,
+		anim_hrp: BasePart,
+		anim_hum: Humanoid,
+		animator: Animator,
+		animToPlay: string
+	)
+		local anim = ReplicatedStorage.Animations.Skills.BDAs.Akaza[animToPlay]
+		AnimationService:Play(anim, animator, 0, 0, 1, 1, 1)
+	end,
+	["Flying Planet"] = function(
+		anim_char: Model,
+		anim_hrp: BasePart,
+		anim_hum: Humanoid,
+		animator: Animator,
+		animToPlay: string
+	)
+		local anim = ReplicatedStorage.Animations.Skills.BDAs.Akaza[animToPlay]
+		AnimationService:Play(anim, animator, 0, 0, 1, 1, 1)
+	end,
+	["Crush Type"] = function(
+		anim_char: Model,
+		anim_hrp: BasePart,
+		anim_hum: Humanoid,
+		animator: Animator,
+		animToPlay: string
+	)
+		local anim = ReplicatedStorage.Animations.Skills.BDAs.Akaza[animToPlay]
 		local animTrack = animator:LoadAnimation(anim) :: AnimationTrack
 		animTrack:Play()
 		animTrack:GetMarkerReachedSignal("Pause"):Once(function()
@@ -1682,156 +1614,135 @@ animRemote.OnClientEvent:Connect(function(humanoid_instance: Humanoid, animToPla
 
 		task.delay(0.35, function()
 			local landedConnection: RBXScriptConnection
-			landedConnection = humanoid_instance.StateChanged:Connect(function(_, newState)
-				if newState ~= Enum.HumanoidStateType.Landed and newState ~= Enum.HumanoidStateType.Running then return end
-				
+			landedConnection = anim_hum.StateChanged:Connect(function(_, newState)
+				if newState ~= Enum.HumanoidStateType.Landed and newState ~= Enum.HumanoidStateType.Running then
+					return
+				end
+
 				animTrack:AdjustSpeed(1)
 				landedConnection:Disconnect()
 			end)
-			
+
 			task.delay(0.5, function()
 				animTrack:AdjustSpeed(1)
 				landedConnection:Disconnect()
 			end)
 		end)
-		
-	end
-	
-	--Doma
-	if animToPlay == "Freezing Clouds" then
-		local anim = ReplicatedStorage.Animations.Skills.BDAs.Doma[animToPlay]
-		AnimationService:Play(
-			anim,
-			animator,
-			0,
-			0,
-			1,
-			1,
-			1
-		)
-	end
-	
-	if animToPlay == "Barren Hanging Garden" then
-		local anim = ReplicatedStorage.Animations.Skills.BDAs.Doma[animToPlay]
-		AnimationService:Play(
-			anim,
-			animator,
-			0,
-			0,
-			1,
-			1,
-			1
-		)
-	end
-	
-	if animToPlay == "Frozen Lotus" then
-		local anim = ReplicatedStorage.Animations.Skills.BDAs.Doma[animToPlay]
-		AnimationService:Play(
-			anim,
-			animator,
-			0,
-			0,
-			1,
-			1,
-			1
-		)
-	end
-	
-	if animToPlay == "Wintry Icicles" then
-		local anim = ReplicatedStorage.Animations.Skills.BDAs.Doma[animToPlay]
-		AnimationService:Play(
-			anim,
-			animator,
-			0,
-			0,
-			1,
-			1,
-			1
-		)
-	end
-	
-	--	Breaths	--
-	--MOON
-	if animToPlay == "Loathsome Moon, Chains" then
-		local anim = ReplicatedStorage.Animations.Skills.Breaths.Moon.LoathsomeMoon
-		AnimationService:Play(
-			anim,
-			animator,
-			0,
-			0,
-			1,
-			1,
-			1
-		)
-	end
-	
-	if animToPlay == "Moon Spirit Calamitous Eddy" then
-		local anim = ReplicatedStorage.Animations.Skills.Breaths.Moon.CalamitousEddy
-		AnimationService:Play(
-			anim,
-			animator,
-			0,
-			0,
-			1,
-			1,
-			1
-		)
-	end
-	
-	if animToPlay == "Catastrophe, Tenman Crescent Moon" then
-		local anim = ReplicatedStorage.Animations.Skills.Breaths.Moon.CatastropheTenman
-		AnimationService:Play(
-			anim,
-			animator,
-			0,
-			0,
-			1,
-			1,
-			1
-		)
-	end
-	
-	if animToPlay == "Moonbow, Half Moon" then
-		local anim = ReplicatedStorage.Animations.Skills.Breaths.Moon.MoonbowHalfMoon
-		AnimationService:Play(
-			anim,
-			animator,
-			0,
-			0,
-			1,
-			1,
-			1
-		)
-	end
-	
-	--SUN
-	if animToPlay == "Dance" then
-		local anim: Animation    = ReplicatedStorage.Animations.Skills.Breaths.Sun[animToPlay]
-		local animTrack: AnimationTrack? = AnimationService:Play(
-			anim,
-			animator,
-			0,
-			0,
-			1,
-			1,
-			1
-		)
-		if animTrack then
-			
-			local function playSFX(hrp: BasePart)
+	end,
 
+	--Doma
+	["Freezing Clouds"] = function(
+		anim_char: Model,
+		anim_hrp: BasePart,
+		anim_hum: Humanoid,
+		animator: Animator,
+		animToPlay: string
+	)
+		local anim = ReplicatedStorage.Animations.Skills.BDAs.Doma[animToPlay]
+		AnimationService:Play(anim, animator, 0, 0, 1, 1, 1)
+	end,
+	["Barren Hanging Garden"] = function(
+		anim_char: Model,
+		anim_hrp: BasePart,
+		anim_hum: Humanoid,
+		animator: Animator,
+		animToPlay: string
+	)
+		local anim = ReplicatedStorage.Animations.Skills.BDAs.Doma[animToPlay]
+		AnimationService:Play(anim, animator, 0, 0, 1, 1, 1)
+	end,
+	["Frozen Lotus"] = function(
+		anim_char: Model,
+		anim_hrp: BasePart,
+		anim_hum: Humanoid,
+		animator: Animator,
+		animToPlay: string
+	)
+		local anim = ReplicatedStorage.Animations.Skills.BDAs.Doma[animToPlay]
+		AnimationService:Play(anim, animator, 0, 0, 1, 1, 1)
+	end,
+	["Wintry Icicles"] = function(
+		anim_char: Model,
+		anim_hrp: BasePart,
+		anim_hum: Humanoid,
+		animator: Animator,
+		animToPlay: string
+	)
+		local anim = ReplicatedStorage.Animations.Skills.BDAs.Doma[animToPlay]
+		AnimationService:Play(anim, animator, 0, 0, 1, 1, 1)
+	end,
+
+	--	Breaths	--
+	--Moon
+	["Loathsome Moon, Chains"] = function(
+		anim_char: Model,
+		anim_hrp: BasePart,
+		anim_hum: Humanoid,
+		animator: Animator,
+		animToPlay: string
+	)
+		local anim = ReplicatedStorage.Animations.Skills.Breaths.Moon[animToPlay]
+		AnimationService:Play(anim, animator, 0, 0, 1, 1, 1)
+	end,
+	["Moon Spirit Calamitous Eddy"] = function(
+		anim_char: Model,
+		anim_hrp: BasePart,
+		anim_hum: Humanoid,
+		animator: Animator,
+		animToPlay: string
+	)
+		local anim = ReplicatedStorage.Animations.Skills.Breaths.Moon[animToPlay]
+		AnimationService:Play(anim, animator, 0, 0, 1, 1, 1)
+	end,
+	["Catastrophe, Tenman Crescent Moon"] = function(
+		anim_char: Model,
+		anim_hrp: BasePart,
+		anim_hum: Humanoid,
+		animator: Animator,
+		animToPlay: string
+	)
+		local anim = ReplicatedStorage.Animations.Skills.Breaths.Moon[animToPlay]
+		AnimationService:Play(anim, animator, 0, 0, 1, 1, 1)
+	end,
+	["Moonbow, Half Moon"] = function(
+		anim_char: Model,
+		anim_hrp: BasePart,
+		anim_hum: Humanoid,
+		animator: Animator,
+		animToPlay: string
+	)
+		local anim = ReplicatedStorage.Animations.Skills.Breaths.Moon[animToPlay]
+		AnimationService:Play(anim, animator, 0, 0, 1, 1, 1)
+	end,
+
+	--Sun
+	["Dance"] = function(
+		anim_char: Model,
+		anim_hrp: BasePart,
+		anim_hum: Humanoid,
+		animator: Animator,
+		animToPlay: string
+	)
+		local anim: Animation = ReplicatedStorage.Animations.Skills.Breaths.Sun[animToPlay]
+		local animTrack: AnimationTrack? = AnimationService:Play(anim, animator, 0, 0, 1, 1, 1)
+		if animTrack then
+			local function playSFX()
 				local SFX: Sound = ReplicatedStorage.FX.SFX.Combat.Skillsets.Breaths.Sun[animToPlay]:Clone()
-				SFX.Parent = hrp
+				SFX.Parent = anim_hrp
 				SFX:Play()
 				Debris:AddItem(SFX, SFX.TimeLength)
 			end
-			
+
 			local function emitVFX(slashToPlay: Folder)
-				local character_instance = humanoid_instance.Parent :: Model?
-				if not character_instance then return end
+				local character_instance = anim_hum.Parent :: Model?
+				if not character_instance then
+					return
+				end
 				local hrp = character_instance:FindFirstChild("HumanoidRootPart") :: BasePart?
-				if not hrp then return end
-				playSFX(hrp)
+				if not hrp then
+					return
+				end
+				playSFX()
 
 				for _, v: Attachment in pairs(slashToPlay:GetChildren()) do
 					if v:IsA("Attachment") then
@@ -1845,47 +1756,51 @@ animRemote.OnClientEvent:Connect(function(humanoid_instance: Humanoid, animToPla
 					end
 				end
 			end
-			
+
 			local slash_conn: RBXScriptConnection
 			slash_conn = animTrack:GetMarkerReachedSignal("Slash"):Connect(function()
 				local model = SkillsetsVFX.Breaths.Sun.Dance :: Model
 				local slashToPlay = model:FindFirstChild("Slash")
-				if not slashToPlay then return end
+				if not slashToPlay then
+					return
+				end
 				emitVFX(slashToPlay)
 			end)
-			
+
 			task.delay(animTrack.Length, function()
-				if slash_conn then slash_conn:Disconnect() end
+				if slash_conn then
+					slash_conn:Disconnect()
+				end
 			end)
 		end
-	end
-	
-	if animToPlay == "Raging Sun" then
-		local anim: Animation    = ReplicatedStorage.Animations.Skills.Breaths.Sun[animToPlay]
-		local animTrack: AnimationTrack? = AnimationService:Play(
-			anim,
-			animator,
-			0,
-			0,
-			1,
-			1,
-			1
-		)
+	end,
+	["Raging Sun"] = function(
+		anim_char: Model,
+		anim_hrp: BasePart,
+		anim_hum: Humanoid,
+		animator: Animator,
+		animToPlay: string
+	)
+		local anim: Animation = ReplicatedStorage.Animations.Skills.Breaths.Sun[animToPlay]
+		local animTrack: AnimationTrack? = AnimationService:Play(anim, animator, 0, 0, 1, 1, 1)
 		if animTrack then
-			
-			local function playSFX(hrp: BasePart)
+			local function playSFX()
 				local SFX: Sound = ReplicatedStorage.FX.SFX.Combat.Skillsets.Breaths.Sun[animToPlay]:Clone()
-				SFX.Parent = hrp
+				SFX.Parent = anim_hrp
 				SFX:Play()
 				Debris:AddItem(SFX, SFX.TimeLength)
 			end
-			
+
 			local function emitVFX(slashToPlay: Folder)
-				local character_instance = humanoid_instance.Parent :: Model?
-				if not character_instance then return end
+				local character_instance = anim_hum.Parent :: Model?
+				if not character_instance then
+					return
+				end
 				local hrp = character_instance:FindFirstChild("HumanoidRootPart") :: BasePart?
-				if not hrp then return end
-				playSFX(hrp)
+				if not hrp then
+					return
+				end
+				playSFX()
 
 				for _, v: Attachment in pairs(slashToPlay:GetChildren()) do
 					if v:IsA("Attachment") then
@@ -1899,74 +1814,76 @@ animRemote.OnClientEvent:Connect(function(humanoid_instance: Humanoid, animToPla
 					end
 				end
 			end
-			
+
 			local firstSlash_conn: RBXScriptConnection
 			firstSlash_conn = animTrack:GetMarkerReachedSignal("First Slash"):Connect(function()
-				
 				local model = SkillsetsVFX.Breaths.Sun["Raging Sun"] :: Model
 				local slashToPlay = model:FindFirstChild("Slash1") :: Folder?
-				if not slashToPlay then return end
+				if not slashToPlay then
+					return
+				end
 
 				emitVFX(slashToPlay)
 			end)
-			
-			
+
 			local secondSlash_conn: RBXScriptConnection
 			secondSlash_conn = animTrack:GetMarkerReachedSignal("Second Slash"):Connect(function()
-
 				local model = SkillsetsVFX.Breaths.Sun["Raging Sun"] :: Model
 				local slashToPlay = model:FindFirstChild("Slash2") :: Folder?
-				if not slashToPlay then return end
-			
+				if not slashToPlay then
+					return
+				end
+
 				emitVFX(slashToPlay)
 			end)
-			
+
 			task.delay(animTrack.Length, function()
-				if firstSlash_conn then firstSlash_conn:Disconnect() end
-				if secondSlash_conn then secondSlash_conn:Disconnect() end
+				if firstSlash_conn then
+					firstSlash_conn:Disconnect()
+				end
+				if secondSlash_conn then
+					secondSlash_conn:Disconnect()
+				end
 			end)
 		end
-	end
-	
-	if animToPlay == "Burning Bones, Summer Sun" then
-		local anim: Animation    = ReplicatedStorage.Animations.Skills.Breaths.Sun[animToPlay]
-		AnimationService:Play(
-			anim,
-			animator,
-			0,
-			0,
-			1,
-			1,
-			1
-		)
-	end
-	
-	if animToPlay == "Setting Sun Transformation" then
-		local anim: Animation    = ReplicatedStorage.Animations.Skills.Breaths.Sun[animToPlay]
-		local animTrack: AnimationTrack = AnimationService:Play(
-			anim,
-			animator,
-			0,
-			0,
-			1,
-			1,
-			1
-		)
+	end,
+	["Burning Bones, Summer Sun"] = function(
+		anim_char: Model,
+		anim_hrp: BasePart,
+		anim_hum: Humanoid,
+		animator: Animator,
+		animToPlay: string
+	)
+		local anim: Animation = ReplicatedStorage.Animations.Skills.Breaths.Sun[animToPlay]
+		AnimationService:Play(anim, animator, 0, 0, 1, 1, 1)
+	end,
+	["Setting Sun Transformation"] = function(
+		anim_char: Model,
+		anim_hrp: BasePart,
+		anim_hum: Humanoid,
+		animator: Animator,
+		animToPlay: string
+	)
+		local anim: Animation = ReplicatedStorage.Animations.Skills.Breaths.Sun[animToPlay]
+		local animTrack: AnimationTrack = AnimationService:Play(anim, animator, 0, 0, 1, 1, 1)
 		if animTrack then
-			
-			local function playSFX(hrp: BasePart)
+			local function playSFX()
 				local SFX: Sound = ReplicatedStorage.FX.SFX.Combat.Skillsets.Breaths.Sun[animToPlay]:Clone()
-				SFX.Parent = hrp
+				SFX.Parent = anim_hrp
 				SFX:Play()
 				Debris:AddItem(SFX, SFX.TimeLength)
 			end
-			
+
 			local function emitVFX(slashToPlay: Folder)
-				local character_instance = humanoid_instance.Parent :: Model?
-				if not character_instance then return end
+				local character_instance = anim_hum.Parent :: Model?
+				if not character_instance then
+					return
+				end
 				local hrp = character_instance:FindFirstChild("HumanoidRootPart") :: BasePart?
-				if not hrp then return end
-				playSFX(hrp)
+				if not hrp then
+					return
+				end
+				playSFX()
 
 				for _, v: Attachment in pairs(slashToPlay:GetChildren()) do
 					if v:IsA("Attachment") then
@@ -1980,17 +1897,45 @@ animRemote.OnClientEvent:Connect(function(humanoid_instance: Humanoid, animToPla
 					end
 				end
 			end
-			
+
 			local slash_conn: RBXScriptConnection
 			slash_conn = animTrack:GetMarkerReachedSignal("Slash"):Connect(function()
 				local slashToPlay = SkillsetsVFX.Breaths.Sun[animToPlay]:FindFirstChild("Slash") :: Folder?
-				if not slashToPlay then return end
+				if not slashToPlay then
+					return
+				end
 				emitVFX(slashToPlay)
 			end)
-			
+
 			task.delay(animTrack.Length, function()
-				if slash_conn then slash_conn:Disconnect() end
+				if slash_conn then
+					slash_conn:Disconnect()
+				end
 			end)
 		end
+	end,
+}
+--	Plays animations on the client
+animRemote.OnClientEvent:Connect(function(anim_hum: Humanoid, animToPlay: string)
+	if not animToPlay then
+		warn("No animation to play!")
+		return
 	end
+	if not anim_hum then
+		warn("No humanoid instance!")
+		return
+	end
+	local anim_char
+	if anim_hum.Parent then
+		anim_char = anim_hum.Parent
+	else
+		return
+	end
+	local anim_hrp = anim_char:FindFirstChild("HumanoidRootPart")
+	if not anim_hrp then
+		return
+	end
+	local animator = anim_hum:FindFirstChildOfClass("Animator") :: Animator
+
+	skillAnims[animToPlay](anim_char, anim_hrp, anim_hum, animator, animToPlay)
 end)
