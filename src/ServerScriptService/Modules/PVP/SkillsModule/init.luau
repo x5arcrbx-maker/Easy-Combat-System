@@ -38,6 +38,23 @@ local function setIsAttacking(char: Model, hitType: string, durationOfAttacking:
 	end)
 end
 
+--Adds forward velocity
+local function forwardVelocity(char: Model, hrp: BasePart, velocity: number, TIME: number)
+	--preventing velocity if ragdolled, stunned, or blocking
+	for _, attribute in pairs(Attributes.PREVENTION_ATTRIBUTES) do
+		if char:GetAttribute(attribute) then
+			return
+		end
+	end
+
+	--Actual velocity code
+	local bv: BodyVelocity = Instance.new("BodyVelocity")
+	bv.MaxForce = Vector3.new(100000, 100000, 100000)
+	bv.Velocity = hrp.CFrame.LookVector * velocity
+	bv.Parent = hrp
+	Debris:AddItem(bv, TIME)
+end
+
 -- VisualizeHitbox function (for debugging)
 local function _visualizeHitbox(hitboxCFrame: CFrame, hitboxSize: Vector3, TIME: number)
 	TIME = TIME or 0.1
@@ -123,29 +140,6 @@ function SkillsModule.NormalAttack(char: Model, hum: Humanoid, hrp: BasePart, co
 			end)
 		end
 	end
-
-	--[[ --forwardVelocity function
-		local function forwardVelocity(char : Model, hum : Humanoid, hrp : BasePart)
-		--preventing velocity if ragdolled, stunned, or blocking
-		local ragdoll = char:GetAttribute("Ragdolled")
-		local stunned = char:GetAttribute("Stunned")
-		local trueStunned = char:GetAttribute("TrueStunned")
-		local blocking = char:GetAttribute("Blocking")
-		if ragdoll or stunned or trueStunned or blocking then return end
-
-		local direction = hum.MoveDirection --Direction of movement
-
-		if hum.MoveDirection.Magnitude == 0 then direction = hrp.CFrame.LookVector end --If not moving, lookvector is the direction
-
-		--Actual velocity code
-		local bv = Instance.new("BodyVelocity")
-		bv.MaxForce = Vector3.new(100000, 100000, 100000)
-		bv.Velocity = direction * 20
-		bv.Parent = hrp
-		game:GetService("Debris"):AddItem(bv, .15)
-	end
-	forwardVelocity(char, hum, hrp)
-	]]
 
 	vfxRemote:FireAllClients(hrp, "NormalAttack")
 	local function handleAttack()
@@ -388,27 +382,6 @@ function SkillsModule.HeavyAttack(char: Model, hum: Humanoid, hrp: BasePart, hit
 
 	vfxRemote:FireAllClients(hrp, "HeavyAttack")
 
-	--Velocity function
-	local function forwardVelocity()
-		--if hitType == "Blunt" then
-		--	return
-		--end
-
-		--preventing velocity if ragdolled, stunned, or blocking
-		for _, attribute in pairs(Attributes.PREVENTION_ATTRIBUTES) do
-			if char:GetAttribute(attribute) then
-				return
-			end
-		end
-
-		--Actual velocity code
-		local bv: BodyVelocity = Instance.new("BodyVelocity")
-		bv.MaxForce = Vector3.new(100000, 100000, 100000)
-		bv.Velocity = hrp.CFrame.LookVector * 50
-		bv.Parent = hrp
-		Debris:AddItem(bv, 0.15)
-	end
-
 	local function handleAttack()
 		--Hitbox size changes based on hitType
 		local length: number, height: number, depth: number
@@ -487,82 +460,9 @@ function SkillsModule.HeavyAttack(char: Model, hum: Humanoid, hrp: BasePart, hit
 	end
 
 	task.delay(STARTUP, function()
-		forwardVelocity()
+		forwardVelocity(char, hrp, 55, 0.2)
 		handleAttack()
 	end)
-
-	--[[
-	task.delay(0.6, forwardVelocity)
-	task.delay(0.6, function()
-		--Hitbox size changes based on hitType
-		local length: number, height: number, depth: number
-
-		--Setting IsAttacking (for clashes)
-		if hitType == "Sharp" then
-			setIsAttacking(char, hitType, 0.2)
-			length = 5.5 height = 7.5 depth = 10.5
-		else
-			setIsAttacking(char, hitType, 0.15)
-			length = 6.5 height = 8.5 depth = 9.5
-		end
-
-		--Setup
-		local params = OverlapParams.new()
-		params.FilterType = Enum.RaycastFilterType.Exclude
-		params.FilterDescendantsInstances = { char }
-
-		local hitboxSize: Vector3  = Vector3.new(length, height, depth)
-		local hitboxCFrame: CFrame = hrp.CFrame * CFrame.new(0, 0, -depth / 2) --Position of hitbox
-
-		--Getting parts in box
-		local partsInBox = workspace:GetPartBoundsInBox(hitboxCFrame, hitboxSize, params)
-		--visualizeHitbox(hitboxCFrame, hitboxSize, 0.5)
-
-		if partsInBox then
-			for _, v in pairs(partsInBox) do
-				if v.Name == "HumanoidRootPart" then
-					local opponentChar = v.Parent :: Model?
-					if not opponentChar then return end
-					local opponentHum  = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
-					if not opponentHum then return end
-					local opponentHrp = v
-
-					--Checking for fists or katana
-					if hitType == "Blunt" then
-						hitType = "FistM2"
-						DMG = DMG - 0.5
-						STUN_TIME = STUN_TIME + 0.1
-						Effect = false
-					elseif hitType == "Sharp" then
-						hitType = "KatanaM2"
-						DMG = DMG
-						STUN_TIME = STUN_TIME
-						Effect = true
-						StatusEffect = "Bleed"
-					end
-
-					HitModule.Hit(
-						hum,
-						opponentHum,
-						hitType,
-						DMG,
-						STUN_TIME,
-						PBable,
-						KB,
-						KBforce,
-						KB_TIME,
-						KB_Direction,
-						0,
-						Ragdoll,
-						Ragdoll_TIME,
-						Effect,
-						StatusEffect
-					)
-				end
-			end
-		end
-	end)
-	]]
 end
 -------------------
 
@@ -741,6 +641,179 @@ SkillsModule.Subskills = {
 		if hum:GetState() == Enum.HumanoidStateType.Dead then
 			return
 		end
+
+		--STATS
+		local hitCount = 2
+		local hitType = "Blunt"
+		local DMG = 7 / hitCount
+		local STUN_TIME = 0.6
+		local PBable = false
+		local KB = true
+		local KBforce = 25
+		local KB_TIME = 0.2
+		local KB_Direction = "Look"
+		local Ragdoll = false
+		local Ragdoll_TIME = nil
+
+		--COOLDOWN and STARTUP
+		local COOLDOWN = 15 --real is (20s)
+		local STARTUP = 0.25
+
+		local ok = SkillGuard:CheckSkillAllowed(player, char, skill, COOLDOWN, true, 1)
+		if not ok then
+			return
+		end
+
+		animRemote:FireAllClients(hum, skill)
+
+		local hrp = char:FindFirstChild("HumanoidRootPart") :: Part
+		forwardVelocity(char, hrp, 25, 0.1)
+
+		--Setup
+		local params = OverlapParams.new()
+		params.FilterType = Enum.RaycastFilterType.Exclude
+		params.FilterDescendantsInstances = { char }
+		local length = 7.5
+		local height = 7.5
+		local depth = 12
+		local hitboxSize = Vector3.new(length, height, depth)
+
+		task.delay(STARTUP, function()
+			for i = 1, hitCount do
+				if i == 2 then --change stats based on hit number of skill
+					--PBable = true
+					KBforce = 50
+					Ragdoll = true
+					Ragdoll_TIME = STUN_TIME
+				end
+				setIsAttacking(char, hitType, 0.15)
+
+				local hitboxCFrame = hrp.CFrame * CFrame.new(0, 0, -depth / 2) --Position of hitbox
+				local partsInBox = workspace:GetPartBoundsInBox(hitboxCFrame, hitboxSize, params)
+
+				if partsInBox then
+					for _, v in partsInBox do
+						if v.Name == "HumanoidRootPart" then
+							local opponentChar = v.Parent :: Model?
+							if not opponentChar then
+								continue
+							end
+							local opponentHum = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
+							if not opponentHum then
+								continue
+							end
+
+							--Preventing an attack when player isn't supposed to attack or opponent isn't supposed to be hit
+							HitModule.Hit(
+								hum,
+								opponentHum,
+								hitType,
+								DMG,
+								STUN_TIME,
+								PBable,
+								KB,
+								KBforce,
+								KB_TIME,
+								KB_Direction,
+								0,
+								Ragdoll,
+								Ragdoll_TIME
+							)
+						end
+					end
+				end
+				task.wait(0.475)
+			end
+		end)
+	end,
+	
+	["Eye Drifting Kick"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
+		for _, v in Attributes.DOWNED_ATTRIBUTES do
+			if char:GetAttribute(v) then
+				return
+			end
+		end
+		if hum:GetState() == Enum.HumanoidStateType.Dead then
+			return
+		end
+
+		--STATS
+		local hitCount = 1
+		local hitType = "Blunt"
+		local DMG = 7 / hitCount
+		local STUN_TIME = 1
+		local PBable = true
+		local KB = true
+		local KBforce = 45
+		local KB_TIME = 0.2
+		local KB_Direction = "Look"
+		local Ragdoll = true
+		local Ragdoll_TIME = STUN_TIME
+
+		--COOLDOWN and STARTUP
+		local COOLDOWN = 15 --real is (20s)
+		local STARTUP = 0.3
+
+		local ok = SkillGuard:CheckSkillAllowed(player, char, skill, COOLDOWN, true, 1)
+		if not ok then
+			return
+		end
+
+		animRemote:FireAllClients(hum, skill)
+
+		local hrp = char:FindFirstChild("HumanoidRootPart") :: Part
+
+		--Setup
+		local params = OverlapParams.new()
+		params.FilterType = Enum.RaycastFilterType.Exclude
+		params.FilterDescendantsInstances = { char }
+		local length = 7.5
+		local height = 7.5
+		local depth = 35
+		local hitboxSize = Vector3.new(length, height, depth)
+
+		task.delay(STARTUP, function()
+			for i = 1, hitCount do
+				setIsAttacking(char, hitType, 0.15)
+
+				local hitboxCFrame = hrp.CFrame * CFrame.new(0, 0, -depth / 2) --Position of hitbox
+				local partsInBox = workspace:GetPartBoundsInBox(hitboxCFrame, hitboxSize, params)
+				
+				if partsInBox then
+					for _, v in partsInBox do
+						if v.Name == "HumanoidRootPart" then
+							local opponentChar = v.Parent :: Model?
+							if not opponentChar then
+								continue
+							end
+							local opponentHum = opponentChar:FindFirstChildOfClass("Humanoid") :: Humanoid?
+							if not opponentHum then
+								continue
+							end
+
+							--Preventing an attack when player isn't supposed to attack or opponent isn't supposed to be hit
+							HitModule.Hit(
+								hum,
+								opponentHum,
+								hitType,
+								DMG,
+								STUN_TIME,
+								PBable,
+								KB,
+								KBforce,
+								KB_TIME,
+								KB_Direction,
+								0,
+								Ragdoll,
+								Ragdoll_TIME
+							)
+						end
+					end
+				end
+				forwardVelocity(char, hrp, 150, 0.1)
+
+			end
+		end)
 	end,
 }
 -----------------
@@ -1279,15 +1352,6 @@ SkillsModule.Doma = {
 
 		animRemote:FireAllClients(hum, skill)
 
-		local function forwardVelocity(hrp: BasePart)
-			local BodyVelocity = Instance.new("BodyVelocity") :: BodyVelocity
-			BodyVelocity.Parent = hrp
-			BodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
-			BodyVelocity.Velocity = hrp.CFrame.LookVector * 17.5
-			BodyVelocity.Name = "ForwardVelocity_BarrenHangingGarden"
-			Debris:AddItem(BodyVelocity, 0.1)
-		end
-
 		task.delay(STARTUP, function()
 			local hrp = char:FindFirstChild("HumanoidRootPart") :: BasePart?
 			if not hrp then
@@ -1313,7 +1377,7 @@ SkillsModule.Doma = {
 					PBable = false
 				end
 
-				forwardVelocity(hrp)
+				forwardVelocity(char, hrp, 17.5, 0.1)
 
 				local hitboxCFrame = hrp.CFrame * CFrame.new(0, 0, -depth / 2) --Position of hitbox
 				local partsInBox = workspace:GetPartBoundsInBox(hitboxCFrame, hitboxSize, params)
@@ -2342,23 +2406,7 @@ SkillsModule.Sun = {
 			return
 		end
 
-		local function forwardVelocity()
-			--preventing velocity if ragdolled, stunned, or blocking
-			for _, attribute in pairs(Attributes.PREVENTION_ATTRIBUTES) do
-				if char:GetAttribute(attribute) then
-					return
-				end
-			end
-
-			--Actual velocity code
-			local bv: BodyVelocity = Instance.new("BodyVelocity")
-			bv.MaxForce = Vector3.new(100000, 100000, 100000)
-			bv.Velocity = hrp.CFrame.LookVector * 60
-			bv.Parent = hrp
-			Debris:AddItem(bv, 0.2)
-		end
-
-		task.delay(STARTUP - 0.1, forwardVelocity)
+		task.delay(STARTUP - 0.1, forwardVelocity, char, hrp, 60, 0.2)
 		task.delay(STARTUP, function()
 			vfxRemote:FireAllClients(hrp, skill)
 
@@ -2585,25 +2633,9 @@ SkillsModule.Sun = {
 			return
 		end
 
-		local function forwardVelocity()
-			--preventing velocity if ragdolled, stunned, or blocking
-			for _, attribute in pairs(Attributes.PREVENTION_ATTRIBUTES) do
-				if char:GetAttribute(attribute) then
-					return
-				end
-			end
-
-			--Actual velocity code
-			local bv: BodyVelocity = Instance.new("BodyVelocity")
-			bv.MaxForce = Vector3.new(100000, 100000, 100000)
-			bv.Velocity = hrp.CFrame.LookVector * 85
-			bv.Parent = hrp
-			Debris:AddItem(bv, 0.35)
-		end
-
 		task.delay(STARTUP, function()
 			setIsAttacking(char, hitType, 0.65)
-			forwardVelocity()
+			forwardVelocity(char, hrp, 85, 0.35)
 			vfxRemote:FireAllClients(hrp, skill)
 
 			--Setup
@@ -2704,23 +2736,7 @@ SkillsModule.Sun = {
 			return
 		end
 
-		local function forwardVelocity()
-			--preventing velocity if ragdolled, stunned, or blocking
-			for _, attribute in pairs(Attributes.PREVENTION_ATTRIBUTES) do
-				if char:GetAttribute(attribute) then
-					return
-				end
-			end
-
-			--Actual velocity code
-			local bv: BodyVelocity = Instance.new("BodyVelocity")
-			bv.MaxForce = Vector3.new(100000, 100000, 100000)
-			bv.Velocity = hrp.CFrame.RightVector * 50
-			bv.Parent = hrp
-			Debris:AddItem(bv, 0.1)
-		end
-
-		task.delay(STARTUP - 0.1, forwardVelocity)
+		task.delay(STARTUP - 0.1, forwardVelocity, char, hrp, 50, 0.1)
 		task.delay(STARTUP, function()
 			vfxRemote:FireAllClients(hrp, skill)
 

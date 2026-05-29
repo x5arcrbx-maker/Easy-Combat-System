@@ -95,7 +95,7 @@ local function applyMovement(character)
 
 	if usingAttack then
 		character:SetAttribute("IsSprinting", false)
-		hum.WalkSpeed = slowedWalkSpeed
+		hum.WalkSpeed = defaultWalkSpeed
 		hum.JumpPower = stunnedJumpPower
 		return
 	end

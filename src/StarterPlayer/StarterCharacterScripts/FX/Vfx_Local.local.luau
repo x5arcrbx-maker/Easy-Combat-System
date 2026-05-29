@@ -124,6 +124,71 @@ local function triggerEffects(parentObject: Instance?)
 		end
 	end
 end
+
+local function createAfterImages(char: Model, TIME_BETWEEN: number, AMOUNT: number, playVFX: boolean?, parentObject: Instance?)
+	if not char then return end
+	
+	if not TIME_BETWEEN then 
+		TIME_BETWEEN = 0 
+	end
+	if not AMOUNT then
+		AMOUNT = 1
+	end
+	
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+
+	task.spawn(function()
+		--print("afterImage func ran")
+
+		local cloneFolder = Instance.new("Folder")
+		cloneFolder.Name = "AfterImage_TrashFolder"
+		cloneFolder.Parent = Trash
+		
+		
+		
+		for _ = 1, AMOUNT do
+			if playVFX then
+				local parentObjectClone = parentObject:Clone()
+				
+				parentObjectClone.Parent = hrp
+				triggerEffects(parentObjectClone)
+				
+				Debris:AddItem(parentObjectClone, 3)
+			end
+			
+			local characterChildren = char:GetChildren()
+
+			for _, v: BasePart in pairs (characterChildren) do
+				if v:IsA("BasePart") then
+					local clone = v:Clone()
+					for _, obj in pairs(clone:GetChildren()) do
+						obj:Destroy()
+					end
+					clone.Anchored = true
+					clone.CanCollide = false
+					clone.CastShadow = false
+					clone.Color = Color3.fromRGB(math.random(0,255), math.random(0,255), math.random(0,255))
+					clone.Material = Enum.Material.Neon
+					clone.Transparency = 0.25
+					clone.Parent = cloneFolder
+
+					--print("Created part for after image")
+
+					TweenService:Create(
+						clone,
+						TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.In),
+						{Transparency = 1}
+					):Play()
+				end
+			end
+			task.wait(TIME_BETWEEN)
+		end 
+		Debris:AddItem(cloneFolder, 0.3)
+
+		--print("afterImage func ended")
+	end)
+end
 --------------
 
 --//:MAIN
@@ -1543,6 +1608,40 @@ end) -- End of OnClientEvent connection
 
 local skillAnims = {
 
+	--	Subskills	--
+	["Sting & Send"] = function(
+		anim_char: Model,
+		anim_hrp: BasePart,
+		anim_hum: Humanoid,
+		animator: Animator,
+		animToPlay: string
+	)
+		local anim = ReplicatedStorage.Animations.Skills.Subskills.General[animToPlay]
+		AnimationService:Play(anim, animator, 0, 0, 1, 1, 1)
+	end,
+	["Eye Drifting Kick"] = function(
+		anim_char: Model,
+		anim_hrp: BasePart,
+		anim_hum: Humanoid,
+		animator: Animator,
+		animToPlay: string
+	)
+		local anim: Animation = ReplicatedStorage.Animations.Skills.Subskills.General[animToPlay]
+		local animTrack: AnimationTrack? = AnimationService:Play(anim, animator, 0, 0, 1, 1, 1)
+		if animTrack then
+			local markerReached: RBXScriptConnection
+			markerReached = animTrack:GetMarkerReachedSignal("Kick"):Once(function()
+				local vfx_attachment = SkillsetsVFX.Subskills.General[animToPlay]
+				createAfterImages(anim_char, 0.036, 5, true, vfx_attachment)
+			end)
+			
+			task.delay(animTrack.Length, function()
+				if markerReached then
+					markerReached:Disconnect()
+				end
+			end)
+		end
+	end,
 	--	BDAs	--
 	--Akaza
 	["Annihilation Type: Punch"] = function(

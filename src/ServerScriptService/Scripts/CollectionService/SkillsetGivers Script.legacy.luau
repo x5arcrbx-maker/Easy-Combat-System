@@ -1,7 +1,7 @@
 --//:SERVICES
 local CollectionService = game:GetService("CollectionService")
-local ServerStorage = game:GetService("ServerStorage")
 local Players = game:GetService("Players")
+local ServerStorage = game:GetService("ServerStorage")
 
 --//:VARIABLES
 local SkillsetGivers = CollectionService:GetTagged("SkillsetGiver")
@@ -9,7 +9,6 @@ local SkillsetsFolder = ServerStorage:WaitForChild("Skillsets(TOOLS)")
 local OnCooldown = {}
 
 local function giveSkillset(SkillsetGiver: Instance, character: Model, player: Player)
-	
 	local Category = SkillsetGiver:FindFirstChild("Category?") :: StringValue
 	local Name = SkillsetGiver:FindFirstChild("Skillset?") :: StringValue
 
@@ -39,22 +38,22 @@ local function giveSkillset(SkillsetGiver: Instance, character: Model, player: P
 			--Clear existing weapons from player's backpack and character--
 			local backpack = player:FindFirstChild("Backpack") --Get player's backpack
 			for _, item in pairs(backpack:GetChildren()) do -- Remove weapons in backpack
-				if item:IsA("Tool") then
+				if item:IsA("Tool") and not item:HasTag("SubSkill") then
 					if CollectionService:HasTag(item, "Skill") then
 						item:Destroy()
 					end
-					
+
 					if item:GetAttribute("Katana") or item:GetAttribute("Weapon") then
 						item:Destroy()
 					end
 				end
 			end
 			for _, item in pairs(character:GetChildren()) do -- Remove weapons in character
-				if item:IsA("Tool") then
+				if item:IsA("Tool") and not item:HasTag("SubSkill") then
 					if CollectionService:HasTag(item, "Skill") then
 						item:Destroy()
 					end
-					
+
 					if item:GetAttribute("Katana") or item:GetAttribute("Weapon") then
 						item:Destroy()
 					end
@@ -80,22 +79,21 @@ local function giveSkillset(SkillsetGiver: Instance, character: Model, player: P
 	else
 		warn("SkillsetGiver is missing 'Category?' or 'Skillset?' value objects")
 	end
-	
 end
 
 --//:FUNCTIONS
 for _, SkillsetGiver in pairs(SkillsetGivers) do
-	
 	SkillsetGiver.Touched:Connect(function(Hit)
 		local Character: Model? = Hit.Parent
 		if Character and Character:IsA("Model") and Character:FindFirstChildOfClass("Humanoid") then
-			if Character:GetAttribute("InCombat") or Character:GetAttribute("UsingAttack") then return end
-			
+			if Character:GetAttribute("InCombat") or Character:GetAttribute("UsingAttack") then
+				return
+			end
+
 			local player = Players:GetPlayerFromCharacter(Character)
 			if player then
 				giveSkillset(SkillsetGiver, Character, player)
 			end
 		end
 	end)
-	
 end
