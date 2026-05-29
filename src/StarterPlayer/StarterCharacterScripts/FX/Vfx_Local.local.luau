@@ -45,9 +45,10 @@ end
 
 local function SFX_Checker(hrp: BasePart?, Sound: Sound?, Pitch: number?)
 	if Sound then
+		local cloneSound: Sound = Sound:Clone()
 		-- Safely modify pitch if PitchShiftSoundEffect exists
 		if Pitch then
-			local pitchShift: PitchShiftSoundEffect? = Sound:FindFirstChildOfClass("PitchShiftSoundEffect")
+			local pitchShift: PitchShiftSoundEffect? = cloneSound:FindFirstChildOfClass("PitchShiftSoundEffect")
 			if pitchShift then
 				pitchShift.Octave = Pitch
 			end
@@ -55,12 +56,12 @@ local function SFX_Checker(hrp: BasePart?, Sound: Sound?, Pitch: number?)
 
 		-- Ensure hrp still exists before parenting
 		if hrp and hrp.Parent then
-			Sound.Parent = hrp
-			Sound:Play()
+			cloneSound.Parent = hrp
+			cloneSound:Play()
 			-- Add a small buffer to TimeLength to ensure sound plays completely
-			Debris:AddItem(Sound, math.max(Sound.TimeLength, 0.5))
+			Debris:AddItem(cloneSound, math.max(cloneSound.TimeLength, 0.5))
 		else
-			Sound:Destroy() -- Clean up if hrp is invalid
+			cloneSound:Destroy() -- Clean up if hrp is invalid
 		end
 	else
 		warn("SFX not found")
@@ -125,18 +126,28 @@ local function triggerEffects(parentObject: Instance?)
 	end
 end
 
-local function createAfterImages(char: Model, TIME_BETWEEN: number, AMOUNT: number, playVFX: boolean?, parentObject: Instance?)
-	if not char then return end
-	
-	if not TIME_BETWEEN then 
-		TIME_BETWEEN = 0 
+local function createAfterImages(
+	char: Model,
+	TIME_BETWEEN: number,
+	AMOUNT: number,
+	playVFX: boolean?,
+	parentObject: Instance?
+)
+	if not char then
+		return
+	end
+
+	if not TIME_BETWEEN then
+		TIME_BETWEEN = 0
 	end
 	if not AMOUNT then
 		AMOUNT = 1
 	end
-	
+
 	local hrp = char:FindFirstChild("HumanoidRootPart")
-	if not hrp then return end
+	if not hrp then
+		return
+	end
 
 	task.spawn(function()
 		--print("afterImage func ran")
@@ -144,22 +155,20 @@ local function createAfterImages(char: Model, TIME_BETWEEN: number, AMOUNT: numb
 		local cloneFolder = Instance.new("Folder")
 		cloneFolder.Name = "AfterImage_TrashFolder"
 		cloneFolder.Parent = Trash
-		
-		
-		
+
 		for _ = 1, AMOUNT do
 			if playVFX then
 				local parentObjectClone = parentObject:Clone()
-				
+
 				parentObjectClone.Parent = hrp
 				triggerEffects(parentObjectClone)
-				
+
 				Debris:AddItem(parentObjectClone, 3)
 			end
-			
+
 			local characterChildren = char:GetChildren()
 
-			for _, v: BasePart in pairs (characterChildren) do
+			for _, v: BasePart in pairs(characterChildren) do
 				if v:IsA("BasePart") then
 					local clone = v:Clone()
 					for _, obj in pairs(clone:GetChildren()) do
@@ -168,7 +177,7 @@ local function createAfterImages(char: Model, TIME_BETWEEN: number, AMOUNT: numb
 					clone.Anchored = true
 					clone.CanCollide = false
 					clone.CastShadow = false
-					clone.Color = Color3.fromRGB(math.random(0,255), math.random(0,255), math.random(0,255))
+					clone.Color = Color3.fromRGB(math.random(0, 255), math.random(0, 255), math.random(0, 255))
 					clone.Material = Enum.Material.Neon
 					clone.Transparency = 0.25
 					clone.Parent = cloneFolder
@@ -178,12 +187,12 @@ local function createAfterImages(char: Model, TIME_BETWEEN: number, AMOUNT: numb
 					TweenService:Create(
 						clone,
 						TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.In),
-						{Transparency = 1}
+						{ Transparency = 1 }
 					):Play()
 				end
 			end
 			task.wait(TIME_BETWEEN)
-		end 
+		end
 		Debris:AddItem(cloneFolder, 0.3)
 
 		--print("afterImage func ended")
@@ -1313,297 +1322,6 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 	end
 
 	--Sun
-	if vfxToPlay == "Dance" then
-		--[[
-		local function playVFX()
-			local model = SkillsetsVFX.Breaths.Sun[vfxToPlay] :: Model
-			if not model then
-				warn("VFX for [" .. vfxToPlay .. "] not found!")
-				return
-			end
-			model = model:Clone()
-			model.Parent = Trash
-
-			for _, mesh: MeshPart in pairs(model:GetChildren()) do
-
-				task.delay(0.25, function()
-					for _, v: Instance in pairs(mesh:GetDescendants()) do
-						if v:IsA("ParticleEmitter") then
-							v.Enabled = false
-						end
-					end
-				end)
-
-
-				mesh.CFrame = CFrame.lookAlong(
-					hrp.Position + ((hrp.CFrame.UpVector * 2) + (hrp.CFrame.LookVector * 5)),
-					hrp.CFrame.LookVector
-				)
-				mesh.Orientation = mesh.Orientation + Vector3.new(180, 0, 0)
-
-				TweenService:Create( --Position
-					mesh,
-					TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out, 0, false, 0),
-					{
-						Position = mesh.Position + (hrp.CFrame.LookVector * 7.5)
-					}
-				):Play()
-
-				task.delay(0.3, function()
-					TweenService:Create( --Transparency
-						mesh,
-						TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
-						{
-							Transparency = 1
-						}
-					):Play()
-				end)
-
-			end
-			Debris:AddItem(model, 2)
-		end
-		playVFX()
-		
-		local function playSFX()
-
-			local SFX: Sound = ReplicatedStorage.FX.SFX.Combat.Skillsets.Breaths.Sun[vfxToPlay]:Clone()
-			SFX.Parent = hrp
-			SFX:Play()
-			Debris:AddItem(SFX, SFX.TimeLength)
-		end
-		playSFX()
-		]]
-	end
-
-	if vfxToPlay == "Raging Sun" then
-		--[[
-		local function playVFX(i: number)
-			local model = SkillsetsVFX.Breaths.Sun[vfxToPlay] :: Model
-			if not model then
-				warn("VFX for [" .. vfxToPlay .. "] not found!")
-				return
-			end
-			model = model:Clone()
-			model.Parent = Trash
-
-			--If the second vfx is playing, move it up 1 stud to not overlap the other vfx
-			local yRotation = -35
-			local upVectorMultiplier = 1
-			local rightVectorMultiplier = 2
-			if i == 2 then
-				yRotation = 35
-				upVectorMultiplier = 2
-				rightVectorMultiplier = -2
-			end
-
-			for _, mesh: MeshPart in pairs(model:GetChildren()) do
-				task.delay(0.25, function()
-					for _, v: Instance in pairs(mesh:GetDescendants()) do
-						if v:IsA("ParticleEmitter") then
-							v.Enabled = false
-						end
-					end
-				end)
-
-
-				mesh.CFrame = CFrame.lookAlong(
-					hrp.Position + (
-						(hrp.CFrame.UpVector * upVectorMultiplier) 
-							+ (hrp.CFrame.LookVector * 2) 
-							+ (hrp.CFrame.RightVector * rightVectorMultiplier)
-					),
-					hrp.CFrame.LookVector
-				)
-				mesh.Orientation = mesh.Orientation + Vector3.new(0, 180, -90)
-
-				TweenService:Create( --Position
-					mesh,
-					TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out, 0, false, 0),
-					{
-						Position = mesh.Position + (hrp.CFrame.LookVector * 4) + (hrp.CFrame.RightVector * (rightVectorMultiplier / 2) ),
-						Orientation = mesh.Orientation + Vector3.new(0, yRotation, 0),
-						--Size = mesh.Size + Vector3.new(1, 0, 0)
-					}
-				):Play()
-
-				task.delay(0.35, function()
-					TweenService:Create( --Transparency
-						mesh,
-						TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
-						{
-							Transparency = 1
-						}
-					):Play()
-				end)
-
-			end
-
-
-			Debris:AddItem(model, 2)
-		end
-		
-		local function playSFX()
-			local SFX: Sound = ReplicatedStorage.FX.SFX.Combat.Skillsets.Breaths.Sun[vfxToPlay]:Clone()
-			SFX.Parent = hrp
-			SFX:Play()
-			Debris:AddItem(SFX, SFX.TimeLength)
-		end
-		
-		for i = 1, 2 do
-			playVFX(i)
-			playSFX()
-			task.wait(0.3)
-		end
-		]]
-	end
-
-	if vfxToPlay == "Burning Bones, Summer Sun" then
-		local function playVFX()
-			local mesh = SkillsetsVFX.Breaths.Sun[vfxToPlay] :: MeshPart
-			if not mesh then
-				warn("VFX for [" .. vfxToPlay .. "] not found!")
-				return
-			end
-
-			--Properties
-			mesh = mesh:Clone()
-			mesh.Parent = Trash
-			mesh.CFrame = CFrame.lookAlong(
-				hrp.Position + ((hrp.CFrame.UpVector * 2) + (hrp.CFrame.LookVector * 10)),
-				hrp.CFrame.LookVector
-			)
-			mesh.Orientation = mesh.Orientation + Vector3.new(0, 90, -90)
-			mesh.Transparency = 1
-
-			--Tweening
-			TweenService:Create(
-				mesh,
-				TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
-				{ Transparency = 0 }
-			):Play()
-			TweenService
-				:Create(mesh, TweenInfo.new(0.75, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0), {
-					Orientation = mesh.Orientation + Vector3.new(720, 0, 0),
-					Size = mesh.Size + Vector3.new(2, 0, 2),
-				})
-				:Play()
-			task.delay(0.5, function()
-				TweenService:Create(
-					mesh,
-					TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
-					{ Transparency = 1 }
-				):Play()
-			end)
-
-			--Emit particles
-			for _, v in pairs(mesh:GetDescendants()) do
-				if v:IsA("ParticleEmitter") then
-					--Emits particles
-					task.spawn(function()
-						for _ = 1, 3 do
-							v:Emit(1)
-							task.wait(0.1)
-						end
-					end)
-
-					--Disables particles
-					task.delay(0.4, function()
-						v.Enabled = false
-					end)
-				end
-			end
-
-			Debris:AddItem(mesh, 3)
-		end
-		playVFX()
-
-		local function playSFX()
-			local SFX: Sound = ReplicatedStorage.FX.SFX.Combat.Skillsets.Breaths.Sun[vfxToPlay]:Clone()
-			SFX.Parent = hrp
-			SFX:Play()
-			Debris:AddItem(SFX, SFX.TimeLength)
-		end
-		playSFX()
-	end
-
-	if vfxToPlay == "Setting Sun Transformation" then
-
-		--[[
-		local function playVFX()
-			local model = SkillsetsVFX.Breaths.Sun[vfxToPlay] :: Model
-			if not model then
-				warn("VFX for [" .. vfxToPlay .. "] not found!")
-				return
-			end
-			model = model:Clone()
-			model.Parent = Trash
-
-
-			for _, mesh: MeshPart in pairs(model:GetChildren()) do
-
-				for _, v: Instance in pairs(mesh:GetDescendants()) do
-					if v:IsA("ParticleEmitter") then
-
-						task.spawn(function()
-							for _ = 1, 5 do
-								v:Emit(1)
-								task.wait(0.05)
-							end
-						end)
-
-						task.delay(0.25, function()
-							v.Enabled = false
-						end)
-
-					end
-				end
-
-
-				mesh.CFrame = CFrame.lookAlong(
-					hrp.Position + (
-						(hrp.CFrame.UpVector * 1) 
-							+ (hrp.CFrame.LookVector * 2)
-					),
-					hrp.CFrame.LookVector
-				)
-				mesh.Orientation = mesh.Orientation + Vector3.new(0, 180, -90)
-
-				TweenService:Create( --Position
-					mesh,
-					TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out, 0, false, 0),
-					{
-						Position = mesh.Position + (hrp.CFrame.LookVector * 2),
-						--Size = mesh.Size + Vector3.new(1, 0, 0)
-					}
-				):Play()
-
-				task.delay(0.3, function()
-					TweenService:Create( --Transparency
-						mesh,
-						TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
-						{
-							Transparency = 1
-						}
-					):Play()
-				end)
-
-			end
-
-
-			Debris:AddItem(model, 2)
-		end
-		playVFX()
-		
-		local function playSFX()
-
-			local SFX: Sound = ReplicatedStorage.FX.SFX.Combat.Skillsets.Breaths.Sun[vfxToPlay]:Clone()
-			SFX.Parent = hrp
-			SFX:Play()
-			Debris:AddItem(SFX, SFX.TimeLength)
-		end
-		playSFX()
-		]]
-	end
 end) -- End of OnClientEvent connection
 
 local skillAnims = {
@@ -1628,19 +1346,36 @@ local skillAnims = {
 	)
 		local anim: Animation = ReplicatedStorage.Animations.Skills.Subskills.General[animToPlay]
 		local animTrack: AnimationTrack? = AnimationService:Play(anim, animator, 0, 0, 1, 1, 1)
-		if animTrack then
-			local markerReached: RBXScriptConnection
-			markerReached = animTrack:GetMarkerReachedSignal("Kick"):Once(function()
-				local vfx_attachment = SkillsetsVFX.Subskills.General[animToPlay]
-				createAfterImages(anim_char, 0.036, 5, true, vfx_attachment)
-			end)
-			
-			task.delay(animTrack.Length, function()
-				if markerReached then
-					markerReached:Disconnect()
+		if not animTrack then
+			return
+		end
+
+		local markerReached: RBXScriptConnection
+		markerReached = animTrack:GetMarkerReachedSignal("Kick"):Once(function()
+			local sound: Sound = SkillsetsSFX.Subskills.General[animToPlay].Sound
+			task.spawn(function()
+				for count = 1, 5 do
+					local pitch: number
+					local addedPitch: number? = tonumber(("0." .. count))
+					if addedPitch then
+						pitch = 1 + addedPitch
+					else
+						pitch = 1
+					end
+					SFX_Checker(anim_hrp, sound, pitch)
+					task.wait(0.036)
 				end
 			end)
-		end
+
+			local vfx_attachment = SkillsetsVFX.Subskills.General[animToPlay]
+			createAfterImages(anim_char, 0.036, 5, true, vfx_attachment)
+		end)
+
+		task.delay(animTrack.Length, function()
+			if markerReached then
+				markerReached:Disconnect()
+			end
+		end)
 	end,
 	--	BDAs	--
 	--Akaza
@@ -1681,16 +1416,41 @@ local skillAnims = {
 		animator: Animator,
 		animToPlay: string
 	)
-		local anim = ReplicatedStorage.Animations.Skills.BDAs.Akaza[animToPlay]
-		local animTrack = animator:LoadAnimation(anim) :: AnimationTrack
-		animTrack:Play()
-		animTrack:GetMarkerReachedSignal("Pause"):Once(function()
+		local anim: Animation = ReplicatedStorage.Animations.Skills.BDAs.Akaza[animToPlay]
+		local animTrack: AnimationTrack = AnimationService:Play(anim, animator, 0, 0, 1, 1, 1)
+		if not animTrack then
+			return
+		end
+
+		local landedConnection: RBXScriptConnection
+		local getMarkerConnection: RBXScriptConnection
+		getMarkerConnection = animTrack:GetMarkerReachedSignal("Pause"):Once(function()
 			animTrack:AdjustSpeed(0)
+
+			landedConnection = anim_hum.StateChanged:Connect(function(_, newState)
+				if newState ~= Enum.HumanoidStateType.Landed and newState ~= Enum.HumanoidStateType.Running then
+					return
+				end
+
+				animTrack:AdjustSpeed(1)
+				landedConnection:Disconnect()
+			end)
 		end)
-		animTrack.Stopped:Once(function()
-			animTrack:Stop()
-			animTrack:Destroy()
-			animTrack = nil
+
+		task.delay(animTrack.Length + 1, function()
+			-- if animTrack then
+			-- 	animTrack:Stop(0.5)
+			-- 	animTrack:Destroy()
+			-- 	animTrack = nil
+			-- end
+
+			if landedConnection then
+				landedConnection:Disconnect()
+			end
+
+			if getMarkerConnection then
+				getMarkerConnection:Disconnect()
+			end
 		end)
 
 		--[[
@@ -1710,23 +1470,6 @@ local skillAnims = {
 		--	end
 		--end)
 		--]]
-
-		task.delay(0.35, function()
-			local landedConnection: RBXScriptConnection
-			landedConnection = anim_hum.StateChanged:Connect(function(_, newState)
-				if newState ~= Enum.HumanoidStateType.Landed and newState ~= Enum.HumanoidStateType.Running then
-					return
-				end
-
-				animTrack:AdjustSpeed(1)
-				landedConnection:Disconnect()
-			end)
-
-			task.delay(0.5, function()
-				animTrack:AdjustSpeed(1)
-				landedConnection:Disconnect()
-			end)
-		end)
 	end,
 
 	--Doma
