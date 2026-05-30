@@ -4,10 +4,17 @@ local Players = game:GetService("Players")
 local ServerStorage = game:GetService("ServerStorage")
 
 --//:VARIABLES
+local remote = game:GetService("ReplicatedStorage").Remotes_Bindables.Remotes.GeneralPlayer.GiveMoveset
 local SkillsetGivers = CollectionService:GetTagged("SkillsetGiver")
 local SkillsetsFolder = ServerStorage:WaitForChild("Skillsets(TOOLS)")
 local OnCooldown = {}
 
+--//:FUNCTIONS
+
+--	Gives skillset to player
+--		(handles checking for skills in inventory
+--		and removing before giving,
+--		giving skills, giving possible weapon)
 local function giveSkillset(SkillsetGiver: Instance, character: Model, player: Player)
 	local Category = SkillsetGiver:FindFirstChild("Category?") :: StringValue
 	local Name = SkillsetGiver:FindFirstChild("Skillset?") :: StringValue
@@ -81,19 +88,36 @@ local function giveSkillset(SkillsetGiver: Instance, character: Model, player: P
 	end
 end
 
---//:FUNCTIONS
-for _, SkillsetGiver in pairs(SkillsetGivers) do
-	SkillsetGiver.Touched:Connect(function(Hit)
-		local Character: Model? = Hit.Parent
-		if Character and Character:IsA("Model") and Character:FindFirstChildOfClass("Humanoid") then
-			if Character:GetAttribute("InCombat") or Character:GetAttribute("UsingAttack") then
-				return
-			end
+local function InitTouchedEvent()
+	for _, SkillsetGiver in pairs(SkillsetGivers) do
+		SkillsetGiver.Touched:Connect(function(Hit)
+			local Character: Model? = Hit.Parent
+			if Character and Character:IsA("Model") and Character:FindFirstChildOfClass("Humanoid") then
+				if Character:GetAttribute("InCombat") or Character:GetAttribute("UsingAttack") then
+					return
+				end
 
-			local player = Players:GetPlayerFromCharacter(Character)
-			if player then
-				giveSkillset(SkillsetGiver, Character, player)
+				local player = Players:GetPlayerFromCharacter(Character)
+				if player then
+					giveSkillset(SkillsetGiver, Character, player)
+				end
 			end
-		end
-	end)
+		end)
+	end
 end
+InitTouchedEvent()
+
+remote.OnServerEvent:Connect(function(player: Player, Frame: Frame?)
+	if not player or not Frame then
+		return
+	end
+
+	local Character: Model? = player.Character
+	if Character then
+		if Character:GetAttribute("InCombat") or Character:GetAttribute("UsingAttack") then
+			return
+		end
+
+		giveSkillset(Frame, Character, player)
+	end
+end)

@@ -389,14 +389,14 @@ function SkillsModule.HeavyAttack(char: Model, hum: Humanoid, hrp: BasePart, hit
 		--Setting IsAttacking (for clashes)
 		if hitType == "Sharp" then
 			setIsAttacking(char, hitType, 0.2)
-			length = 5.5
-			height = 7.5
-			depth = 10.5
+			length = 6
+			height = 8.5
+			depth = 11.5
 		else
 			setIsAttacking(char, hitType, 0.15)
-			length = 6.5
-			height = 8.5
-			depth = 9.5
+			length = 7
+			height = 9
+			depth = 10
 		end
 
 		--Setup
@@ -667,14 +667,13 @@ SkillsModule.Subskills = {
 		animRemote:FireAllClients(hum, skill)
 
 		local hrp = char:FindFirstChild("HumanoidRootPart") :: Part
-		forwardVelocity(char, hrp, 25, 0.1)
 
 		--Setup
 		local params = OverlapParams.new()
 		params.FilterType = Enum.RaycastFilterType.Exclude
 		params.FilterDescendantsInstances = { char }
-		local length = 7.5
-		local height = 7.5
+		local length = 8.5
+		local height = 8.5
 		local depth = 12
 		local hitboxSize = Vector3.new(length, height, depth)
 
@@ -685,6 +684,9 @@ SkillsModule.Subskills = {
 					KBforce = 50
 					Ragdoll = true
 					Ragdoll_TIME = STUN_TIME
+
+					depth = 15
+					forwardVelocity(char, hrp, 35, 0.1)
 				end
 				setIsAttacking(char, hitType, 0.15)
 
@@ -726,7 +728,7 @@ SkillsModule.Subskills = {
 			end
 		end)
 	end,
-	
+
 	["Eye Drifting Kick"] = function(player: Player, char: Model, hum: Humanoid, skill: string)
 		for _, v in Attributes.DOWNED_ATTRIBUTES do
 			if char:GetAttribute(v) then
@@ -767,8 +769,8 @@ SkillsModule.Subskills = {
 		local params = OverlapParams.new()
 		params.FilterType = Enum.RaycastFilterType.Exclude
 		params.FilterDescendantsInstances = { char }
-		local length = 7.5
-		local height = 7.5
+		local length = 10
+		local height = 10
 		local depth = 35
 		local hitboxSize = Vector3.new(length, height, depth)
 
@@ -778,7 +780,7 @@ SkillsModule.Subskills = {
 
 				local hitboxCFrame = hrp.CFrame * CFrame.new(0, 0, -depth / 2) --Position of hitbox
 				local partsInBox = workspace:GetPartBoundsInBox(hitboxCFrame, hitboxSize, params)
-				
+
 				if partsInBox then
 					for _, v in partsInBox do
 						if v.Name == "HumanoidRootPart" then
@@ -811,7 +813,6 @@ SkillsModule.Subskills = {
 					end
 				end
 				forwardVelocity(char, hrp, 150, 0.1)
-
 			end
 		end)
 	end,
