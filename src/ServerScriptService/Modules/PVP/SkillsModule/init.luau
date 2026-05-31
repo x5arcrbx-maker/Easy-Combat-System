@@ -150,12 +150,12 @@ function SkillsModule.NormalAttack(char: Model, hum: Humanoid, hrp: BasePart, co
 		if hitType == "Sharp" then
 			setIsAttacking(char, hitType, 0.2)
 			length = 5
-			height = 5
+			height = 6
 			depth = 7.5
 		else
 			setIsAttacking(char, hitType, 0.15)
 			length = 4.5
-			height = 5
+			height = 6
 			depth = 7
 		end
 
@@ -835,10 +835,10 @@ SkillsModule.Akaza = {
 		--STATS
 		local hitType = "Blunt"
 		local DMG = 10
-		local STUN_TIME = 2.5
+		local STUN_TIME = 3
 		local PBable = true
 		local KB = true
-		local KBforce = 90
+		local KBforce = 105
 		local KB_TIME = 0.2
 		local KB_Direction = "Look"
 		local Ragdoll = true
@@ -1011,10 +1011,10 @@ SkillsModule.Akaza = {
 		--STATS
 		local hitType = "Blunt"
 		local DMG = 8.5 -- Damage dealt to the target
-		local STUN_TIME = 2
+		local STUN_TIME = 2.5
 		local PBable = true
 		local KB = true
-		local KBforce = 100
+		local KBforce = 125
 		local KB_TIME = 0.1
 		local KB_Direction = "UpLook"
 		local Direction_Divider = 4
@@ -1113,10 +1113,10 @@ SkillsModule.Akaza = {
 		--STATS
 		local hitType = "Blunt"
 		local DMG = 6.5 -- Damage dealt to the target
-		local STUN_TIME = 1.5
+		local STUN_TIME = 2
 		local PBable = false
 		local KB = true
-		local KBforce = 40
+		local KBforce = 50
 		local KB_TIME = 0.1
 		local KB_Direction = "Away"
 		local RAGDOLL = true
@@ -1808,7 +1808,7 @@ SkillsModule.Moon = {
 		local Ragdoll_TIME = STUN_TIME --(2.5)
 
 		--COOLDOWN
-		local COOLDOWN = 12 --15s
+		local COOLDOWN = 14 --15s
 		local STARTUP = 0.3
 		local ENDLAG = 0.75
 		local _DURATION = ENDLAG - STARTUP
@@ -2062,7 +2062,7 @@ SkillsModule.Moon = {
 		local KB_Direction = "Look"
 
 		--COOLDOWN
-		local COOLDOWN = 14 -- REAL CD IS 12s
+		local COOLDOWN = 13 -- REAL CD IS 12s
 		local STARTUP = 0.3
 
 		local enoughBreath: boolean, breathAmount: number = BreathingHandler:CheckBreathingBar(Breath_NEEDED, char)
@@ -2643,7 +2643,7 @@ SkillsModule.Sun = {
 			local params = OverlapParams.new()
 			params.FilterType = Enum.RaycastFilterType.Exclude
 			params.FilterDescendantsInstances = { char }
-			local length: number, height: number, depth: number = 14, 14, 38
+			local length: number, height: number, depth: number = 14, 14, 35
 			local hitboxSize = Vector3.new(length, height, depth) -- width, height depth
 			local hitboxCFrame = hrp.CFrame * CFrame.new(0, 0, -depth / 2) --Position of hitbox
 

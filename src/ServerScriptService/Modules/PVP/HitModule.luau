@@ -622,34 +622,29 @@ function hitModule.Hit(
 					--Increase knockback drastically
 					if KB then
 						local existingVelocity = opponentHRP:FindFirstChildOfClass("BodyVelocity")
-						if existingVelocity then existingVelocity:Destroy() end
+						if existingVelocity then 
+							existingVelocity:Destroy() 
+						end
 						
-						KBforce = KBforce * 2
-						--if KB_Direction == "Look" or KB_Direction == "LookVector" or KB_Direction == "LookUp" then
-						--	KBforce = KBforce * 1.5
-						--	KB_Direction = "LookUp"
-						--	Direction_Divider = 5
-						--end
-
-						--if KB_Direction == "Away" or KB_Direction == "Distance" then
-						--	KB_Direction = "AwayUp"
-						--	KBforce = KBforce * 3
-						--end
-
-						--if KB_Direction == "UpLook" then
-						--	KBforce = KBforce * 2
-						--end
-
-						--if KB_Direction == "Up" or KB_Direction == "Upwards" then
-						--	KBforce = KBforce * 2
-						--end
+						if KBforce then
+							--Increase KBforce more if a smaller number, less if a larger number.
+							if KBforce <= 50 then
+								KBforce = KBforce * 3
+							elseif KBforce <= 100 then
+								KBforce = KBforce * 2.5
+							else
+								KBforce = KBforce * 2
+							end
+						end
 					end
 					
 					if PBable and (hitType == "Sharp" or hitType == "KatanaM1" or hitType == "KatanaM2") then
 						local opponentTorso = opponentChar:FindFirstChild("Torso") :: BasePart?
 						if opponentTorso then
 							local neckAttachment = opponentTorso:FindFirstChild("NeckAttachment") :: Attachment?
-							if neckAttachment then neckAttachment:Destroy() end
+							if neckAttachment then 
+								neckAttachment:Destroy() 
+							end
 						end
 						
 						setStun(opponentChar, 2.5, true) --TrueStun the opponent so they cannot move while dead

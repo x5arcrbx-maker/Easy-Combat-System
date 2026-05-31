@@ -1874,11 +1874,11 @@ local skillAnims = {
 		end)
 
 		task.delay(animTrack.Length + 1, function()
-			-- if animTrack then
-			-- 	animTrack:Stop(0.5)
-			-- 	animTrack:Destroy()
-			-- 	animTrack = nil
-			-- end
+			if animTrack then
+				animTrack:Stop(0.5)
+				animTrack:Destroy()
+				animTrack = nil
+			end
 
 			if landedConnection then
 				landedConnection:Disconnect()
