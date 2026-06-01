@@ -28,7 +28,7 @@ local config = { --SETTINGS
 	["LOCKED_CAMERA_OFFSET"] = Vector3.new(1.75, 0.25, 0), --Vector3.new(1.75, 0.25, 0)
 	["LOCKED_MOUSE_ICON"] = "http://www.roblox.com/asset/?id=6001676828", --"rbxasset://textures/MouseLockedCursor.png"
 	["SHIFT_LOCK_KEYBINDS"] = {
-		Enum.KeyCode.LeftShift, --KEYBOARD KEYBIND
+		Enum.KeyCode.LeftAlt, --KEYBOARD KEYBIND
 		Enum.KeyCode.DPadLeft, --CONSOLE KEYBIND
 	},
 }

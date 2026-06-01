@@ -1,33 +1,23 @@
-
-
 --//:SERVICES//
-local UserInputService     = game:GetService("UserInputService")
-local Players 			   = game:GetService("Players")
-local ReplicatedStorage    = game:GetService("ReplicatedStorage")
-local Debris 			   = game:GetService("Debris")
+local CollectionService = game:GetService("CollectionService")
 local ContextActionService = game:GetService("ContextActionService")
-local RunService 		   = game:GetService("RunService")
-local TweenService 		   = game:GetService("TweenService")
-local CollectionService    = game:GetService("CollectionService")
-
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local _Debris = game:GetService("Debris")
 
 --//:VARIABLES//
 local player = Players.LocalPlayer :: Player
-local char   = player.Character or player.CharacterAdded:Wait() :: Model 		 
-local hrp = char:WaitForChild("HumanoidRootPart") :: BasePart 	 
-local hum = char:WaitForChild("Humanoid") :: Humanoid		 
-local animator = hum:WaitForChild("Animator") :: Animator 
+local char = player.Character or player.CharacterAdded:Wait() :: Model
+local hrp = char:WaitForChild("HumanoidRootPart") :: BasePart
+local hum = char:WaitForChild("Humanoid") :: Humanoid
+local animator = hum:WaitForChild("Animator") :: Animator
 local Camera = workspace.CurrentCamera :: Camera
-
 
 --//:MODULES//
 local actionsMap = require(script.ActionsMap)
-
-
-
-
-
-
 
 --//:MAIN//
 local module = {}
@@ -36,32 +26,30 @@ function module:Init()
 	-- Non-PVP --
 	local function Enable_NonPVP()
 		local function sprint()
-
 			--REMOTES
-			local movementChangeEvent: RemoteEvent = ReplicatedStorage.Remotes_Bindables.Remotes.GeneralPlayer.RequestMovementChange
-
+			local movementChangeEvent: RemoteEvent =
+				ReplicatedStorage.Remotes_Bindables.Remotes.GeneralPlayer.RequestMovementChange
 
 			--VARIABLES
-			local PREVENTION_ATTRIBUTES: {string} = {
+			local PREVENTION_ATTRIBUTES: { string } = {
 				"Ragdolled",
 				"TrueStunned",
 				"Stunned",
 				"Blocking",
 				"Slowed",
-				"UsingAttack"
+				"UsingAttack",
 			}
 			local keybinds = actionsMap.Sprint
-			
+
 			local connection: RBXScriptConnection
-			
+
 			local sprinting: boolean = false
-			
+
 			local pressTimeThreshold: number = 0.175
 			local lastPressedTime: number = 0
 
-
 			--FUNCTIONS
-			
+
 			--Begin character sprinting
 			local function beginSprint()
 				if not char:GetAttribute("IsSprinting") or not sprinting then
@@ -69,7 +57,7 @@ function module:Init()
 					sprinting = true
 				end
 			end
-			
+
 			--Stop character sprinting
 			local function endSprint()
 				movementChangeEvent:FireServer("Sprint", false)
@@ -81,75 +69,76 @@ function module:Init()
 				end
 				]]
 			end
-			
+
 			--Will decide whether to beginSprint or endSprint (depending on toggleSprint)
 			local function trySprint(toggleSprint: boolean)
 				--Attribute prevention
 				for _, attribute in pairs(PREVENTION_ATTRIBUTES) do
-					if char:GetAttribute(attribute) then 
-						endSprint() 
+					if char:GetAttribute(attribute) then
+						endSprint()
 						return
 					end
 				end
-				
-				if toggleSprint then beginSprint() else endSprint() end
+
+				if toggleSprint then
+					beginSprint()
+				else
+					endSprint()
+				end
 			end
 
 			--Prevents character from sprinting backwards or looking backwards while sprinting
 			local function trackMoveDirectionChange()
-				
 				connection = RunService.Heartbeat:Connect(function()
 					local moveDir: Vector3 = hum.MoveDirection
-					local lookDir_Camera: Vector3 = Camera.CFrame.LookVector
+					local _lookDir_Camera: Vector3 = Camera.CFrame.LookVector
 					local lookDir_Hrp: Vector3 = hrp.CFrame.LookVector
-					
-					
+
 					----Conditions to end sprint
 					--local angleBetweenLookDirections: number = math.acos(lookDir_Camera:Dot(lookDir_Hrp) / (lookDir_Camera.Magnitude * lookDir_Hrp.Magnitude))
-					--if angleBetweenLookDirections > math.rad(120) then 
-					--	endSprint() 
+					--if angleBetweenLookDirections > math.rad(120) then
+					--	endSprint()
 					--end
-					
+
 					if moveDir.Magnitude > 0 then
 						local dot: number = moveDir:Dot(lookDir_Hrp)
-						if dot < 0 then  --moving backwards
-							endSprint() 
+						if dot < 0 then --moving backwards
+							endSprint()
 						end --^ Checks move direction, and if not (to some extent) forward, then cancel sprint
 					end
 				end)
-				
+
 				--Disconnects the connection when the character dies
 				char.Humanoid.Died:Once(function()
 					connection:Disconnect()
 				end) --End connection
-				
 			end
 			player.CharacterAdded:Connect(trackMoveDirectionChange)
-			if char then trackMoveDirectionChange() end
-			
-			
+			if char then
+				trackMoveDirectionChange()
+			end
+
 			--Track PREVENTION_ATTRIBUTES
 			for _, attribute in pairs(PREVENTION_ATTRIBUTES) do
-			
 				char:GetAttributeChangedSignal(attribute):Connect(function()
 					if char:GetAttribute(attribute) then
 						movementChangeEvent:FireServer("Sprint", false)
 						sprinting = false
 					end
 				end)
-				
 			end --End for
-
 
 			--EVENTS
 			UserInputService.InputBegan:Connect(function(input, GPE)
-				if GPE then return end 
-				if input.KeyCode ~= keybinds.Keyboard and input.KeyCode ~= keybinds.Console then return end
-				
-						
+				if GPE then
+					return
+				end
+				if input.KeyCode ~= keybinds.Keyboard and input.KeyCode ~= keybinds.Console then
+					return
+				end
+
 				if input.KeyCode == keybinds.Keyboard then
 					if lastPressedTime > (tick() - pressTimeThreshold) then --Double pressed within threshold time
-
 						--Keyboard and Console have different double-tap sprint systems.
 						--When keyboard doubletaps, on InputBegan it simply tries to sprint.
 						--When Console doubletaps, it checks if the player is already sprinting, and if so, will stop sprinting, otherwise begin sprinting.
@@ -157,7 +146,7 @@ function module:Init()
 
 						if input.KeyCode == keybinds.Keyboard then
 							trySprint(true)
-					--[[
+							--[[
 					elseif input.KeyCode == keybinds.Console then
 					if char:GetAttribute("IsSprinting") and sprinting then
 						trySprint(false)
@@ -174,34 +163,33 @@ function module:Init()
 						trySprint(false) --End sprint
 					end
 				end
-			
 			end)
-			
+
 			UserInputService.InputEnded:Connect(function(input, GPE)
-				if GPE then return end 
-				if input.KeyCode ~= keybinds.Keyboard and input.KeyCode ~= keybinds.Console then return end
-				
-				
+				if GPE then
+					return
+				end
+				if input.KeyCode ~= keybinds.Keyboard and input.KeyCode ~= keybinds.Console then
+					return
+				end
+
 				lastPressedTime = tick() --Single press
 				if input.KeyCode == keybinds.Keyboard then
 					trySprint(false) --End sprint because input ended
 				end
 			end)
 
-
 			--Binding and customizing action
 			ContextActionService:BindAction("Sprint", trySprint, true)
 			ContextActionService:SetTitle("Sprint", "Sprint")
-			ContextActionService:SetPosition("Sprint", UDim2.new(0.273, 0,   0.515, 0))  
-
+			ContextActionService:SetPosition("Sprint", UDim2.fromScale(0.273, 0.515))
 		end
 		sprint()
 
 		local function dash()
-
 			--REMOTES
-			local mainRemote: RemoteEvent 	 	   = ReplicatedStorage.Remotes_Bindables.Remotes.GeneralPlayer.Flashstep
-			local VfxRemote: UnreliableRemoteEvent = mainRemote.FlashstepVFX
+			local mainRemote: RemoteEvent = ReplicatedStorage.Remotes_Bindables.Remotes.GeneralPlayer.Flashstep
+			local _VfxRemote: UnreliableRemoteEvent = mainRemote.FlashstepVFX
 
 			--VARIABLES
 			local PREVENTION_ATTRIBUTES = {
@@ -220,7 +208,7 @@ function module:Init()
 
 			local DURATION: number = ReplicatedStorage.Values.Movement.Dash.Duration.Value
 			local zoomedOutFOV: number = 90
-			local defaultFOV: number   = 70
+			local defaultFOV: number = 70
 
 			local outFOV_Tween: Tween = TweenService:Create(
 				Camera,
@@ -234,15 +222,20 @@ function module:Init()
 			)
 
 			--FUNCTIONS
-			
-			
-			local function cancelDashIfAttribute(char: Model?): boolean
-				if not char or not char.Parent then return true end
+
+			local function cancelDashIfAttribute(character: Model?): boolean
+				if not character or not character.Parent then
+					return true
+				end
 
 				for _, attribute in ipairs(PREVENTION_ATTRIBUTES) do
-					if attribute == "DashOnCooldown" then continue end
+					if attribute == "DashOnCooldown" then
+						continue
+					end
 
-					if char:GetAttribute(attribute) then return true end
+					if character:GetAttribute(attribute) then
+						return true
+					end
 				end
 
 				return false
@@ -259,46 +252,50 @@ function module:Init()
 				local RunConnection: RBXScriptConnection
 				RunConnection = RunService.Heartbeat:Connect(function()
 					if cancelDashIfAttribute(char) then
-						if outFOV_Tween.PlaybackState == Enum.PlaybackState.Playing then outFOV_Tween:Cancel() end
+						if outFOV_Tween.PlaybackState == Enum.PlaybackState.Playing then
+							outFOV_Tween:Cancel()
+						end
 						RunConnection:Disconnect()
 						return
 					end
 				end)
-				task.delay(DURATION, function() --If camera tweens aren't canceled during RunConnection, disconnect RunConnection
-					if RunConnection then RunConnection:Disconnect() end
-				end)
+				task.delay(
+					DURATION,
+					function() --If camera tweens aren't canceled during RunConnection, disconnect RunConnection
+						if RunConnection then
+							RunConnection:Disconnect()
+						end
+					end
+				)
 			end
 
 			local function tryDash(
-				action: string,
+				_action: string,
 				inputState: Enum.UserInputState,
-				inputObject: InputObject
+				_inputObject: InputObject
 			): Enum.ContextActionResult
-				
-				if inputState ~= Enum.UserInputState.Begin or inputState == Enum.UserInputState.Cancel then return Enum.ContextActionResult.Pass end
+				if inputState ~= Enum.UserInputState.Begin or inputState == Enum.UserInputState.Cancel then
+					return Enum.ContextActionResult.Pass
+				end
 				for _, attribute in pairs(PREVENTION_ATTRIBUTES) do
-					if char:GetAttribute(attribute) then return Enum.ContextActionResult.Pass end
+					if char:GetAttribute(attribute) then
+						return Enum.ContextActionResult.Pass
+					end
 				end --Checks all prevention attributes (meant to cancel a dash before happening).
-				
+
 				mainRemote:FireServer()
 				tweenCamera()
 				return Enum.ContextActionResult.Sink
 			end
 
 			--BIND & CUSTOMIZE ACTION
-			ContextActionService:BindAction(
-				"Dash", 
-				tryDash, 
-				true,
-				keybinds.Keyboard, keybinds.Console
-			)
+			ContextActionService:BindAction("Dash", tryDash, true, keybinds.Keyboard, keybinds.Console)
 			ContextActionService:SetTitle("Dash", "Dash")
-			ContextActionService:SetPosition("Dash", UDim2.new(0.431, 0,   0.353, 0))  
+			ContextActionService:SetPosition("Dash", UDim2.fromScale(0.431, 0.353))
 		end
 		dash()
 
 		local function climb()
-
 			--REMOTES
 			local climbEvent = ReplicatedStorage.Remotes_Bindables.Remotes.GeneralPlayer.WallClimb :: RemoteEvent
 
@@ -306,17 +303,13 @@ function module:Init()
 			local ACTION_NAME: string = "WallClimb"
 
 			--FUNCTIONS
-			local function beginClimb(
-				actionName: string, 
-				inputState: Enum.UserInputState, 
-				inputObject: InputObject
-			)
-				if inputState ~= Enum.UserInputState.Begin then return end
+			local function beginClimb(_actionName: string, inputState: Enum.UserInputState, _inputObject: InputObject)
+				if inputState ~= Enum.UserInputState.Begin then
+					return
+				end
 
 				local state = hum:GetState()
-				if state == Enum.HumanoidStateType.Jumping
-					or state == Enum.HumanoidStateType.Freefall then
-
+				if state == Enum.HumanoidStateType.Jumping or state == Enum.HumanoidStateType.Freefall then
 					climbEvent:FireServer(true)
 				end
 			end
@@ -324,29 +317,19 @@ function module:Init()
 			-- BIND INPUTS --
 			hum.StateChanged:Connect(function(_, newState)
 				--Allowing climb
-				if newState == Enum.HumanoidStateType.Jumping 
-					or newState == Enum.HumanoidStateType.Freefall then
-
-					ContextActionService:BindAction(
-						ACTION_NAME,
-						beginClimb,
-						true,
-						keybinds.Keyboard, keybinds.Console
-					)
+				if newState == Enum.HumanoidStateType.Jumping or newState == Enum.HumanoidStateType.Freefall then
+					ContextActionService:BindAction(ACTION_NAME, beginClimb, true, keybinds.Keyboard, keybinds.Console)
 					ContextActionService:SetTitle(ACTION_NAME, "Climb")
-					ContextActionService:SetPosition(ACTION_NAME, UDim2.new(0.709, 0,   0.356, 0))  
+					ContextActionService:SetPosition(ACTION_NAME, UDim2.fromScale(0.709, 0.356))
 				else
 					ContextActionService:UnbindAction(ACTION_NAME)
 				end
 
 				--Reset climb count
-				if newState == Enum.HumanoidStateType.Landed 
-					or newState == Enum.HumanoidStateType.Running then
-
+				if newState == Enum.HumanoidStateType.Landed or newState == Enum.HumanoidStateType.Running then
 					climbEvent:FireServer(false)
 				end
 			end) --End of StateChanged
-
 		end
 		climb()
 	end
@@ -356,14 +339,13 @@ function module:Init()
 	-- PVP --
 	local function Enable_PVP()
 		local function block()
-
 			--REMOTES
 			local blockingEvent: RemoteEvent = ReplicatedStorage.Remotes_Bindables.Remotes.PVP.Blocking.BlockingEvent
 
 			--VARIABLES
-			local COOLDOWN: number = ReplicatedStorage.Values.Combat.Base.Block.CooldownTime.Value
+			local _COOLDOWN: number = ReplicatedStorage.Values.Combat.Base.Block.CooldownTime.Value
 
-			local PREVENTION_ATTRIBUTES: {string} = {
+			local PREVENTION_ATTRIBUTES: { string } = {
 				"Ragdolled",
 				"TrueStunned",
 				--"Carried",
@@ -375,32 +357,33 @@ function module:Init()
 			local isBlocking: boolean = false
 			local allowedToBlock: boolean = true
 			local beganWhilePrevented: boolean = false --prevents cooldown being set if began input whilst prevented (e.g., ragdolled but began input)
-			
+
 			--Animations
-			local blockingAnimKatana: AnimationTrack = animator:LoadAnimation(ReplicatedStorage.Animations.General.Blocking.Katana)
-			local blockingAnimFist: AnimationTrack = animator:LoadAnimation(ReplicatedStorage.Animations.General.Blocking.Fist)
+			local blockingAnimKatana: AnimationTrack =
+				animator:LoadAnimation(ReplicatedStorage.Animations.General.Blocking.Katana)
+			local blockingAnimFist: AnimationTrack =
+				animator:LoadAnimation(ReplicatedStorage.Animations.General.Blocking.Fist)
 			-------------
 
 			--FUNCTIONS
 			local function startBlocking()
 				if char:GetAttribute("BlockOnCooldown") or char:GetAttribute("Blocking") then
 					beganWhilePrevented = true
-					return 
+					return
 				end
 				for _, v in pairs(PREVENTION_ATTRIBUTES) do
-					if char:GetAttribute(v) then 
+					if char:GetAttribute(v) then
 						beganWhilePrevented = true
-						return 
+						return
 					end
 				end
-				if isBlocking then 
+				if isBlocking then
 					beganWhilePrevented = true
-					return 
+					return
 				end --prevents remote spamming (if we are blocking)
-				
-				
+
 				beganWhilePrevented = false
-				
+
 				blockingEvent:FireServer(true) --Tell server we are blocking
 				isBlocking = true --Set debounce boolean to true
 
@@ -413,27 +396,37 @@ function module:Init()
 			end
 
 			local function stopBlocking()
-				if beganWhilePrevented then return end
-				
-				
+				if beganWhilePrevented then
+					return
+				end
+
 				blockingEvent:FireServer(false) --Tell server we are not blocking
 				isBlocking = false --Set debounce boolean to false
 
 				--If animTracks are playing, stop them
-				if blockingAnimFist.IsPlaying then blockingAnimFist:Stop() end
-				if blockingAnimKatana.IsPlaying then blockingAnimKatana:Stop() end
+				if blockingAnimFist.IsPlaying then
+					blockingAnimFist:Stop()
+				end
+				if blockingAnimKatana.IsPlaying then
+					blockingAnimKatana:Stop()
+				end
 			end
 
 			local function tryBlock(
-				actionName: string, 
-				inputState: Enum.UserInputState, 
-				input: InputObject
+				_actionName: string,
+				inputState: Enum.UserInputState,
+				_input: InputObject
 			): Enum.ContextActionResult
-				
 				--Safe guards
-				if not allowedToBlock then return Enum.ContextActionResult.Pass end
-				if inputState == Enum.UserInputState.Cancel then return Enum.ContextActionResult.Pass end
-				if hum:GetState() == Enum.HumanoidStateType.Dead or hum.Health <= 0 then return Enum.ContextActionResult.Pass end
+				if not allowedToBlock then
+					return Enum.ContextActionResult.Pass
+				end
+				if inputState == Enum.UserInputState.Cancel then
+					return Enum.ContextActionResult.Pass
+				end
+				if hum:GetState() == Enum.HumanoidStateType.Dead or hum.Health <= 0 then
+					return Enum.ContextActionResult.Pass
+				end
 
 				--Check input state
 				if inputState == Enum.UserInputState.Begin then
@@ -444,17 +437,15 @@ function module:Init()
 				return Enum.ContextActionResult.Sink
 			end
 
-
 			--Binding actions
 			ContextActionService:BindAction("Block", tryBlock, true, keybinds.Keyboard, keybinds.Console)
 			ContextActionService:SetTitle("Block", "Block")
-			ContextActionService:SetPosition("Block", UDim2.new(0.435, 0,   0.032, 0))
-
+			ContextActionService:SetPosition("Block", UDim2.fromScale(0.435, 0.032))
 
 			-- Listen for attribute changes (PREVENTION_ATTRIBUTES)
 			for _, attribute: string in ipairs(PREVENTION_ATTRIBUTES) do
 				char:GetAttributeChangedSignal(attribute):Connect(function()
-					if char:GetAttribute(attribute) then 
+					if char:GetAttribute(attribute) then
 						if char:GetAttribute("Blocking") or isBlocking then
 							stopBlocking()
 						end
@@ -464,15 +455,12 @@ function module:Init()
 					end
 				end)
 			end --End of for loop
-
 		end
 		block()
 
 		local function normalAndHeavy()
-
 			--MODULES
-			local AnimationService = require(ReplicatedStorage.Modules.Packages.AnimationService) :: ModuleScript
-
+			local _AnimationService = require(ReplicatedStorage.Modules.Packages.AnimationService) :: ModuleScript
 
 			--========================================================--
 			--                    REMOTE EVENTS                       --
@@ -480,8 +468,7 @@ function module:Init()
 			local Remotes: Folder = ReplicatedStorage.Remotes_Bindables.Remotes.PVP.M1sAndM2s
 			local M1Remote: RemoteEvent = Remotes.M1RemoteEvent
 			local M2Remote: RemoteEvent = Remotes.M2RemoteEvent
-			
-			
+
 			--========================================================--
 			--                     ATTACK SETTINGS                     --
 			--========================================================--
@@ -496,7 +483,6 @@ function module:Init()
 			local Attacking: boolean = false --Overall debounce
 			local playingM1Track -- Stores the currently playing M1 animation track
 
-
 			--========================================================--
 			--                  ANIMATION LOADING                      --
 			--========================================================--
@@ -507,10 +493,9 @@ function module:Init()
 
 			local M1_FistFolder = M1Folder:FindFirstChild("Fist") :: Folder
 			local M1_KatanaFolder = M1Folder:FindFirstChild("Katana") :: Folder
-			
+
 			local M2_FistFolder = M2Folder:FindFirstChild("Fist") :: Folder
 			local M2_KatanaFolder = M2Folder:FindFirstChild("Katana") :: Folder
-
 
 			local function LoadAnim(folder: Folder, index: number)
 				local animObj = folder:FindFirstChild(tostring(index))
@@ -529,7 +514,6 @@ function module:Init()
 				M1Katana[i] = LoadAnim(M1_KatanaFolder, i)
 			end
 
-
 			-- Heavy Attack animations (random choice)
 			local M2Fist = {}
 			local M2Katana = {}
@@ -539,21 +523,26 @@ function module:Init()
 				M2Katana[i] = LoadAnim(M2_KatanaFolder, i)
 			end
 
-
 			--========================================================--
 			--                      HELPERS                            --
 			--========================================================--
 			local function GetWeaponType(): string
 				local tool = char:FindFirstChildOfClass("Tool")
 
-				if tool and tool.Name == "Katana" then return "Katana"
-				elseif tool and tool.Name ~= "Katana" then return "OtherTool"
-				else return "Fist" end
+				if tool and tool.Name == "Katana" then
+					return "Katana"
+				elseif tool and tool.Name ~= "Katana" then
+					return "OtherTool"
+				else
+					return "Fist"
+				end
 			end
 
 			local function PlayM1Anim(type: any, index: number): boolean | AnimationTrack
 				local animTrack = (type == "Katana") and M1Katana[index] or M1Fist[index]
-				if not animTrack then return false end
+				if not animTrack then
+					return false
+				end
 
 				local success, err = pcall(function()
 					animTrack:Play()
@@ -598,12 +587,11 @@ function module:Init()
 					end)
 				end
 			end
-			
-			
+
 			--========================================================--
 			--                     INPUT SYSTEM                       --
 			--========================================================--
-			local PREVENT_ATTRIBUTES: {string} = {
+			local PREVENT_ATTRIBUTES: { string } = {
 				--"Gripped",
 				--"Carried",
 				--"Knocked",
@@ -611,9 +599,9 @@ function module:Init()
 				"TrueStunned",
 				"Stunned",
 				"Blocking",
-				"UsingAttack" 
+				"UsingAttack",
 			}
-			local RESET_ATTRIBUTES: {string} = {
+			local RESET_ATTRIBUTES: { string } = {
 				--"Gripped",
 				--"Carried",
 				--"Knocked",
@@ -624,30 +612,32 @@ function module:Init()
 			local controlsEnabled: boolean = true
 
 			local function HandleM1(
-				actionName: string, 
-				inputState: Enum.UserInputState, 
-				inputObject: InputObject
+				_actionName: string,
+				inputState: Enum.UserInputState,
+				_inputObject: InputObject
 			): Enum.ContextActionResult
+				if not controlsEnabled then
+					return Enum.ContextActionResult.Pass
+				end
+				if inputState == Enum.UserInputState.Cancel or inputState ~= Enum.UserInputState.Begin then
+					return Enum.ContextActionResult.Pass
+				end
 
-				if not controlsEnabled then 
-					return Enum.ContextActionResult.Pass 
+				if hum:GetState() == Enum.HumanoidStateType.Dead or hum.Health <= 0 then
+					return Enum.ContextActionResult.Pass
 				end
-				if inputState == Enum.UserInputState.Cancel or inputState ~= Enum.UserInputState.Begin then 
-					return Enum.ContextActionResult.Pass 
-				end
-
-				if hum:GetState() == Enum.HumanoidStateType.Dead or hum.Health <= 0 then 
-					return Enum.ContextActionResult.Pass 
-				end
-				if Attacking or clicked or M1OnCooldown then 
-					return Enum.ContextActionResult.Pass 
+				if Attacking or clicked or M1OnCooldown then
+					return Enum.ContextActionResult.Pass
 				end
 				for _, v in pairs(PREVENT_ATTRIBUTES) do
-					if char:GetAttribute(v) then return Enum.ContextActionResult.Pass end
+					if char:GetAttribute(v) then
+						return Enum.ContextActionResult.Pass
+					end
 				end
 				local weapon: string = GetWeaponType()
-				if weapon == "OtherTool" then return Enum.ContextActionResult.Pass end
-
+				if weapon == "OtherTool" then
+					return Enum.ContextActionResult.Pass
+				end
 
 				local combo: number? = char:GetAttribute("Combo") or 0
 				Attacking = true
@@ -664,7 +654,7 @@ function module:Init()
 
 				if combo == 1 then
 					PressTime = tick()
-					local animTrack: AnimationTrack  = PlayM1Anim(weapon, 1)
+					local animTrack: AnimationTrack = PlayM1Anim(weapon, 1)
 					if animTrack then
 						if playingM1Track and playingM1Track ~= animTrack then
 							playingM1Track:Stop()
@@ -691,7 +681,7 @@ function module:Init()
 					NewPressTime = tick()
 					if NewPressTime - PressTime < 3 then
 						PressTime = tick()
-						local animTrack: AnimationTrack  = PlayM1Anim(weapon, combo)
+						local animTrack: AnimationTrack = PlayM1Anim(weapon, combo)
 						if animTrack then
 							if playingM1Track and playingM1Track ~= animTrack then
 								playingM1Track:Stop()
@@ -723,7 +713,7 @@ function module:Init()
 					if NewPressTime - PressTime < 3 then
 						M1OnCooldown = true
 
-						local animTrack: AnimationTrack  = PlayM1Anim(weapon, 5)
+						local animTrack: AnimationTrack = PlayM1Anim(weapon, 5)
 						if animTrack then
 							if playingM1Track and playingM1Track ~= animTrack then
 								playingM1Track:Stop()
@@ -761,28 +751,34 @@ function module:Init()
 			end
 
 			local function HandleM2(
-				actionName: string, 
-				inputState: Enum.UserInputState, 
-				inputObject: InputObject
+				_actionName: string,
+				inputState: Enum.UserInputState,
+				_inputObject: InputObject
 			): Enum.ContextActionResult
-
-				if not controlsEnabled then 
-					return Enum.ContextActionResult.Pass 
+				if not controlsEnabled then
+					return Enum.ContextActionResult.Pass
 				end
-				if inputState == Enum.UserInputState.Cancel or inputState ~= Enum.UserInputState.Begin then 
-					return Enum.ContextActionResult.Pass 
+				if inputState == Enum.UserInputState.Cancel or inputState ~= Enum.UserInputState.Begin then
+					return Enum.ContextActionResult.Pass
 				end
-				if hum:GetState() == Enum.HumanoidStateType.Dead or hum.Health <= 0 then 
-					return Enum.ContextActionResult.Pass 
+				if hum:GetState() == Enum.HumanoidStateType.Dead or hum.Health <= 0 then
+					return Enum.ContextActionResult.Pass
 				end
-				if Attacking then return Enum.ContextActionResult.Pass end
-				if char:GetAttribute("HeavyAttackOnCooldown") then return Enum.ContextActionResult.Pass  end
+				if Attacking then
+					return Enum.ContextActionResult.Pass
+				end
+				if char:GetAttribute("HeavyAttackOnCooldown") then
+					return Enum.ContextActionResult.Pass
+				end
 				for _, v in pairs(PREVENT_ATTRIBUTES) do
-					if char:GetAttribute(v) then return Enum.ContextActionResult.Pass end
+					if char:GetAttribute(v) then
+						return Enum.ContextActionResult.Pass
+					end
 				end
 				local weapon: string = GetWeaponType()
-				if weapon == "OtherTool" then return Enum.ContextActionResult.Pass end
-
+				if weapon == "OtherTool" then
+					return Enum.ContextActionResult.Pass
+				end
 
 				Attacking = true
 
@@ -798,7 +794,7 @@ function module:Init()
 				--animTrack:GetMarkerReachedSignal("FireServer"):Once(function()
 				--	M2Remote:FireServer()
 				--end)
-				
+
 				animTrack.Stopped:Once(function()
 					if playingM1Track == animTrack then
 						playingM1Track = nil
@@ -810,7 +806,7 @@ function module:Init()
 			end
 
 			-- Recovery listeners to avoid stuck debounces when attributes change (e.g., TrueStunned/Ragdolled)
-			for _, v in pairs(RESET_ATTRIBUTES) do
+			for _, _ in pairs(RESET_ATTRIBUTES) do
 				Attacking = false
 				clicked = false
 			end
@@ -818,48 +814,52 @@ function module:Init()
 			--========================================================--
 			--                     INPUT LISTENERS                     --
 			--========================================================--
-			local keybinds  = actionsMap.Attacking
-			local keybinds_Light  = keybinds.LightAttack
-			local keybinds_Heavy  = keybinds.HeavyAttack
+			local keybinds = actionsMap.Attacking
+			local keybinds_Light = keybinds.LightAttack
+			local keybinds_Heavy = keybinds.HeavyAttack
 
 			local shiftlockEnabled = char:WaitForChild("ShiftLockEnabled") :: BoolValue
 
 			UserInputService.InputBegan:Connect(function(input, GPE)
-				if GPE then return end
-				
+				if GPE then
+					return
+				end
+
 				--M1
-				if 
-					input.UserInputType == keybinds_Light.Keyboard or input.KeyCode == keybinds_Light.Console
-				then HandleM1("LightAttack", input.UserInputState, input) end
-				
+				if input.UserInputType == keybinds_Light.Keyboard or input.KeyCode == keybinds_Light.Console then
+					HandleM1("LightAttack", input.UserInputState, input)
+				end
+
 				--M2
-				if 
-					input.KeyCode == keybinds_Heavy.Keyboard.NonShiftLock 
+				if
+					input.KeyCode == keybinds_Heavy.Keyboard.NonShiftLock
 					or (input.UserInputType == keybinds_Heavy.Keyboard.ShiftLock and shiftlockEnabled.Value == true)
 					or input.KeyCode == keybinds_Heavy.Console
-				then HandleM2("HeavyAttack", input.UserInputState, input) end
+				then
+					HandleM2("HeavyAttack", input.UserInputState, input)
+				end
 			end)
 
 			ContextActionService:BindAction( --Light BindAction
-				"LightAttack", 
-				HandleM1, 
+				"LightAttack",
+				HandleM1,
 				true
 			)
 			ContextActionService:SetTitle("LightAttack", "M1")
-			ContextActionService:SetPosition("LightAttack", UDim2.new(0.552, 0,   -0.149, 0))
+			ContextActionService:SetPosition("LightAttack", UDim2.fromScale(0.552, -0.149))
 
 			ContextActionService:BindAction( --Heavy BindAction
-				"HeavyAttack", 
-				HandleM2, 
+				"HeavyAttack",
+				HandleM2,
 				true
 			)
 			ContextActionService:SetTitle("HeavyAttack", "M2")
-			ContextActionService:SetPosition("HeavyAttack", UDim2.new(0.317, 0,   -0.15, 0))
-
-
+			ContextActionService:SetPosition("HeavyAttack", UDim2.fromScale(0.317, -0.15))
 
 			local function handleChildAdded(child: Instance)
-				if not child:IsA("Tool") then return end
+				if not child:IsA("Tool") then
+					return
+				end
 
 				if CollectionService:HasTag(child, "Skill") or CollectionService:HasTag(child, "Food") then
 					controlsEnabled = false
@@ -869,27 +869,30 @@ function module:Init()
 			end
 
 			local function handleChildRemoved(child: Instance)
-				if not child:IsA("Tool") then return end
+				if not child:IsA("Tool") then
+					return
+				end
 				controlsEnabled = true
 			end
 
 			char.ChildAdded:Connect(handleChildAdded)
 			char.ChildRemoved:Connect(handleChildRemoved)
-
 		end
 		normalAndHeavy()
 
 		local function breathingBar()
 			local Race: StringValue = player:WaitForChild("Race")
-			repeat task.wait() until Race.Value ~= ("" and nil)
-			if Race.Value ~= "Human" then return end --Ensure player is a human before proceeding with the function
-
-
+			repeat
+				task.wait()
+			until Race.Value ~= ("" and nil)
+			if Race.Value ~= "Human" then
+				return
+			end --Ensure player is a human before proceeding with the function
 
 			--VARIABLES
 			local breathing_remote: RemoteEvent = ReplicatedStorage.Remotes_Bindables.Remotes.PVP.BreathingBar
-			local keybinds  = actionsMap.Breathing
-			local PREVENT_ATTRIBUTES: {string} = {
+			local keybinds = actionsMap.Breathing
+			local PREVENT_ATTRIBUTES: { string } = {
 				"Gripped",
 				"Carried",
 				"Knocked",
@@ -897,95 +900,115 @@ function module:Init()
 				"Ragdolled",
 				"Stunned",
 				"Blocking",
-				"UsingAttack" 
+				"UsingAttack",
 			}
+			local soundsAllowed: boolean = true
+			local inhaleSound = ReplicatedStorage.FX.SFX.GeneralPlayer.Breathing.Inhale :: Sound
+			local exhaleSound = ReplicatedStorage.FX.SFX.GeneralPlayer.Breathing.Exhale :: Sound
 
 			--FUNCTIONS
-			local function beginBreathing(
-				inputState: Enum.UserInputState 
-			)
+			local function beginBreathing(inputState: Enum.UserInputState): Enum.ContextActionResult?
 				--InputState check
-				if inputState ~= Enum.UserInputState.Begin then return Enum.ContextActionResult.Pass end
+				if inputState ~= Enum.UserInputState.Begin then
+					return Enum.ContextActionResult.Pass
+				end
 
 				for _, attribute in pairs(PREVENT_ATTRIBUTES) do
-					if char:GetAttribute(attribute) then return end
+					if char:GetAttribute(attribute) then
+						return Enum.ContextActionResult.Pass
+					end
 				end --^ check if PREVENT attributes are true
+
 				breathing_remote:FireServer(true)
+
+				if soundsAllowed then
+					exhaleSound:Stop()
+					inhaleSound:Play()
+				end
+				return Enum.ContextActionResult.Sink
 			end
 
-			local function endBreathing(
-				inputState: Enum.UserInputState
-			)
+			local function endBreathing(canceled: boolean, inputState: Enum.UserInputState)
 				--InputState check
-				if inputState ~= Enum.UserInputState.End then return end
+				if inputState ~= Enum.UserInputState.End then
+					return
+				end
 
 				breathing_remote:FireServer(false)
+
+				if soundsAllowed then
+					inhaleSound:Stop()
+					if not canceled then
+						exhaleSound:Play()
+					end
+				end
 			end
 
 			local function tryBreathing(
-				actionName: string, 
-				inputState: Enum.UserInputState, 
-				inputObject: InputObject
+				_actionName: string,
+				inputState: Enum.UserInputState,
+				_inputObject: InputObject
 			): Enum.ContextActionResult
 				--InputState checks
-				if inputState == Enum.UserInputState.Cancel then 
-					return Enum.ContextActionResult.Pass 
+				if inputState == Enum.UserInputState.Cancel then
+					return Enum.ContextActionResult.Pass
 				end
-				if inputState ~= Enum.UserInputState.Begin and inputState ~= Enum.UserInputState.End then 
-					return Enum.ContextActionResult.Pass 
+				if inputState ~= Enum.UserInputState.Begin and inputState ~= Enum.UserInputState.End then
+					return Enum.ContextActionResult.Pass
 				end
 
 				if inputState == Enum.UserInputState.Begin then
 					beginBreathing(inputState)
-					return Enum.ContextActionResult.Sink
-
 				elseif inputState == Enum.UserInputState.End then
-					endBreathing(inputState)
-					return Enum.ContextActionResult.Sink
+					endBreathing(false, inputState)
 				end
+				return Enum.ContextActionResult.Sink
 			end
 
-
 			--BINDING--
-			ContextActionService:BindAction(
-				"Breathing",
-				tryBreathing,
-				true,
-				keybinds.Keyboard, keybinds.Console
-			)
+			ContextActionService:BindAction("Breathing", tryBreathing, true, keybinds.Keyboard, keybinds.Console)
 			ContextActionService:SetTitle("Breathing", "Breathing")
-			ContextActionService:SetPosition("Breathing", UDim2.new(0.75, 0, -0.15, 0))
+			ContextActionService:SetPosition("Breathing", UDim2.fromScale(0.75, -0.15))
 
 			--DETECTING PREVENT ATTRIBUTES
 			for _, attribute in pairs(PREVENT_ATTRIBUTES) do
 				char:GetAttributeChangedSignal(attribute):Connect(function()
-					endBreathing(Enum.UserInputState.End)
+					endBreathing(true, Enum.UserInputState.End)
 				end)
 			end
+
+			local breathAttr_Name: string = "BreathingBar"
+			char:GetAttributeChangedSignal(breathAttr_Name):Connect(function()
+				local valueOfAttribute = char:GetAttribute(breathAttr_Name)
+				if valueOfAttribute and valueOfAttribute >= 100 then
+					soundsAllowed = false
+				else
+					soundsAllowed = true
+				end
+			end)
 		end
 		breathingBar()
 
-		local function gripAndCarry()
-
+		local function _gripAndCarry()
 			--MODULES
-			local ContextActionUtility = require(ReplicatedStorage.Modules.Packages.ContextActionUtility)
+			local _ContextActionUtility = require(ReplicatedStorage.Modules.Packages.ContextActionUtility)
 
 			--REMOTES
-			local carryEvent  = ReplicatedStorage.Remotes_Bindables.Remotes.PVP.GripAndCarry.CarryEvent :: RemoteEvent
-			local gripEvent   = ReplicatedStorage.Remotes_Bindables.Remotes.PVP.GripAndCarry.GripEvent :: RemoteEvent
+			local carryEvent = ReplicatedStorage.Remotes_Bindables.Remotes.PVP.GripAndCarry.CarryEvent :: RemoteEvent
+			local gripEvent = ReplicatedStorage.Remotes_Bindables.Remotes.PVP.GripAndCarry.GripEvent :: RemoteEvent
 			local reviveEvent = ReplicatedStorage.Remotes_Bindables.Remotes.PVP.GripAndCarry.ReviveEvent :: RemoteEvent
 
 			--VARIABLES
 			hum:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
 
-			local carry_debounce 	  = false
+			local carry_debounce = false
 			local carry_debounce_TIME = 1
-			local grip_debounce		  = false
-			local grip_debounce_TIME  = 1.5
+			local grip_debounce = false
+			local grip_debounce_TIME = 1.5
 
-			local keybinds  = actionsMap.GripAndCarry
-			local keybinds_Carry  = keybinds.Carry
-			local keybinds_Grip  = keybinds.Grip
+			local keybinds = actionsMap.GripAndCarry
+			local keybinds_Carry = keybinds.Carry
+			local keybinds_Grip = keybinds.Grip
 
 			--//:FUNCTIONS
 			local function GetClosestDowned(character_position: Vector3)
@@ -994,30 +1017,27 @@ function module:Init()
 
 				for _, v in pairs(ReplicatedStorage.Values.Downed:GetChildren()) do
 					if v:IsA("ObjectValue") then
-						if not v.Value then 
-							print("No value for: "..v.Name) 
+						if not v.Value then
+							print("No value for: " .. v.Name)
 							continue
 						end
 
 						local v_character = v.Value
 						if v_character:FindFirstChild("Dead") then
 							print("Character is dead")
-							continue 
+							continue
 						end
 
 						local v_characterHead = v_character:FindFirstChild("Head") :: Part?
-						if not v_characterHead then 
-							warn("Head not found for: "..v_character.Name) 
-							continue 
+						if not v_characterHead then
+							warn("Head not found for: " .. v_character.Name)
+							continue
 						end
 
 						local distance = (v_characterHead.Position - character_position).Magnitude
-						if  
-							distance > maxDistance or
-							(nearestDistance and distance >= nearestDistance)
-						then
+						if distance > maxDistance or (nearestDistance and distance >= nearestDistance) then
 							print("Distance is too far")
-							continue 
+							continue
 						end
 
 						nearestDistance = distance
@@ -1029,16 +1049,21 @@ function module:Init()
 				return nearestDowned
 			end
 
-			local function Carry(actionName: string, inputState: Enum.UserInputState, inputObject: any)
-				if carry_debounce then return end
-				if inputState ~= Enum.UserInputState.Begin then return end
-				if inputObject.KeyCode ~= keybinds_Carry.Keyboard 
-					and inputObject.KeyCode ~= keybinds_Carry.Console 
-				then return end
-
+			local function Carry(_actionName: string, inputState: Enum.UserInputState, inputObject: any)
+				if carry_debounce then
+					return
+				end
+				if inputState ~= Enum.UserInputState.Begin then
+					return
+				end
+				if inputObject.KeyCode ~= keybinds_Carry.Keyboard and inputObject.KeyCode ~= keybinds_Carry.Console then
+					return
+				end
 
 				local characterHead = char:FindFirstChild("Head") :: BasePart?
-				if not characterHead then return end
+				if not characterHead then
+					return
+				end
 
 				local victim = GetClosestDowned(characterHead.Position)
 				if victim then
@@ -1053,12 +1078,18 @@ function module:Init()
 				print("Fired carry event")
 			end
 
-			local function Grip(actionName: string, inputState: Enum.UserInputState, inputObject)
-				if grip_debounce == true then return end
-				if inputState ~= Enum.UserInputState.Begin then return end
+			local function Grip(_actionName: string, inputState: Enum.UserInputState, _inputObject)
+				if grip_debounce == true then
+					return
+				end
+				if inputState ~= Enum.UserInputState.Begin then
+					return
+				end
 
 				local characterHead = char:FindFirstChild("Head") :: BasePart?
-				if not characterHead then return end
+				if not characterHead then
+					return
+				end
 
 				local victim = GetClosestDowned(characterHead.Position)
 				if victim then
@@ -1075,30 +1106,27 @@ function module:Init()
 
 			ContextActionService:BindAction("Carry", Carry, true)
 			ContextActionService:SetImage("Carry", "rbxassetid://18362401517")
-			ContextActionService:SetPosition("Carry", UDim2.new(0.826, 0,   0.213, 0))
+			ContextActionService:SetPosition("Carry", UDim2.fromScale(0.826, 0.213))
 
 			ContextActionService:BindAction("Grip", Grip, true)
 			ContextActionService:SetImage("Grip", "rbxassetid://18362400331")
-			ContextActionService:SetPosition("Grip", UDim2.new(0.83, 0,   0.025, 0))
+			ContextActionService:SetPosition("Grip", UDim2.fromScale(0.83, 0.025))
 
 			UserInputService.InputBegan:Connect(function(input, GPE)
-				if GPE then return end
+				if GPE then
+					return
+				end
 
-				if input.KeyCode == keybinds_Carry.Keyboard 
-					or input.KeyCode == keybinds_Carry.Console then
-
+				if input.KeyCode == keybinds_Carry.Keyboard or input.KeyCode == keybinds_Carry.Console then
 					Carry("Carry", Enum.UserInputState.Begin, input)
 				end
 
-				if input.KeyCode == keybinds_Grip.Keyboard 
-					or input.KeyCode == keybinds_Grip.Console then
-
+				if input.KeyCode == keybinds_Grip.Keyboard or input.KeyCode == keybinds_Grip.Console then
 					Grip("Grip", Enum.UserInputState.Begin, input)
 				end
 			end)
 
-
-		--[[local buttonPositionTable = {	
+			--[[local buttonPositionTable = {	
 			[1] = UDim2.new(0,123,0,70), 
 			[2] = UDim2.new(0,30,0,60),
 			[3] = UDim2.new(0,180,0,160),
@@ -1122,7 +1150,9 @@ function module:Init()
 
 			hum.HealthChanged:Connect(function(health)
 				local trigger = char:FindFirstChild("RagdollTrigger") :: BoolValue?
-				if not trigger or not trigger.Value then return end
+				if not trigger or not trigger.Value then
+					return
+				end
 
 				if (health / hum.Health) >= 0.15 then
 					reviveEvent:FireServer()
@@ -1134,7 +1164,7 @@ function module:Init()
 	end
 	Enable_PVP()
 	--print("PvP Game-Controls initialized")
-	
+
 	print("Game-Controls initialized!")
 end
 

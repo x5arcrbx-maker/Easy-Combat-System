@@ -1,30 +1,29 @@
 --!strict
 --//:SERVICES
-local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 
 --//:REFERENCES
 --	player & character variables
 local player = Players.LocalPlayer :: Player
 local char = player.Character or player.CharacterAdded:Wait() :: Model -- The player's character
-local hum = char:FindFirstChildOfClass("Humanoid") or char:WaitForChild("Humanoid") :: Humanoid 
-local animator = hum:FindFirstChildOfClass("Animator") or hum:WaitForChild("Animator") :: Animator 
+local hum = char:FindFirstChildOfClass("Humanoid") or char:WaitForChild("Humanoid") :: Humanoid
+local animator = hum:FindFirstChildOfClass("Animator") or hum:WaitForChild("Animator") :: Animator
 
 --	animations
-local idleAnim_Obj = script:FindFirstChild("DefaultIdle")
-local walkAnim_Obj = script:FindFirstChild("WalkAnim")
-local defaultRunAnim_Obj = script:FindFirstChild("DefaultRun")
-local katanaRunAnim_Obj = script:FindFirstChild("KatanaRun")
+local idleAnim_Obj = script:FindFirstChild("DefaultIdle") :: Animation
+local walkAnim_Obj = script:FindFirstChild("WalkAnim") :: Animation
+local defaultRunAnim_Obj = script:FindFirstChild("DefaultRun") :: Animation
+local katanaRunAnim_Obj = script:FindFirstChild("KatanaRun") :: Animation
 
 --//:VARIABLES
 --	Tracks
-local idleTrack: AnimationTrack  = animator:LoadAnimation(idleAnim_Obj)
+local idleTrack: AnimationTrack = animator:LoadAnimation(idleAnim_Obj)
 idleTrack.Priority = Enum.AnimationPriority.Idle
 
-local walkTrack: AnimationTrack  = animator:LoadAnimation(walkAnim_Obj)
+local walkTrack: AnimationTrack = animator:LoadAnimation(walkAnim_Obj)
 walkTrack.Priority = Enum.AnimationPriority.Movement
 
-local runTrackDefault: AnimationTrack  = animator:LoadAnimation(defaultRunAnim_Obj)
+local runTrackDefault: AnimationTrack = animator:LoadAnimation(defaultRunAnim_Obj)
 runTrackDefault.Priority = Enum.AnimationPriority.Movement
 
 local runTrackKatana: AnimationTrack = animator:LoadAnimation(katanaRunAnim_Obj)
@@ -33,12 +32,11 @@ runTrackKatana.Priority = Enum.AnimationPriority.Movement
 --	the run track that is currently playing, ensures the correct one is stopped when switching
 local currentRunTrack = runTrackDefault
 
-
 --//:CONSTANTS
 --	numbers
 local RUN_THRESHOLD: number = 16 -- Speed above which run animation plays
 local animFade_Play: number = 0.3
-local animFade_Stop: number = 0.15
+local animFade_Stop: number = 0.25
 
 --//:FUNCTIONS
 local function stopAll()
@@ -97,7 +95,6 @@ hum.Climbing:Connect(stopAll)
 hum.Swimming:Connect(stopAll)
 hum.Died:Connect(stopAll) --Stop animations on death
 stopAll() --Stop animations on spawn
-
 
 char.ChildAdded:Connect(function()
 	if hum:GetState() == Enum.HumanoidStateType.Running and hum.WalkSpeed > RUN_THRESHOLD then

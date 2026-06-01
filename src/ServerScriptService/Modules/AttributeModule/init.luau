@@ -55,16 +55,31 @@ local function addHighlight(character: Model)
 	local highlight: Highlight = Instance.new("Highlight")
 	highlight.Name				   = "CharacterHighlight"
 	highlight.FillTransparency    = 1
-	highlight.OutlineTransparency = 0.75
-	highlight.OutlineColor        = Color3.fromRGB(255, 255, 255)
+	highlight.OutlineTransparency = 0.5
+	highlight.OutlineColor        = Color3.fromRGB(0, 0, 0)
 	highlight.DepthMode 		   = Enum.HighlightDepthMode.Occluded
 	highlight.Parent 			   = character
+end
+
+local function addTrailForFinishers(character: Model)
+	local torso = character:WaitForChild("Torso") :: BasePart
+	
+	local neckAttachment = torso:WaitForChild("NeckAttachment") :: Attachment
+	local waistCenterAttachment = torso:WaitForChild("WaistCenterAttachment") :: Attachment
+	
+	local trail = script.FinisherTrail
+	local cloneTrail = trail:Clone()
+	cloneTrail.Attachment0 = neckAttachment
+	cloneTrail.Attachment1 = waistCenterAttachment
+	cloneTrail.Enabled = false
+	cloneTrail.Parent = character
 end
 
 function CharacterAttributes.ApplyTo(character)
 	if not character then return end
 
-	--addHighlight(character)
+	addHighlight(character)
+	task.spawn(addTrailForFinishers, character)
 
 	for attrName: string, defaultValue: any in pairs(CharacterAttributes.Defaults) do
 		if character:GetAttribute(attrName) == nil then

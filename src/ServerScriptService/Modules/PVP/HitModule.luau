@@ -628,12 +628,29 @@ function hitModule.Hit(
 						
 						if KBforce then
 							--Increase KBforce more if a smaller number, less if a larger number.
-							if KBforce <= 50 then
+							if KBforce <= 25 then
+								KBforce = KBforce * 3.5
+							elseif KBforce <= 50 then
 								KBforce = KBforce * 3
+								local trail = opponentChar:FindFirstChild("FinisherTrail") :: Trail
+								if trail then
+									trail.Enabled = true
+									trail.Lifetime = 1
+								end
 							elseif KBforce <= 100 then
 								KBforce = KBforce * 2.5
+								local trail = opponentChar:FindFirstChild("FinisherTrail") :: Trail
+								if trail then
+									trail.Enabled = true
+									trail.Lifetime = 1.5
+								end
 							else
 								KBforce = KBforce * 2
+								local trail = opponentChar:FindFirstChild("FinisherTrail") :: Trail
+								if trail then
+									trail.Enabled = true
+									trail.Lifetime = 2
+								end
 							end
 						end
 					end
