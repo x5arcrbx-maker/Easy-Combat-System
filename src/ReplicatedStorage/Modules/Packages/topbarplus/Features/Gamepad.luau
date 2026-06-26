@@ -14,7 +14,7 @@ local GuiService = game:GetService("GuiService")
 
 
 -- LOCAL
-local DEFAULT_HIGHLIGHT_KEY = Enum.KeyCode.DPadRight -- The default key to highlight the topbar icon
+local DEFAULT_HIGHLIGHT_KEY = nil --Enum.KeyCode.DPadRight -- The default key to highlight the topbar icon
 local GAMEPAD_INPUT = Enum.PreferredInput.Gamepad
 local Gamepad = {}
 local Icon

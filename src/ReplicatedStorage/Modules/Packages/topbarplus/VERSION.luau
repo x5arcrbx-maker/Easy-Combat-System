@@ -2,13 +2,9 @@
 -- LOCAL
 local VERSION = {}
 
-
-
 -- SHARED
 VERSION.appVersion = "v3.4.0"
 VERSION.latestVersion = nil :: string?
-
-
 
 -- FUNCTIONS
 function VERSION.getLatestVersion(): string?
@@ -20,7 +16,7 @@ function VERSION.getLatestVersion(): string?
 	local placeName = ""
 	while true do
 		local success, hdDevelopmentDetails = pcall(function()
-			return game:GetService("MarketplaceService"):GetProductInfo(DEVELOPMENT_PLACE_ID)
+			return game:GetService("MarketplaceService"):GetProductInfoAsync(DEVELOPMENT_PLACE_ID)
 		end)
 		if success and hdDevelopmentDetails then
 			placeName = hdDevelopmentDetails.Name
@@ -45,7 +41,5 @@ function VERSION.isUpToDate()
 	local appVersion = VERSION.getAppVersion()
 	return latestVersion ~= nil and latestVersion == appVersion
 end
-
-
 
 return VERSION

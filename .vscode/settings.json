@@ -85,4 +85,5 @@
     "luau-lsp.completion.imports.separateGroupsWithLine": true,
     "luau-lsp.fflags.enableNewSolver": true,
     "stylua.targetReleaseVersion": "latest",
+    "luau-lsp.diagnostics.workspace": true,
 }

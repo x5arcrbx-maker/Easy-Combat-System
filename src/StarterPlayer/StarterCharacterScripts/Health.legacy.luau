@@ -5,6 +5,8 @@ local currentHealth = hum.Health
 local lastDamage = nil
 local lastRegen = tick()
 
+local hungerBasedRegen = false
+
 local regenerationLimit = 1 * hum.MaxHealth
 local regenerationRate = 1
 local regenerationSize = 0 * hum.MaxHealth
@@ -53,7 +55,10 @@ while true do
 				
 				lastRegen = tick()
 				
-				changeRegenSizeBasedOnHunger()
+				if hungerBasedRegen then
+					changeRegenSizeBasedOnHunger()
+				end
+				
 				local healthToAdd = regenerationSize
 				hum.Health = math.min(hum.Health + healthToAdd, hum.MaxHealth) --uses math.min to not go over the MaxHealth
 				
