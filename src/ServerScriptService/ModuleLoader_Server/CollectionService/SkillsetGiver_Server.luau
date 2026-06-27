@@ -128,6 +128,7 @@ function module:Init()
 				if earlyAccessGui then
 					local earlyAccessGuiClone = earlyAccessGui:Clone()
 					earlyAccessGuiClone.Parent = SkillsetGiver
+					earlyAccessGuiClone.Adornee = SkillsetGiver
 				end
 			end
 
