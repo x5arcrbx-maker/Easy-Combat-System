@@ -76,7 +76,7 @@ end
 function module:Ragdoll(char: Model)
 	local humanoid = char:FindFirstChildOfClass("Humanoid") :: Humanoid
 	local hrp = char:FindFirstChild("HumanoidRootPart") :: BasePart
-	if not humanoid then
+	if not humanoid or not hrp then
 		return
 	end
 	humanoid:ChangeState(Enum.HumanoidStateType.Physics)
