@@ -44,9 +44,6 @@ local function Initialize(player: Player, profile: typeof(PlayerStore:StartSessi
 	Yen.Name = "Yen"
 	Yen.Value = profile.Data.Yen
 
-	local YenMultiplier: NumberValue = Instance.new("NumberValue")
-	YenMultiplier.Parent = leaderstats
-	YenMultiplier.Name = "YenMultiplier"
 	GamePassHandler:InitGamePassForPlayer(player, "2x Yen")
 
 	local Rank: StringValue = Instance.new("StringValue")
@@ -54,9 +51,6 @@ local function Initialize(player: Player, profile: typeof(PlayerStore:StartSessi
 	Rank.Name = "Rank"
 	Rank.Value = profile.Data.Rank
 
-	local EarlyAccess: BoolValue = Instance.new("BoolValue")
-	EarlyAccess.Parent = player
-	EarlyAccess.Name = "EarlyAccess"
 	GamePassHandler:InitGamePassForPlayer(player, "Early Access")
 
 	--[[

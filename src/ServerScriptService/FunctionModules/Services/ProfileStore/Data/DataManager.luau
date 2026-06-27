@@ -38,7 +38,8 @@ function DataManager.UpdateYen(player: Player, value: number)
 	end
 
 	--All checks passed, update data
-	profile.Data.Yen += value
+	local yenMultiplier = player:GetAttribute("YenMultiplier") or 1
+	profile.Data.Yen += (value * yenMultiplier)
 
 	local leaderstats: Folder? = player:FindFirstChild("leaderstats")
 	if not leaderstats then
@@ -50,7 +51,6 @@ function DataManager.UpdateYen(player: Player, value: number)
 		warn("Yen not found for (" .. player.Name .. "). Make sure it's a NumberValue in leaderstats.")
 		return
 	end
-
 	yen.Value = profile.Data.Yen
 
 	updateDataRemote:FireClient(player, "Yen", profile.Data.Yen)

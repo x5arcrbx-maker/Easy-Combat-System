@@ -8,51 +8,43 @@ local ServerStorage = game:GetService("ServerStorage")
 --//:VARIABLES
 local initGamePassFunctions = {
 	["2x Yen"] = function(player: Player, ownsGamePass: boolean)
-		local leaderstats = player:FindFirstChild("leaderstats")
-		if not leaderstats then
-			warn("Leaderstats not found for player: " .. player.Name)
-			return
-		end
-		local yenMultiplier = leaderstats:FindFirstChild("YenMultiplier") :: NumberValue
-		if not yenMultiplier then
-			warn("YenMultiplier not found for player: " .. player.Name)
-			return
-		end
-
 		if ownsGamePass then
-			yenMultiplier.Value = 2
+			player:SetAttribute("YenMultiplier", 2)
 		else
-			yenMultiplier.Value = 1
+			player:SetAttribute("YenMultiplier", 1)
 		end
 	end,
 	["Custom Flashstep Color"] = function(player: Player, ownsGamePass: boolean) end,
 	["Early Access"] = function(player: Player, ownsGamePass: boolean)
-		local earlyAccessValue = player:FindFirstChild("EarlyAccess") :: BoolValue
-		if not earlyAccessValue then
-			warn("EarlyAccess BoolValue not found for player: " .. player.Name)
-			return
-		end
-		earlyAccessValue.Value = ownsGamePass
+		player:SetAttribute("EarlyAccess", ownsGamePass)
 	end,
 	["Radio"] = function(player: Player, ownsGamePass: boolean)
 		local backpack = player.Backpack :: Backpack
-		if not ownsGamePass then
-			local existingRadio = backpack:FindFirstChild("Radio")
-			if existingRadio then
-				existingRadio:Destroy()
-			end
-			return
-		end
-
 		local character = player.Character
 		if not character then
 			warn("Character not found for player: " .. player.Name)
 			return
 		end
 
-		local radio = ServerStorage.Tools["Other(TOOLS)"].Gamepasses:FindFirstChild("Radio")
+		local toolsFolder = ServerStorage:FindFirstChild("Tools") :: Folder
+		if not toolsFolder then
+			warn("Tools folder not found")
+			return
+		end
+		local otherToolsFolder = toolsFolder:FindFirstChild("Other(TOOLS)") :: Folder
+		if not otherToolsFolder then
+			warn("Other(TOOLS) folder not found")
+			return
+		end
+		local gamepassesFolder = otherToolsFolder:FindFirstChild("Gamepasses") :: Folder
+		if not gamepassesFolder then
+			warn("Gamepasses folder not found")
+			return
+		end
+
+		local radio = gamepassesFolder:FindFirstChild("Radio")
 		if not radio then
-			warn("Radio gamepass not found")
+			warn("Radio gamepass tool not found")
 			return
 		end
 
@@ -75,7 +67,22 @@ function GamePassHandler:InitGamePassForPlayer(player: Player, gamePassName: str
 		return false
 	end
 	local playerUser: User = player.User
-	local gamePassFolder = ReplicatedStorage.Values.NumberValues.GamePasses :: Folder
+
+	local valuesFolder = ReplicatedStorage:FindFirstChild("Values") :: Folder
+	if not valuesFolder then
+		return false
+	end
+	local NumberValuesFolder = valuesFolder:FindFirstChild("NumberValues") :: Folder
+	if not NumberValuesFolder then
+		return false
+	end
+
+	local gamePassFolder = NumberValuesFolder:FindFirstChild("GamePasses") :: Folder
+	if not gamePassFolder then
+		warn("GamePasses folder not found in NumberValues")
+		return false
+	end
+
 	local gamePass = gamePassFolder:FindFirstChild(gamePassName) :: NumberValue
 	if not gamePass then
 		warn("Gamepass not found: " .. gamePassName)
@@ -90,9 +97,10 @@ function GamePassHandler:InitGamePassForPlayer(player: Player, gamePassName: str
 		return false
 	end --^ If gamePass.Value is 0 then it means the gamepass is not set up yet.
 
+	--Use pcall to avoid errors and check if the player owns the gamepass
 	local success: boolean, ownsGamePass: boolean = pcall(function()
 		return MarketPlaceService:UserOwnsGamePassAsync(playerUser, gamePass.Value)
-	end) --^ use pcall to avoid errors and check if the player owns the gamepass
+	end)
 	if not success then
 		warn("Error while checking if player has gamepass: " .. gamePassName)
 		return false

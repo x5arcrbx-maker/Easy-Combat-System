@@ -10,16 +10,14 @@
 --Getting player
 local player = game:GetService("Players").LocalPlayer :: Player
 
-
 --//:SERVICES
-local UserInputService = game:GetService("UserInputService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local MarketPlaceService = game:GetService("MarketplaceService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SoundService = game:GetService("SoundService")
+local UserInputService = game:GetService("UserInputService")
 
 --//:MODULES
 local topbarPlus = require(ReplicatedStorage.Modules.Packages.topbarplus)
-
 
 --//:VARIABLES
 local icons = {
@@ -33,7 +31,7 @@ local connections = {
 		Party = {},
 		Keybinds = {},
 	},
-	Shop = {}
+	Shop = {},
 }
 
 local guiFolder = script:WaitForChild("GUIs") :: Folder?
@@ -44,7 +42,6 @@ local guiClickSound = soundsFolder:WaitForChild("GuiClick") :: Sound?
 local gamepassPromptClickSound = soundsFolder:WaitForChild("GamepassPromptClick") :: Sound?
 local hoverSound = soundsFolder:WaitForChild("HoverSound") :: Sound?
 local typingSound = soundsFolder:WaitForChild("TypingSound") :: Sound?
-
 
 --//:FUNCTIONS
 local function _checkExistenceAndTypes(instance: Instance?, path: Instance | string?, typeToCheck: string?): boolean
@@ -101,7 +98,7 @@ local function playGuiSound(sound: Sound?, pitch: number?)
 	end
 end
 
-local function promptGamePassPurchase(player: Player, gamepassId: number|string)
+local function promptGamePassPurchase(player: Player, gamepassId: number | string)
 	if not gamepassId then
 		return
 	end
@@ -196,42 +193,34 @@ local function Init_SettingsIcon()
 
 		--Connections
 		for _, category in pairs(category_Frame:GetChildren()) do
-			if 
-				category:IsA("ImageButton") or category:IsA("TextButton") 
-				and category.Visible
-			then
-				local categoryHoverBegan_Conn: RBXScriptConnection = 
-					sounds_CategoryButton.MouseEnter:Connect(function()
-						playGuiSound(hoverSound, 1)
-					end)
+			if category:IsA("ImageButton") or category:IsA("TextButton") and category.Visible then
+				local categoryHoverBegan_Conn: RBXScriptConnection = sounds_CategoryButton.MouseEnter:Connect(function()
+					playGuiSound(hoverSound, 1)
+				end)
 				table.insert(connections.Settings, categoryHoverBegan_Conn)
 
-				local categoryHoverEnded_Conn: RBXScriptConnection = 
-					sounds_CategoryButton.MouseLeave:Connect(function()
-						playGuiSound(hoverSound, .85)
-					end)
+				local categoryHoverEnded_Conn: RBXScriptConnection = sounds_CategoryButton.MouseLeave:Connect(function()
+					playGuiSound(hoverSound, 0.85)
+				end)
 				table.insert(connections.Settings, categoryHoverEnded_Conn)
 			end
 		end
 
+		local sounds_categoryActivated_conn: RBXScriptConnection = sounds_CategoryButton.Activated:Connect(function()
+			playGuiSound(guiClickSound, 1)
 
-		local sounds_categoryActivated_conn: RBXScriptConnection = 
-			sounds_CategoryButton.Activated:Connect(function()
-				playGuiSound(guiClickSound, 1)
-
-				if not configure_Frame then
-					return
-				end
-				if configure_Frame.Parent == main_Frame and configure_Frame.Visible then
-					configure_Frame.Parent = sounds_CategoryButton
-					configure_Frame.Visible = false
-				else
-					configure_Frame.Parent = main_Frame
-					configure_Frame.Visible = true
-				end
-			end)
+			if not configure_Frame then
+				return
+			end
+			if configure_Frame.Parent == main_Frame and configure_Frame.Visible then
+				configure_Frame.Parent = sounds_CategoryButton
+				configure_Frame.Visible = false
+			else
+				configure_Frame.Parent = main_Frame
+				configure_Frame.Visible = true
+			end
+		end)
 		table.insert(connections.Settings.Sounds, sounds_categoryActivated_conn)
-
 
 		local function updateTextBoxes(textbox): number?
 			local number = tonumber(textbox.Text)
@@ -240,20 +229,23 @@ local function Init_SettingsIcon()
 				return nil
 			end
 
-			--if number < 0 then
-			--	number = 0
-			--elseif number > 10 then
-			--	number = 10
-			--end
-			playGuiSound(typingSound, math.random(85,115) / 100)
+			--[[
+			if number < 0 then
+				number = 0
+			elseif number > 10 then
+				number = 10
+			end
+			]]
+
+			playGuiSound(typingSound, math.random(85, 115) / 100)
 			number = math.clamp(number, 0, 10)
 			textbox.Text = tostring(number)
 			return number
 		end
 
-
-		local sounds_musicVolume_conn: RBXScriptConnection = 
-			musicVolume_textBox:GetPropertyChangedSignal("Text"):Connect(function()
+		local sounds_musicVolume_conn: RBXScriptConnection = musicVolume_textBox
+			:GetPropertyChangedSignal("Text")
+			:Connect(function()
 				local number = updateTextBoxes(musicVolume_textBox)
 				if not number then
 					return
@@ -266,8 +258,9 @@ local function Init_SettingsIcon()
 			end)
 		table.insert(connections.Settings.Sounds, sounds_musicVolume_conn)
 
-		local sounds_footstepsVolume_conn: RBXScriptConnection = 
-			footstepsVolume_textBox:GetPropertyChangedSignal("Text"):Connect(function()
+		local sounds_footstepsVolume_conn: RBXScriptConnection = footstepsVolume_textBox
+			:GetPropertyChangedSignal("Text")
+			:Connect(function()
 				local number = updateTextBoxes(footstepsVolume_textBox)
 				if not number then
 					return
@@ -298,8 +291,7 @@ local function Init_SettingsIcon()
 			end
 		end
 
-
-		playGuiSound(topbarClickSound, .85)
+		playGuiSound(topbarClickSound, 0.85)
 
 		--Player variables
 		local playerGui: StarterGui = player.PlayerGui
@@ -397,48 +389,75 @@ local function Init_ShopIcon()
 		end
 
 		--Connections
-		for _, frame in pairs(page_Frame:GetChildren()) do
-			if frame:IsA("Frame") and frame.Visible then
-				local gamepass = ReplicatedStorage.Values.NumberValues.GamePasses:FindFirstChild(frame.Name) :: NumberValue
+		for _, imageLabel in pairs(page_Frame:GetChildren()) do
+			if imageLabel:IsA("ImageLabel") and imageLabel.Visible then
+				local gamepass =
+					ReplicatedStorage.Values.NumberValues.GamePasses:FindFirstChild(imageLabel.Name) :: NumberValue
 				if not gamepass then
 					continue
 				end
 				local gamepassID = gamepass.Value
-				if not gamepassID or gamepassID == 0 then 
-					continue 
-				end
-				local button = frame:FindFirstChild("BuyButton")
-				if not button then
+				if not gamepassID or gamepassID == 0 then
 					continue
 				end
 
+				local button = imageLabel:FindFirstChild("BuyButton") :: ImageButton
+				if not button then
+					continue
+				end
+				local buttonUIGradient = button:FindFirstChildOfClass("UIGradient") :: UIGradient
+				if not buttonUIGradient then
+					continue
+				end
+				local buttonUIStroke = button:FindFirstChildOfClass("UIStroke") :: UIStroke
+				if not buttonUIStroke then
+					continue
+				end
+				local buttonText = button:FindFirstChild("TextLabel") :: TextLabel
+				if not buttonText then
+					continue
+				end
+				local buttonTextUIGradient = buttonText:FindFirstChildOfClass("UIGradient") :: UIGradient
+				if not buttonTextUIGradient then
+					continue
+				end
 
-				local hoverBegan_Conn: RBXScriptConnection = 
-					button.MouseEnter:Connect(function()
-						playGuiSound(hoverSound, 1)
-					end)
+				--Check if player owns the GamePass or not
+				if not MarketPlaceService:UserOwnsGamePassAsync(player.UserId, gamepassID) then --Not owned
+					buttonText.Text = "Get"
+					button.AutoButtonColor = true
+					buttonUIGradient.Color = ColorSequence.new(Color3.fromRGB(105, 150, 108))
+					buttonUIStroke.Color = Color3.fromRGB(103, 185, 103)
+				else --Owned
+					buttonText.Text = "Owned"
+					button.AutoButtonColor = false
+					buttonUIGradient.Color = ColorSequence.new(Color3.fromRGB(50, 50, 50))
+					buttonUIStroke.Color = Color3.fromRGB(65, 65, 65)
+					continue --Skip adding connections if the player already owns the gamepass
+				end
+
+				local hoverBegan_Conn: RBXScriptConnection = button.MouseEnter:Connect(function()
+					playGuiSound(hoverSound, 1)
+				end)
 				table.insert(connections.Shop, hoverBegan_Conn)
 
-				local hoverEnded_Conn: RBXScriptConnection = 
-					button.MouseLeave:Connect(function()
-						playGuiSound(hoverSound, .85)
-					end)
+				local hoverEnded_Conn: RBXScriptConnection = button.MouseLeave:Connect(function()
+					playGuiSound(hoverSound, 0.85)
+				end)
 				table.insert(connections.Shop, hoverEnded_Conn)
 
-				local activated_conn: RBXScriptConnection = 
-					button.Activated:Connect(function()
-						playGuiSound(gamepassPromptClickSound, 1)
+				local activated_conn: RBXScriptConnection = button.Activated:Connect(function()
+					playGuiSound(gamepassPromptClickSound, 1)
 
-						-- print("Prompting gamepass: " .. gamepassID)
-						local success, err = pcall(promptGamePassPurchase, player, gamepassID)
-						if not success then
-							warn("Error while trying to prompt gamepass purchase: " .. err)
-						end
-					end)
+					-- print("Prompting gamepass: " .. gamepassID)
+					local success, err = pcall(promptGamePassPurchase, player, gamepassID)
+					if not success then
+						warn("Error while trying to prompt gamepass purchase: " .. err)
+					end
+				end)
 				table.insert(connections.Shop, activated_conn) --Add connection to table
 			end
 		end
-
 	end)
 
 	icons.Shop:bindEvent("deselected", function()
@@ -451,7 +470,7 @@ local function Init_ShopIcon()
 			end
 		end --Disconnect all connections
 
-		playGuiSound(topbarClickSound, .85)
+		playGuiSound(topbarClickSound, 0.85)
 
 		--Player variables
 		local playerGui: StarterGui = player.PlayerGui
@@ -481,13 +500,14 @@ Init_ShopIcon()
 
 --Shiftlock icon
 local function Init_ShiftlockIcon()
-	if UserInputService.TouchEnabled 
-		and not UserInputService.KeyboardEnabled 
-		and not UserInputService.GamepadEnabled 
-	then 
-		icons.Shiftlock = topbarPlus.new() 
-	else 
-		return 
+	if
+		UserInputService.TouchEnabled
+		and not UserInputService.KeyboardEnabled
+		and not UserInputService.GamepadEnabled
+	then
+		icons.Shiftlock = topbarPlus.new()
+	else
+		return
 	end
 
 	icons.Shiftlock:setImage("http://www.roblox.com/asset/?id=105987953182009", "Viewing")
@@ -510,7 +530,7 @@ local function Init_ShiftlockIcon()
 		end
 	end)
 	icons.Shiftlock:bindEvent("deselected", function()
-		playGuiSound(topbarClickSound, .85)
+		playGuiSound(topbarClickSound, 0.85)
 
 		local character = player.Character
 		if not character then

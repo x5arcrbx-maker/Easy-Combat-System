@@ -21,6 +21,14 @@ function module:Init()
 	--		and removing before giving,
 	--		giving skills, giving possible weapon)
 	local function giveSkillset(SkillsetGiver: Instance, character: Model, player: Player)
+		local earlyAccess = SkillsetGiver:FindFirstChild("Early Access?") :: BoolValue
+		if earlyAccess and earlyAccess.Value then
+			local hasEarlyAccess = player:GetAttribute("EarlyAccess")
+			if not hasEarlyAccess then
+				return
+			end
+		end
+
 		local Category = SkillsetGiver:FindFirstChild("Category?") :: StringValue
 		local Name = SkillsetGiver:FindFirstChild("Skillset?") :: StringValue
 
@@ -50,16 +58,16 @@ function module:Init()
 				--Clear existing weapons from player's backpack and character--
 				local backpack = player:FindFirstChild("Backpack") --Get player's backpack
 				for _, item in pairs(backpack:GetChildren()) do -- Remove weapons in backpack
-					if 
-						item:IsA("Tool") 
+					if
+						item:IsA("Tool")
 						and (CollectionService:HasTag(item, "Skill") or CollectionService:HasTag(item, "SubSkill"))
 					then
 						item:Destroy()
 					end
 				end
 				for _, item in pairs(character:GetChildren()) do -- Remove weapons in character
-					if 
-						item:IsA("Tool") 
+					if
+						item:IsA("Tool")
 						and (CollectionService:HasTag(item, "Skill") or CollectionService:HasTag(item, "SubSkill"))
 					then
 						item:Destroy()
@@ -109,12 +117,21 @@ function module:Init()
 		else
 			warn("SkillsetGiver is missing 'Category?' or 'Skillset?' value objects")
 		end
-
-
 	end
 
-	local function InitTouchedEvent()
+	local function InitSkillsetGivers()
 		for _, SkillsetGiver in pairs(SkillsetGivers) do
+			--Clone early access gui to skillset if it's early access
+			local earlyAccess = SkillsetGiver:FindFirstChild("Early Access?") :: BoolValue
+			if earlyAccess and earlyAccess:IsA("BoolValue") and earlyAccess.Value then
+				local earlyAccessGui = script:FindFirstChild("EarlyAccessGui") :: BillboardGui
+				if earlyAccessGui then
+					local earlyAccessGuiClone = earlyAccessGui:Clone()
+					earlyAccessGuiClone.Parent = SkillsetGiver
+				end
+			end
+
+			--Touched events
 			SkillsetGiver.Touched:Connect(function(Hit)
 				local Character: Model? = Hit.Parent
 				if Character and Character:IsA("Model") and Character:FindFirstChildOfClass("Humanoid") then
@@ -130,7 +147,7 @@ function module:Init()
 			end)
 		end
 	end
-	InitTouchedEvent()
+	InitSkillsetGivers()
 
 	remote.OnServerEvent:Connect(function(player: Player, Frame: Frame?)
 		if not player or not Frame then
@@ -146,7 +163,6 @@ function module:Init()
 			giveSkillset(Frame, Character, player)
 		end
 	end)
-
 end
 
 return module
