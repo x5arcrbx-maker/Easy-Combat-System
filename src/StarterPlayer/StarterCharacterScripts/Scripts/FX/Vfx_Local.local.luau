@@ -1179,27 +1179,29 @@ vfxRemote.OnClientEvent:Connect(function(hrp: BasePart, vfxToPlay: string?)
 			--Position
 			Crescent.Position = hrp.CFrame * (hrp.CFrame.RightVector * math.random(-10, 10))
 
+			local tweenInfo_rotation = TweenInfo.new(2, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, 0)
+			local tweenInfo_positionAndSize =
+				TweenInfo.new(1.75, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0)
+			local tweenInfo_transparency =
+				TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, 0)
+
 			TweenService:Create(
 				Crescent, --ROTATION
-				TweenInfo.new(2, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, 0),
+				tweenInfo_rotation,
 				{ Orientation = Crescent.Orientation + Vector3.new(math.random(500, 1000), math.random(-45, 45), 0) }
 			):Play()
 			TweenService:Create(
 				Crescent, --POSITION
-				TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
+				tweenInfo_positionAndSize,
 				{ Position = Crescent.Position + (hrpLookVector * 50) + Vector3.new(0, 5, 0) }
 			):Play()
 			TweenService:Create(
 				Crescent, --SIZE
-				TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
+				tweenInfo_positionAndSize,
 				{ Size = Crescent.Size * Vector3.new(1, math.random(1, 2), 1) }
 			):Play()
-			task.delay(1, function() --TRANSPARENCY
-				TweenService:Create(
-					Crescent,
-					TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, 0, false, 0),
-					{ Transparency = 1 }
-				):Play()
+			task.delay(0.75, function() --TRANSPARENCY
+				TweenService:Create(Crescent, tweenInfo_transparency, { Transparency = 1 }):Play()
 			end)
 
 			for _, obj in Crescent:GetChildren() do
