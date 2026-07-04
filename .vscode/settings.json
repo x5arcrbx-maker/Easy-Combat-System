@@ -22,8 +22,8 @@
         columns and code no more than 100 columns. These rulers help maintain that.
     */
     "editor.rulers": [
-        80,
-        100
+        100,
+        125
     ],
 
     // Stylua Formatting
@@ -85,5 +85,5 @@
     "luau-lsp.completion.imports.separateGroupsWithLine": true,
     "luau-lsp.fflags.enableNewSolver": true,
     "stylua.targetReleaseVersion": "latest",
-    "luau-lsp.diagnostics.workspace": true,
+    "luau-lsp.diagnostics.workspace": false,
 }

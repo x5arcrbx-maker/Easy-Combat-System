@@ -21,8 +21,19 @@ local topbarPlus = require(ReplicatedStorage.Modules.Packages.topbarplus)
 
 --//:VARIABLES
 local icons = {
-	Settings = topbarPlus.new(),
-	Shop = topbarPlus.new(),
+	Settings = topbarPlus.new():setName("Settings"):setCaption("Settings"):setImage("rbxassetid://14134158045"),
+	Shop = topbarPlus.new():setName("Shop"):setCaption("Shop"):setImage("rbxassetid://13429538917"),
+	Skillsets = topbarPlus
+		.new()
+		:setName("Skillsets")
+		:setCaption("Skillsets")
+		:setImage("rbxassetid://11833765861")
+		:setDropdown({
+			Sun = topbarPlus.new():setName("Sun"):setLabel("Sun"):setImage("rbxassetid://2373819686"),
+			Moon = topbarPlus.new():setName("Moon"):setLabel("Moon"):setImage("rbxassetid://132049320741473"),
+			Ice = topbarPlus.new():setName("Ice"):setLabel("Ice"):setImage("rbxassetid://17771304663"),
+			Shockwave = topbarPlus.new():setName("Shockwave"):setLabel("Shockwave"):setImage("rbxassetid://137831468"),
+		}),
 }
 local connections = {
 	Settings = {
@@ -114,12 +125,10 @@ end
 --//Init
 --Settings icon
 local function Init_SettingsIcon()
-	icons.Settings:setImage("http://www.roblox.com/asset/?id=14134158045", "Viewing")
-	icons.Settings:setImage("http://www.roblox.com/asset/?id=14134158045", "Selected")
-	icons.Settings:setImage("http://www.roblox.com/asset/?id=14134158045", "Deselected")
-	icons.Settings:setName("Settings")
-	icons.Settings:setCaption("Settings")
+	----Set properties of the icon
+	--icons.Settings:setImage("http://www.roblox.com/asset/?id=14134158045"):setName("Settings"):setCaption("Settings")
 
+	--Bind events to the icon
 	icons.Settings:bindEvent("selected", function()
 		-- print("----------") --seperator for logs, easier reading
 		-- print("Settings +SELECTED+")
@@ -273,7 +282,6 @@ local function Init_SettingsIcon()
 			end)
 		table.insert(connections.Settings.Sounds, sounds_footstepsVolume_conn)
 	end)
-
 	icons.Settings:bindEvent("deselected", function()
 		-- print("Settings -DESELECTED-")
 
@@ -343,12 +351,10 @@ Init_SettingsIcon()
 
 --Shop icon
 local function Init_ShopIcon()
-	icons.Shop:setImage("rbxassetid://13429538917", "Viewing")
-	icons.Shop:setImage("rbxassetid://13429538917", "Selected")
-	icons.Shop:setImage("rbxassetid://13429538917", "Deselected")
-	icons.Shop:setName("Shop")
-	icons.Shop:setCaption("Shop")
+	----Set properties of the icon
+	--icons.Shop:setImage("rbxassetid://13429538917"):setName("Shop"):setCaption("Shop")
 
+	--Bind events to the icon
 	icons.Shop:bindEvent("selected", function()
 		-- print("----------") --seperator for logs, easier reading
 		-- print("Shop +SELECTED+")
@@ -459,7 +465,6 @@ local function Init_ShopIcon()
 			end
 		end
 	end)
-
 	icons.Shop:bindEvent("deselected", function()
 		-- print("Shop -DESELECTED-")
 
@@ -510,12 +515,10 @@ local function Init_ShiftlockIcon()
 		return
 	end
 
-	icons.Shiftlock:setImage("http://www.roblox.com/asset/?id=105987953182009", "Viewing")
-	icons.Shiftlock:setImage("http://www.roblox.com/asset/?id=105987953182009", "Selected")
-	icons.Shiftlock:setImage("http://www.roblox.com/asset/?id=105987953182009", "Deselected")
-	icons.Shiftlock:setName("Shiftlock")
-	icons.Shiftlock:setCaption("Shiftlock")
+	--Set properties of the icon
+	icons.Shiftlock:setImage("rbxassetid://105987953182009"):setName("Shiftlock"):setCaption("Shiftlock")
 
+	--Bind events to the icon
 	icons.Shiftlock:bindEvent("selected", function()
 		playGuiSound(topbarClickSound, 1)
 
