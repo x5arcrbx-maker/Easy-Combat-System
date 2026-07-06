@@ -8,18 +8,17 @@ function module:Init()
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 	--//:VARIABLES
-	local remote = ReplicatedStorage.Remotes_Bindables.Remotes.GeneralPlayer.GiveMoveset
-	local bindable = ReplicatedStorage.Remotes_Bindables.Bindables.GeneralPlayer.WeaponChange :: BindableEvent
-	local SkillsetGivers = CollectionService:GetTagged("SkillsetGiver")
-	local SkillsetsFolder = ServerStorage.Tools["Skillsets(TOOLS)"]
+	local remote = ReplicatedStorage.Remotes_Bindables.Remotes.GeneralPlayer.GiveMoveset :: RemoteEvent
+	local SkillsetsTools = ServerStorage.Tools["Skillsets(TOOLS)"] :: Folder
+	local SkillsetsValues = ReplicatedStorage.Values.Mixed.Skillsets :: Folder
 	local OnCooldown = {}
 
 	--//:FUNCTIONS
 
-	--	Gives skillset to player
-	--		(handles checking for skills in inventory
-	--		and removing before giving,
-	--		giving skills, giving possible weapon)
+	--Gives skillset to player
+	--	(handles checking for skills in inventory
+	--	and removing before giving,
+	--	giving skills, giving possible weapon)
 	local function giveSkillset(SkillsetGiver: Instance, character: Model, player: Player)
 		local earlyAccess = SkillsetGiver:FindFirstChild("Early Access?") :: BoolValue
 		if earlyAccess and earlyAccess.Value then
@@ -33,7 +32,7 @@ function module:Init()
 		local Name = SkillsetGiver:FindFirstChild("Skillset?") :: StringValue
 
 		if Category and Name then
-			local foundCategory = SkillsetsFolder:FindFirstChild(Category.Value)
+			local foundCategory = SkillsetsTools:FindFirstChild(Category.Value)
 			if not foundCategory then
 				warn("Category '" .. Category.Value .. "' not found in Skillsets folder")
 				return
@@ -81,7 +80,7 @@ function module:Init()
 				end
 
 				--Add randomized subskills to the player's backpack
-				local subskillsFolder = SkillsetsFolder.Subskills
+				local subskillsFolder = SkillsetsTools.Subskills
 				for i, tool in pairs(subskillsFolder.General:GetChildren()) do
 					if i > 2 then --no more than 2 skills
 						break
@@ -119,49 +118,31 @@ function module:Init()
 		end
 	end
 
-	local function InitSkillsetGivers()
-		for _, SkillsetGiver in pairs(SkillsetGivers) do
-			--Clone early access gui to skillset if it's early access
-			local earlyAccess = SkillsetGiver:FindFirstChild("Early Access?") :: BoolValue
-			if earlyAccess and earlyAccess:IsA("BoolValue") and earlyAccess.Value then
-				local earlyAccessGui = script:FindFirstChild("EarlyAccessGui") :: BillboardGui
-				if earlyAccessGui then
-					local earlyAccessGuiClone = earlyAccessGui:Clone()
-					earlyAccessGuiClone.Parent = SkillsetGiver
-					earlyAccessGuiClone.Adornee = SkillsetGiver
-				end
+	remote.OnServerEvent:Connect(function(player: Player, iconName: string?)
+		if not iconName then
+			if game:GetService("RunService"):IsStudio() then
+				warn("Server - Icon name is nil")
 			end
-
-			--Touched events
-			SkillsetGiver.Touched:Connect(function(Hit)
-				local Character: Model? = Hit.Parent
-				if Character and Character:IsA("Model") and Character:FindFirstChildOfClass("Humanoid") then
-					if Character:GetAttribute("InCombat") or Character:GetAttribute("UsingAttack") then
-						return
-					end
-
-					local player = Players:GetPlayerFromCharacter(Character)
-					if player then
-						giveSkillset(SkillsetGiver, Character, player)
-					end
-				end
-			end)
-		end
-	end
-	InitSkillsetGivers()
-
-	remote.OnServerEvent:Connect(function(player: Player, Frame: Frame?)
-		if not player or not Frame then
 			return
 		end
+		local character: Model? = player.Character
 
-		local Character: Model? = player.Character
-		if Character then
-			if Character:GetAttribute("InCombat") or Character:GetAttribute("UsingAttack") then
+		--Check if the player has a character and that it is a Model with a Humanoid,
+		--	and that the player is not in combat or using an attack
+		if
+			character
+			and character:IsA("Model")
+			and character:FindFirstChildOfClass("Humanoid")
+			and not (character:GetAttribute("InCombat") or character:GetAttribute("UsingAttack"))
+		then
+			local icon = SkillsetsValues:FindFirstChild(iconName)
+			if not icon then
+				if game:GetService("RunService"):IsStudio() then
+					warn("Icon '" .. iconName .. "' not found in SkillsetsValues")
+				end
 				return
 			end
-
-			giveSkillset(Frame, Character, player)
+			giveSkillset(icon, character, player)
 		end
 	end)
 end
