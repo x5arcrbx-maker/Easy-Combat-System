@@ -6,15 +6,17 @@ function module:Init()
 	local Players = game:GetService("Players")
 	local ServerStorage = game:GetService("ServerStorage")
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local NotificationService = require(ReplicatedStorage.Modules.Services.NotificationService)
 
 	--//:VARIABLES
+	local cooldowns = {}
 	local remote = ReplicatedStorage.Remotes_Bindables.Remotes.GeneralPlayer.GiveMoveset :: RemoteEvent
+	local bindable = ReplicatedStorage.Remotes_Bindables.Bindables.GeneralPlayer.WeaponChange :: BindableEvent
 	local SkillsetsTools = ServerStorage.Tools["Skillsets(TOOLS)"] :: Folder
 	local SkillsetsValues = ReplicatedStorage.Values.Mixed.Skillsets :: Folder
-	local OnCooldown = {}
+	local COOLDOWN: number = 10 --Cooldown time in seconds
 
 	--//:FUNCTIONS
-
 	--Gives skillset to player
 	--	(handles checking for skills in inventory
 	--	and removing before giving,
@@ -45,13 +47,14 @@ function module:Init()
 			local foundSkillset = foundName --If we found both category and name, this is our skillset
 			if foundSkillset then
 				--Check for cooldown
-				if OnCooldown[player.UserId] then --On cooldown, do not give skillset
+				if cooldowns[player.UserId] and (cooldowns[player.UserId] + COOLDOWN) > tick() then --On cooldown, do not give skillset
+					local remainingCooldown: number = (cooldowns[player.UserId] + COOLDOWN) - tick()
+					character:SetAttribute("MovesetChangeCooldown", remainingCooldown) --Set attribute to remaining cooldown time
+					NotificationService:NotifyPlayer(player, character, "ChangeMovesetOnCooldown")
 					return
 				else --Set cooldown
-					OnCooldown[player.UserId] = true
-					task.delay(10, function()
-						OnCooldown[player.UserId] = nil
-					end)
+					cooldowns[player.UserId] = tick() --Set cooldown to current time
+					character:SetAttribute("MovesetChangeCooldown", COOLDOWN) --Set attribute to remaining cooldown time
 				end
 
 				--Clear existing weapons from player's backpack and character--
@@ -118,6 +121,7 @@ function module:Init()
 		end
 	end
 
+	--//:EVENTS
 	remote.OnServerEvent:Connect(function(player: Player, iconName: string?)
 		if not iconName then
 			if game:GetService("RunService"):IsStudio() then
@@ -143,6 +147,12 @@ function module:Init()
 				return
 			end
 			giveSkillset(icon, character, player)
+		end
+	end)
+
+	Players.PlayerRemoving:Connect(function(player: Player)
+		if cooldowns[player.UserId] then
+			cooldowns[player.UserId] = nil --Remove cooldown for player when they leave
 		end
 	end)
 end

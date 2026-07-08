@@ -624,8 +624,7 @@ function module:Init()
 
 		local function normalAndHeavy()
 			--MODULES
-			local NotifyEquipWeapon_Module =
-				require(ReplicatedStorage.Modules.Services.SkillsService_Client.NotifyEquipWeapon)
+			local NotificationService = require(ReplicatedStorage.Modules.Services.NotificationService)
 			local _AnimationService = require(ReplicatedStorage.Modules.Services.AnimationService) :: ModuleScript
 
 			--========================================================--
@@ -791,7 +790,7 @@ function module:Init()
 				end
 				local weaponIsEquipped: boolean = char:GetAttribute("WeaponIsEquipped")
 				if not weaponIsEquipped then
-					NotifyEquipWeapon_Module:NotifyPlayer(player, char)
+					NotificationService:NotifyPlayer(player, char, "EquipWeapon")
 					return Enum.ContextActionResult.Pass
 				end
 				local toolIsEquipped = char:FindFirstChildOfClass("Tool") :: Tool
@@ -941,7 +940,7 @@ function module:Init()
 				end
 				local weaponIsEquipped: boolean = char:GetAttribute("WeaponIsEquipped")
 				if not weaponIsEquipped then
-					NotifyEquipWeapon_Module:NotifyPlayer(player, char)
+					NotificationService:NotifyPlayer(player, char, "EquipWeapon")
 					return Enum.ContextActionResult.Pass
 				end
 				local toolIsEquipped = char:FindFirstChildOfClass("Tool") :: Tool

@@ -3,7 +3,7 @@ local SkillsService_Client = {}
 function SkillsService_Client:Init(tool: Tool)
 	local _UserInputService = game:GetService("UserInputService") :: UserInputService
 
-	local NotifyEquipWeapon_Module = require(script:WaitForChild("NotifyEquipWeapon"))
+	local NotificationService = require(script.Parent:WaitForChild("NotificationService"))
 
 	local player = game:GetService("Players").LocalPlayer :: Player
 	local character = player.Character or player.CharacterAdded:Wait() :: Model
@@ -22,7 +22,7 @@ function SkillsService_Client:Init(tool: Tool)
 
 	tool.Equipped:Connect(function()
 		skillEvent:FireServer()
-		NotifyEquipWeapon_Module:NotifyPlayer(player, character)
+		NotificationService:NotifyPlayer(player, character, "EquipWeapon")
 	end)
 end
 

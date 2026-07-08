@@ -23,7 +23,7 @@ local Icon = require(ReplicatedStorage.Modules.Packages.topbarplus)
 local icons = {
 	Settings = Icon.new():setName("Settings"):setCaption("Settings"):setImage(14134158045),
 	Shop = Icon.new():setName("Shop"):setCaption("Shop"):setImage(13429538917),
-	Skillsets = Icon.new():setName("Skillsets"):setCaption("Skillsets"):setImage(11833765861),
+	Skillsets = Icon.new():setName("Skillsets"):setLabel("Skillsets"):setImage(11833765861),
 }
 local connections = {
 	Settings = {
@@ -110,6 +110,31 @@ local function promptGamePassPurchase(playerPurchasing: Player, gamepassId: numb
 		end
 	end
 	MarketPlaceService:PromptGamePassPurchase(playerPurchasing, gamepassId)
+end
+
+local function skillsetIcon_BindSelected(icon, iconName: string, remote: RemoteEvent)
+	local success, err = pcall(function()
+		if not iconName then
+			warn("Client - Icon name is nil")
+			return
+		end
+		if not icon then
+			warn("Client - Icon instance is nil for icon: " .. iconName)
+			return
+		end
+		if not remote then
+			warn("Client - RemoteEvent is nil for icon: " .. iconName)
+			return
+		end
+
+		icon:bindEvent("selected", function()
+			playGuiSound(topbarClickSound, 1)
+			remote:FireServer(iconName)
+		end)
+	end)
+	if not success then
+		warn("Error while handling skillset icon bindEvent(selected): " .. err)
+	end
 end
 
 --//Init
@@ -499,13 +524,6 @@ Init_ShopIcon()
 
 local function Init_SkillsetsDropdownIcons()
 	local success, err = pcall(function()
-		local sun = Icon.new():setName("Sun"):setLabel("Sun"):setImage(2373819686)
-		local moon = Icon.new():setName("Moon"):setLabel("Moon"):setImage(132049320741473)
-		local ice = Icon.new():setName("Ice"):setLabel("Ice"):setImage(17771304663)
-		local shockwave = Icon.new():setName("Shockwave"):setLabel("Shockwave"):setImage(137831468)
-
-		icons.Skillsets:setDropdown({ sun, moon, ice, shockwave })
-
 		--Bind events to the root icon
 		icons.Skillsets:bindEvent("selected", function()
 			playGuiSound(topbarClickSound, 1)
@@ -514,32 +532,41 @@ local function Init_SkillsetsDropdownIcons()
 			playGuiSound(topbarClickSound, 0.85)
 		end)
 
+		local sun = Icon.new():setName("Sun"):setLabel("Sun"):setImage(2373819686)
+		local moon = Icon.new():setName("Moon"):setLabel("Moon"):setImage(132049320741473)
+		local ice = Icon.new():setName("Ice"):setLabel("Ice"):setImage(17771304663)
+		local shockwave = Icon.new():setName("Shockwave"):setLabel("Shockwave"):setImage(137831468)
+
+		icons.Skillsets:setDropdown({ sun, moon, ice, shockwave })
+		-- local skillsetIcons = icons.Skillsets:getIcons()
+
 		--Get necessary variables
 		local remote = ReplicatedStorage.Remotes_Bindables.Remotes.GeneralPlayer.GiveMoveset :: RemoteEvent
-		for _, icon in pairs(icons.Skillsets) do
-			-- local icon = v.Value :: Instance?
-			-- if not icon then
-			-- 	if game:GetService("RunService"):IsStudio() then
-			-- 		warn("Client - Icon instance is nil for icon: " .. icon.Name)
-			-- 	end
-			-- 	continue
-			-- end
 
-			icon:bindEvent("selected", function()
-				playGuiSound(topbarClickSound, 1)
-				local iconName = icon.Name
-				if not iconName then
-					if game:GetService("RunService"):IsStudio() then
-						warn("Client - Icon name is nil")
-					end
-					return
-				end
-				remote:FireServer(icon.Name)
-			end)
-			icon:bindEvent("deselected", function()
-				playGuiSound(topbarClickSound, 0.85)
-			end)
-		end
+		skillsetIcon_BindSelected(sun, "Sun", remote)
+		skillsetIcon_BindSelected(moon, "Moon", remote)
+		skillsetIcon_BindSelected(ice, "Ice", remote)
+		skillsetIcon_BindSelected(shockwave, "Shockwave", remote)
+
+		-- for _, icon in pairs(skillsetIcons) do
+		-- 	-- local icon = v.Value :: Instance?
+		-- 	-- if not icon then
+		-- 	-- 	if game:GetService("RunService"):IsStudio() then
+		-- 	-- 		warn("Client - Icon instance is nil for icon: " .. icon.Name)
+		-- 	-- 	end
+		-- 	-- 	continue
+		-- 	-- end
+
+		-- 	icon:bindEvent("selected", function()
+		-- 		print("selected icon")
+		-- 		playGuiSound(topbarClickSound, 1)
+		-- 		remote:FireServer(icon.Name)
+		-- 	end)
+		-- 	-- icon:bindEvent("deselected", function()
+		-- 	-- 	print("deselected icon")
+		-- 	-- 	playGuiSound(topbarClickSound, 0.85)
+		-- 	-- end)
+		-- end
 	end)
 	if not success then
 		warn("Error while initializing Skillsets dropdown icons: " .. err)
