@@ -1,43 +1,69 @@
 --//:SERVICES
+local ReplicatedStorage = game:GetService("ReplicatedStorage") :: ReplicatedStorage
 local UserInputService = game:GetService("UserInputService") :: UserInputService
 
+--//:VARIABLES
+local UIfolder = ReplicatedStorage:WaitForChild("UI") :: Folder
+
 --//:HELPER FUNCTIONS
-local function createNotificationGui(player: Player, name: string): ScreenGui?
+local function createNotificationGui(player: Player, name: string): (ScreenGui?, string?)
+	--Sanity checks for player and name parameters.
 	if not player then
 		warn("NotificationService:NotifyPlayer - Player is nil")
-		return nil
+		return nil, "Player is nil"
 	end
 	if not name then
 		warn("NotificationService:NotifyPlayer - Notification name is nil")
-		return nil
+		return nil, "Notification name is nil"
 	end
 
-	local gui = script:WaitForChild("NotificationGui")
+	local gui = UIfolder:FindFirstChild("NotificationGui") --Find the NotificationGui in UIfolder.
 	if not gui then
-		return nil
+		warn("NotificationService:NotifyPlayer - NotificationGui not found in ReplicatedStorage.UI")
+		return nil, "NotificationGui not found"
+	end
+	--Get the player's PlayerGui to find a folder within it.
+	local playerGui = player:FindFirstChild("PlayerGui") :: PlayerGui
+	if not playerGui then
+		warn("NotificationService:NotifyPlayer - PlayerGui not found for player")
+		return nil, "PlayerGui not found"
+	end
+	--Folder to hold all event GUIs for the player.
+	--	This is to organize Gui based on their category
+	--	(e.g., event-based, startercharacter, etc.)
+	local eventGuis = playerGui:FindFirstChild("EventGUIs") :: Folder
+	if not eventGuis then
+		eventGuis = Instance.new("Folder")
+		eventGuis.Name = "EventGUIs"
+		eventGuis.Parent = playerGui
 	end
 
-	local playerGui = player:WaitForChild("PlayerGui") :: PlayerGui
-	local eventGuis = playerGui:WaitForChild("EventGUIs") :: Folder
-
-	if eventGuis:FindFirstChild(name) then
-		return nil
-	end --^ if gui already exists, exit function
+	if eventGuis:FindFirstChild(name) then --If gui already exists in eventGuis, exit function.
+		return nil, "Notification GUI already exists"
+	end
 	local gui_clone = gui:Clone()
 	gui_clone.Name = name
 	gui_clone.Parent = eventGuis
-	return gui_clone
+	return gui_clone, nil
+	--^	Return gui_clone so the calling function can manipulate it (e.g. change text, tween, etc.)
 end
 
---//:VARIABLES
+local function formatErrorMsg_createNotificationGui(errMessage: string): string
+	return string.format(
+		"NotificationService:NotifyPlayer - Failed to create notification GUI: %s",
+		errMessage or "Unknown error"
+	)
+end
+
+--//:TABLES
 local notificationFunctions = {
 	["EquipWeapon"] = function(player: Player, character: Model)
 		local equipGuiText: string = ""
 
 		if not character:GetAttribute("WeaponIsEquipped") then
-			local gui = createNotificationGui(player, "NotificationGui_EquipWeapon") :: ScreenGui?
+			local gui: ScreenGui?, errMessage: string? = createNotificationGui(player, "NotificationGui_EquipWeapon")
 			if not gui then
-				warn("NotificationService:NotifyPlayer - Failed to create notification GUI")
+				warn(formatErrorMsg_createNotificationGui(errMessage))
 				return
 			end
 
@@ -85,9 +111,10 @@ local notificationFunctions = {
 			return
 		end
 
-		local gui = createNotificationGui(player, "NotificationGui_ChangeMovesetOnCooldown") :: ScreenGui?
+		local gui: ScreenGui?, errMessage: string? =
+			createNotificationGui(player, "NotificationGui_ChangeMovesetOnCooldown")
 		if not gui then
-			--warn("NotificationService:NotifyPlayer - Failed to create notification GUI")
+			warn(formatErrorMsg_createNotificationGui(errMessage))
 			return
 		end
 
@@ -122,21 +149,28 @@ local notificationFunctions = {
 		end)
 	end,
 }
+--^ Holds all notification functions for each notification type.
+--	  Each function takes a player and character as parameters.
 
 --//:MAIN
-local NotificationService = {}
+local NotificationService = {} --module
 
 function NotificationService:NotifyPlayer(player: Player, character: Model, notificationType: string): boolean
+	--Use pcall to catch any errors that may occur during the notification process.
 	local success, err = pcall(function()
-		if not player or not character then
-			warn("NotificationService:NotifyPlayer - Player or Character is nil")
+		--Sanity checks for player, character, and notificationType parameters.
+		if not player then
+			warn("NotificationService:NotifyPlayer - (player: Player) is nil")
 			return false
-		end
-		if not notificationType then
-			warn("NotificationService:NotifyPlayer - Notification type is nil")
+		elseif not character then
+			warn("NotificationService:NotifyPlayer - (character: Model) is nil")
+			return false
+		elseif not notificationType then
+			warn("NotificationService:NotifyPlayer - (notificationType: string) is nil")
 			return false
 		end
 
+		--Find the appropriate notification function based on the notificationType parameter.
 		local notificationFunction = notificationFunctions[notificationType]
 		if notificationFunction then
 			notificationFunction(player, character)
@@ -146,10 +180,11 @@ function NotificationService:NotifyPlayer(player: Player, character: Model, noti
 			return false
 		end
 	end)
-	if not success then
+
+	if not success then --pcall failed, log the error and return false.
 		warn("NotificationService:NotifyPlayer - Error: " .. err)
 		return false
-	else
+	else --pcall succeeded, return true.
 		return true
 	end
 end
