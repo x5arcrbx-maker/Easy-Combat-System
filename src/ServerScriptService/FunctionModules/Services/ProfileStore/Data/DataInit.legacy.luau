@@ -46,10 +46,17 @@ local function Initialize(player: Player, profile: typeof(PlayerStore:StartSessi
 
 	GamePassHandler:InitGamePassForPlayer(player, "2x Yen")
 
+	--[[
 	local Rank: StringValue = Instance.new("StringValue")
 	Rank.Parent = leaderstats
 	Rank.Name = "Rank"
 	Rank.Value = profile.Data.Rank
+	]]
+
+	local Kills: StringValue = Instance.new("NumberValue")
+	Kills.Parent = leaderstats
+	Kills.Name = "Kills"
+	Kills.Value = profile.Data.Kills
 
 	GamePassHandler:InitGamePassForPlayer(player, "Early Access")
 

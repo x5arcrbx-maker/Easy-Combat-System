@@ -602,23 +602,24 @@ function hitModule.Hit(
 						Debris:AddItem(clone_attachment, 5)
 					end
 
-					local player = Players:GetPlayerFromCharacter(attackerChar)
-					if player then
-						local yen_FromOpponent = opponentChar:FindFirstChild("Yen") :: NumberValue
-						if yen_FromOpponent then
-							DataManager.UpdateYen(player, yen_FromOpponent.Value) --if Yen is from an NPC then give the player the Yen
-						else
-							local opponentPlayer = Players:GetPlayerFromCharacter(opponentChar)
-							if opponentPlayer then --ensure opponentPlayer exists
-								local leaderstats = opponentPlayer:FindFirstChild("leaderstats") :: Folder
-								if leaderstats then
-									yen_FromOpponent = leaderstats:FindFirstChild("Yen") :: NumberValue
-									if yen_FromOpponent then --ensure yen exists in opponent's leaderstats
-										local yenAmount = math.clamp(yen_FromOpponent.Value / 5, 0, math.huge)
-										DataManager.UpdateYen(player, yenAmount) --Give attacker yen
-										DataManager.UpdateYen(opponentPlayer, -yenAmount) --subtract opponent yen
-									end
+					local attackerPlayer = Players:GetPlayerFromCharacter(attackerChar)
+					if attackerPlayer then --The attacker is a player, run player logic.
+						local opponentPlayer = Players:GetPlayerFromCharacter(opponentChar)
+						if opponentPlayer then --opponent is a player, run player logic.
+							DataManager.UpdateKills(attackerPlayer, 1, false) --Update kills data for attackerPlayer.
+							local leaderstats = opponentPlayer:FindFirstChild("leaderstats") :: Folder --Find leaderstats to use for getting yen.
+							if leaderstats then --ensure leaderstats exists.
+								local yen_FromOpponent = leaderstats:FindFirstChild("Yen") :: NumberValue --Find Yen value in leaderstats.
+								if yen_FromOpponent then --ensure yen exists in opponent's leaderstats.
+									local yenAmount = math.clamp(yen_FromOpponent.Value / 5, 0, math.huge) --calculate amount to take.
+									DataManager.UpdateYen(attackerPlayer, yenAmount) --Give attacker yen.
+									DataManager.UpdateYen(opponentPlayer, -yenAmount) --subtract opponent yen.
 								end
+							end
+						else --opponent is an NPC.
+							local yen_FromOpponent = opponentChar:FindFirstChild("Yen") :: NumberValue --Find Yen value in opponent-NPC's character.
+							if yen_FromOpponent then --ensure Yen Value exists
+								DataManager.UpdateYen(attackerPlayer, yen_FromOpponent.Value) --Update player's yen based on yen's set value.
 							end
 						end
 					end

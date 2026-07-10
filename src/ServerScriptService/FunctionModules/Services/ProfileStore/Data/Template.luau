@@ -3,7 +3,8 @@ return {
 	Yen = 0,
 	Experience = 0,
 	Level = 1,
-	
+	Kills = 0,
+
 	-- STRING VALUES	--
 	Rank = "None",
 	Race = "Human",
@@ -12,7 +13,7 @@ return {
 	---- ARRAYS / TABLES --
 	Gamepasses = {
 		EarlyAccess = false,
-		Radio = false
+		Radio = false,
 	},
 	Inventory = {}, --Table containing all item names (strings) in inventory
 	Quests = { --Table containing all quests (QuestService)

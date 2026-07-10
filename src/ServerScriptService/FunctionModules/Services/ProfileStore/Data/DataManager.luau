@@ -324,6 +324,37 @@ function DataManager.UpdateQuest(player: Player, value: string)
 	--All checks passed, update data
 end
 
+function DataManager.UpdateKills(player: Player, value: number, settingValue: boolean?)
+	local profile = GetProfile(player)
+	if not profile then
+		warn("Profile not found for (" .. player.Name .. ") in DataManager.UpdateKills")
+		return
+	end
+	if typeof(value) ~= "number" then
+		return
+	end
+
+	--All checks passed, update data
+	if settingValue then
+		profile.Data.Kills = value
+	else
+		profile.Data.Kills += value
+	end
+
+	local leaderstats: Folder? = player:FindFirstChild("leaderstats")
+	if not leaderstats then
+		warn(
+			"DataManager.UpdateKills: Leaderstats not found for ("
+				.. player.Name
+				.. "). Make sure it's a Folder in (player)."
+		)
+		return
+	end
+
+	leaderstats.Kills.Value = profile.Data.Kills
+	-- updateDataRemote:FireClient(player, "Rank", profile.Data.Rank)
+end
+
 --[[
 --function DataManager.ChangeHotbarOrder(player: Player, order: number)
 --	local profile = GetProfile()
