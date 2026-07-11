@@ -180,6 +180,7 @@ local function Initialize(player: Player, profile: typeof(PlayerStore:StartSessi
 			if not character then
 				return false
 			end
+			--[[
 			local humanoid = character:FindFirstChildOfClass("Humanoid")
 			if not humanoid then
 				return false
@@ -187,6 +188,7 @@ local function Initialize(player: Player, profile: typeof(PlayerStore:StartSessi
 			if humanoid and humanoid:GetState() == Enum.HumanoidStateType.Dead then
 				return false
 			end
+			]]
 
 			return true
 		end
@@ -226,6 +228,9 @@ local function Initialize(player: Player, profile: typeof(PlayerStore:StartSessi
 			table.insert(connections, plrBackpack_childRemoved_conn)
 		end
 		createInventoryChangeConnections()
+	end
+	if player.Character then
+		setupCharacter(player.Character)
 	end
 	player_characterAdded_conn = player.CharacterAdded:Connect(setupCharacter)
 	table.insert(connections, player_characterAdded_conn) --Add characterAdded connection to connections table
