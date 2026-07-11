@@ -7,17 +7,17 @@
 
 --//:SERVICES
 local Players = game:GetService("Players")
+local PhysicsService = game:GetService("PhysicsService")
 
 --//:VARIABLES
 --	Extra
 local deathSoundsFolder = script:FindFirstChild("DeathSounds") :: Folder?
 local deathSounds = deathSoundsFolder and deathSoundsFolder:GetChildren() or nil
-
 --	Main
-local PhysicsService = game:GetService("PhysicsService")
-local module = require(script.R6Ragdoll_Functions)
-local ragParts = script.RagdollParts:GetChildren()
-local r6Client = script.R6RagdollClient
+local parentFolder = script.Parent :: Folder
+local module = require(parentFolder.R6Ragdoll_Functions)
+local ragParts = parentFolder.RagdollParts:GetChildren()
+local r6Client = parentFolder.R6Ragdoll_Client
 
 --//:MAIN
 PhysicsService:RegisterCollisionGroup("Ragdoll")
