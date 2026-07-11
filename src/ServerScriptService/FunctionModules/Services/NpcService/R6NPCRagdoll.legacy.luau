@@ -1,1 +1,1 @@
-require(game:GetService("ServerScriptService").FunctionModules.PVP.R6Ragdoll.ModuleScript):Setup(script.Parent)
+require(game:GetService("ServerScriptService").FunctionModules.PVP.R6Ragdoll.R6Ragdoll_Functions):Setup(script.Parent)
