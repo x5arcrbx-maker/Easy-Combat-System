@@ -1,9 +1,15 @@
-local module = {}
+--//:SERVICES
 local Players = game:GetService("Players")
-
 local _PhysicsService = game:GetService("PhysicsService")
+
+--//:VARIABLES
 local ragParts = script.Parent.RagdollParts:GetChildren()
 
+--//:MAIN
+local module = {}
+
+--Adds necessary objects to character for ragdoll to function properly,
+--	and connects an event to the ragdoll trigger.
 function module:Setup(char: Model)
 	assert(
 		Players:GetPlayerFromCharacter(char) == nil,
@@ -73,6 +79,7 @@ function module:Setup(char: Model)
 	end)
 end
 
+--Ragdolls character
 function module:Ragdoll(char: Model)
 	local humanoid = char:FindFirstChildOfClass("Humanoid") :: Humanoid
 	local hrp = char:FindFirstChild("HumanoidRootPart") :: BasePart
@@ -94,6 +101,7 @@ function module:Ragdoll(char: Model)
 	hrp:ApplyAngularImpulse(Vector3.new(-90, 0, 0))
 end
 
+--Unragdolls character
 function module:Unragdoll(char: Model)
 	local humanoid = char:FindFirstChildOfClass("Humanoid") :: Humanoid
 	if not humanoid then

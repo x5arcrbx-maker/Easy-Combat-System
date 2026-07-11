@@ -4,19 +4,25 @@
 	For instructions on how to use, refer to the devforum post:
 	https://devforum.roblox.com/t/smooth-r6-ragdoll-for-players-and-npcs-plug-and-play
 ]]
---//Extras
+
+--//:SERVICES
+local Players = game:GetService("Players")
+
+--//:VARIABLES
+--	Extra
 local deathSoundsFolder = script:FindFirstChild("DeathSounds") :: Folder?
 local deathSounds = deathSoundsFolder and deathSoundsFolder:GetChildren() or nil
 
---Main
+--	Main
 local PhysicsService = game:GetService("PhysicsService")
-local module = require(script.ModuleScript)
+local module = require(script.R6Ragdoll_Functions)
 local ragParts = script.RagdollParts:GetChildren()
 local r6Client = script.R6RagdollClient
 
+--//:MAIN
 PhysicsService:RegisterCollisionGroup("Ragdoll")
 
-game:GetService("Players").PlayerAdded:Connect(function(player)
+Players.PlayerAdded:Connect(function(player)
 	player.CharacterAdded:Connect(function(char)
 		-- Setup ragdoll
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
@@ -66,13 +72,13 @@ game:GetService("Players").PlayerAdded:Connect(function(player)
 				module:Unragdoll(char)
 			end
 		end)
-		
+
 		r6Client:Clone().Parent = char
-		
+
 		--Connect died event
 		humanoid.Died:Once(function()
 			trigger.Value = true
-			
+
 			--//Extras
 			if deathSounds and type(deathSounds) == "table" then
 				local hrp = char:FindFirstChild("HumanoidRootPart")
