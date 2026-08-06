@@ -74,6 +74,7 @@ end
 
 --M1 / Normal Attack
 function SkillsModule.NormalAttack(char: Model, hum: Humanoid, hrp: BasePart, combo: number, hitType: string)
+	print("NormalAttack called with combo:", combo, "and hitType:", hitType)
 	for _, v in Attributes.DOWNED_ATTRIBUTES do
 		if char:GetAttribute(v) then
 			return
@@ -104,39 +105,39 @@ function SkillsModule.NormalAttack(char: Model, hum: Humanoid, hrp: BasePart, co
 		STARTUP = 0.2
 		task.delay(0.4, function() --Slowed and Endlag
 			char:SetAttribute("UsingAttack", false)
-			--print('Attributes set to false')
+			print("UsingAttack set to false")
 		end)
 	else
 		STARTUP = 0.15
 		task.delay(0.35, function() --Slowed and Endlag
 			char:SetAttribute("UsingAttack", false)
-			--print('Attributes set to false')
+			print("UsingAttack set to false")
 		end)
 	end
 
 	--	Handle Slowed
 	if combo >= 5 then --Is the attack the last one?
 		if hitType == "Sharp" then
-			task.delay(0.3, function() --Slowed
+			task.delay(0.35, function() --Slowed
 				char:SetAttribute("Slowed", false)
-				--print('Attributes set to false')
+				print("Slowed set to false")
 			end)
 		else
-			task.delay(0.25, function() --Slowed
+			task.delay(0.3, function() --Slowed
 				char:SetAttribute("Slowed", false)
-				--print('Attributes set to false')
+				print("Slowed set to false")
 			end)
 		end
 	else --The attack is not the last one
 		if hitType == "Sharp" then
-			task.delay(0.2, function() --Slowed
+			task.delay(0.4, function() --Slowed
 				char:SetAttribute("Slowed", false)
-				--print('Attributes set to false')
+				print("Slowed set to false")
 			end)
 		else
-			task.delay(0.15, function() --Slowed
+			task.delay(0.35, function() --Slowed
 				char:SetAttribute("Slowed", false)
-				--print('Attributes set to false')
+				print("Slowed set to false")
 			end)
 		end
 	end

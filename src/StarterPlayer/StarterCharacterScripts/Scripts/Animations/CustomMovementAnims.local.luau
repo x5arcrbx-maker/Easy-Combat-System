@@ -72,9 +72,9 @@ end
 local function onRunning(speed: number)
 	if speed > RUN_THRESHOLD and hum.MoveDirection.Magnitude > 0 then
 		playRun()
-		if currentRunTrack then
-			currentRunTrack:AdjustSpeed(speed / RUN_THRESHOLD)
-		end
+		-- if currentRunTrack then
+		currentRunTrack:AdjustSpeed(1)
+		-- end
 	elseif speed > 1 and hum.MoveDirection.Magnitude > 0 then
 		playWalk(speed)
 		--if walkTrack then
@@ -92,7 +92,7 @@ hum.Running:Connect(onRunning) --onRunning function when humanoid runs
 hum.Jumping:Connect(stopAll)
 hum.Climbing:Connect(stopAll)
 hum.Swimming:Connect(stopAll)
-hum.Died:Connect(stopAll) 
+hum.Died:Connect(stopAll)
 stopAll() --Stop animations on spawn
 
 char.ChildAdded:Connect(function()
