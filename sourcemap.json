@@ -1,0 +1,88 @@
+{
+  "name": "game",
+  "className": "DataModel",
+  "children": [
+    {
+      "name": "StarterPlayer",
+      "className": "StarterPlayer",
+      "pluginManaged": true,
+      "children": [
+        {
+          "name": "StarterCharacterScripts",
+          "className": "StarterCharacterScripts",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "Loader",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "GameCharacterLoader",
+                  "className": "LocalScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Loader/GameCharacterLoader.local.luau"
+                  ]
+                },
+                {
+                  "name": "GameCharacterObj",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Loader/GameCharacterObj.luau"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ServerScriptService",
+      "className": "ServerScriptService",
+      "pluginManaged": true,
+      "children": [
+        {
+          "name": "Scripts",
+          "className": "Folder",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "ServerAttackListener",
+              "className": "Script",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Scripts/ServerAttackListener.legacy.luau"
+              ]
+            },
+            {
+              "name": "CharacterAttributes",
+              "className": "Script",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Scripts/CharacterAttributes.legacy.luau"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Modules",
+          "className": "Folder",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "HitHandler",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Modules/HitHandler.luau"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
