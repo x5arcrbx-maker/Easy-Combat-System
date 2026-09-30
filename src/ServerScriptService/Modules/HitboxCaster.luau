@@ -3,7 +3,14 @@ local HitManager = require(Modules:WaitForChild("HitManager"))
 
 local HitboxCaster = {}
 
-HitboxCaster.castRectangleHitbox = function(character, cframe: CFrame, hitboxSize: Vector3, damage: number)
+HitboxCaster.castRectangleHitbox = function(
+	character,
+	cframe: CFrame,
+	hitboxSize: Vector3,
+	damage: number,
+	force: number,
+	forceTime: number
+)
 	local params = OverlapParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	params:AddToFilter(character)
@@ -16,7 +23,7 @@ HitboxCaster.castRectangleHitbox = function(character, cframe: CFrame, hitboxSiz
 			end
 			local hitCharacter = part:FindFirstAncestorOfClass("Model")
 			if hitCharacter and hitCharacter ~= character then
-				HitManager.TryHit(character, hitCharacter, damage)
+				HitManager.TryHit(character, hitCharacter, force, forceTime, damage)
 			end
 		end
 	end

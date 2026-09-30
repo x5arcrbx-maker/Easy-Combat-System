@@ -3,12 +3,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
 -- MODULES
-local modules = ServerScriptService:WaitForChild("Modules")
-local skillsLibrary = require(modules:WaitForChild("SkillsLibrary"))
+local modules = ServerScriptService:FindFirstChild("Modules")
+-- local hitManager = require(modules:FindFirstChild("HitManager"))
+local skillsLibrary = require(modules:FindFirstChild("SkillsLibrary"))
 
 -- REMOTES
-local remotesFolder = ReplicatedStorage:WaitForChild("Remotes")
-local attackCharacter_remote = remotesFolder:WaitForChild("CharacterAttack")
+local remotesFolder = ReplicatedStorage:FindFirstChild("Remotes")
+local attackCharacter_remote = remotesFolder:FindFirstChild("CharacterAttack")
 
 -- VARIABLES
 
