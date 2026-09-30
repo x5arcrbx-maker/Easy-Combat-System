@@ -4,48 +4,34 @@ local ServerScriptService = game:GetService("ServerScriptService")
 
 -- MODULES
 local modules = ServerScriptService:WaitForChild("Modules")
-local HitHandler = require(modules:WaitForChild("HitHandler"))
+local skillsLibrary = require(modules:WaitForChild("SkillsLibrary"))
 
 -- REMOTES
 local remotesFolder = ReplicatedStorage:WaitForChild("Remotes")
 local attackCharacter_remote = remotesFolder:WaitForChild("CharacterAttack")
 
 -- VARIABLES
-local lightAtkHitbox: Vector3 = Vector3.new(4, 4, 5)
-local heavyAtkHitbox: Vector3 = Vector3.new(7, 7, 8)
 
 -- FUNCTIONS
-local function castHitbox(character, cframe: CFrame, hitboxSize: Vector3)
-	local params = OverlapParams.new()
-	params.FilterType = Enum.RaycastFilterType.Exclude
-	params:AddToFilter(character)
-	local new_cframe = cframe * CFrame.new(0, 0, -hitboxSize.Z / 2) --place hitbox infront of character
-	local hitParts = workspace:GetPartBoundsInBox(new_cframe, hitboxSize, params)
-	if hitParts then
-		for _, part in pairs(hitParts) do
-			local hitCharacter = part:FindFirstAncestorOfClass("Model")
-			if hitCharacter and hitCharacter ~= character then
-				HitHandler.TryHit(character, hitCharacter)
-			end
-		end
-	end
+local function attackExistsInLibrary(attack: string): boolean
+	return skillsLibrary.standardAttacks[attack] ~= nil
 end
 
-local standardAttacks = {
-	Light = function(character: Model, rootPart: BasePart)
-		castHitbox(character, rootPart.CFrame, lightAtkHitbox)
-	end,
-	Heavy = function(character: Model, rootPart: BasePart)
-		castHitbox(character, rootPart.CFrame, heavyAtkHitbox)
-	end,
-}
+attackCharacter_remote.OnServerEvent:Connect(function(player, attack: string)
+	if not attackExistsInLibrary(attack) then
+		warn("Invalid attack:", attack, "from player:", player.Name)
+		return
+	end
 
-attackCharacter_remote.OnServerEvent:Connect(function(player, attackType: string)
-	local character = player.Character
-	if character and standardAttacks[attackType] then
-		local rootPart = character:FindFirstChild("HumanoidRootPart")
+	local character = player.Character :: Model?
+	if character then
+		local rootPart = character:FindFirstChild("HumanoidRootPart") :: BasePart
 		if rootPart then
-			standardAttacks[attackType](character, rootPart)
+			skillsLibrary.standardAttacks[attack].trigger(character, rootPart)
+		else
+			warn("Root part not found for player:", player.Name)
 		end
+	else
+		warn("Invalid attack type or character not found for player:", player.Name)
 	end
 end)

@@ -3,43 +3,6 @@
   "className": "DataModel",
   "children": [
     {
-      "name": "StarterPlayer",
-      "className": "StarterPlayer",
-      "pluginManaged": true,
-      "children": [
-        {
-          "name": "StarterCharacterScripts",
-          "className": "StarterCharacterScripts",
-          "pluginManaged": true,
-          "children": [
-            {
-              "name": "Loader",
-              "className": "Folder",
-              "pluginManaged": true,
-              "children": [
-                {
-                  "name": "GameCharacterLoader",
-                  "className": "LocalScript",
-                  "pluginManaged": true,
-                  "filePaths": [
-                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Loader/GameCharacterLoader.local.luau"
-                  ]
-                },
-                {
-                  "name": "GameCharacterObj",
-                  "className": "ModuleScript",
-                  "pluginManaged": true,
-                  "filePaths": [
-                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Loader/GameCharacterObj.luau"
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
       "name": "ServerScriptService",
       "className": "ServerScriptService",
       "pluginManaged": true,
@@ -73,11 +36,35 @@
           "pluginManaged": true,
           "children": [
             {
-              "name": "HitHandler",
+              "name": "HitboxCaster",
               "className": "ModuleScript",
               "pluginManaged": true,
               "filePaths": [
-                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Modules/HitHandler.luau"
+                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Modules/HitboxCaster.luau"
+              ]
+            },
+            {
+              "name": "HitManager",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Modules/HitManager.luau"
+              ]
+            },
+            {
+              "name": "KnockbackHandler",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Modules/KnockbackHandler.luau"
+              ]
+            },
+            {
+              "name": "SkillsLibrary",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Modules/SkillsLibrary.luau"
               ]
             }
           ]

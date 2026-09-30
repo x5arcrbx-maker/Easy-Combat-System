@@ -1,0 +1,3 @@
+local KnockbackHandler = {}
+
+return KnockbackHandler
