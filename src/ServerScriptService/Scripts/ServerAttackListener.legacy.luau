@@ -2,16 +2,17 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
+-- VARIABLES
+local SSS_Modules = ServerScriptService:FindFirstChild("Modules")
+local RS_Modules = ReplicatedStorage:FindFirstChild("Modules")
+
 -- MODULES
-local modules = ServerScriptService:FindFirstChild("Modules")
--- local hitManager = require(modules:FindFirstChild("HitManager"))
-local skillsLibrary = require(modules:FindFirstChild("SkillsLibrary"))
+local allowedToAttack = require(RS_Modules:FindFirstChild("AllowedToAttack"))
+local skillsLibrary = require(SSS_Modules:FindFirstChild("SkillsLibrary"))
 
 -- REMOTES
 local remotesFolder = ReplicatedStorage:FindFirstChild("Remotes")
 local attackCharacter_remote = remotesFolder:FindFirstChild("CharacterAttack")
-
--- VARIABLES
 
 -- FUNCTIONS
 local function attackExistsInLibrary(attack: string): boolean
@@ -26,6 +27,10 @@ attackCharacter_remote.OnServerEvent:Connect(function(player, attack: string)
 
 	local character = player.Character :: Model?
 	if character then
+		if not allowedToAttack(character) then
+			-- warn("Player is stunned or incapacitated:", player.Name)
+			return
+		end
 		local rootPart = character:FindFirstChild("HumanoidRootPart") :: BasePart
 		if rootPart then
 			skillsLibrary.standardAttacks[attack].trigger(character, rootPart)

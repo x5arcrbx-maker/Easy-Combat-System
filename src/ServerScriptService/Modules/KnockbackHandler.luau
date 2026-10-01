@@ -2,7 +2,7 @@ local Debris = game:GetService("Debris")
 
 local KnockbackHandler = {}
 
-function KnockbackHandler.ApplyKnockback(attacker: Model, target: Model, Force: number, Time: number)
+function KnockbackHandler:Apply(attacker: Model, target: Model, Force: number, Time: number)
 	local targetHumanoidRootPart: BasePart = target:FindFirstChild("HumanoidRootPart")
 	if not targetHumanoidRootPart then
 		warn("Target does not have a HumanoidRootPart. Cannot apply knockback.")

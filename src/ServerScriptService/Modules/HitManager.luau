@@ -1,9 +1,19 @@
 local Modules = script.Parent
 local KnockbackHandler = require(Modules:FindFirstChild("KnockbackHandler"))
-
+local StunHandler = require(Modules:FindFirstChild("StunHandler"))
 local HitManager = {}
 
-function HitManager.TryHit(attacker: Model, target: Model, force: number, forceTime: number, damage: number)
+function HitManager.TryHit(
+	attacker: Model,
+	target: Model,
+	damage: number,
+	stunTime_self: number,
+	stunTime_target: number,
+	stunType_self: string,
+	stunType_target: string,
+	force: number,
+	forceTime: number
+)
 	local targetHumanoid = target:FindFirstChildOfClass("Humanoid")
 	if not targetHumanoid then
 		return
@@ -13,32 +23,56 @@ function HitManager.TryHit(attacker: Model, target: Model, force: number, forceT
 		return
 	end
 
-	if not force then
-		warn("Force is nil. Cannot process hit.")
-		return
-	elseif type(force) ~= "number" then
-		warn("Force is not a number. Cannot process hit.")
-		return
+	local arguments = {
+		Model = {
+			attacker,
+			target,
+		},
+		number = {
+			damage,
+			stunTime_self,
+			stunTime_target,
+			force,
+			forceTime,
+		},
+		string = {
+			stunType_self,
+			stunType_target,
+		},
+	}
+	for _, arg in ipairs(arguments.Model) do
+		if arg == nil then
+			warn("One or more arguments (type Model) are nil. Cannot process hit.")
+			return
+		elseif not arg:IsA("Model") then
+			warn("One or more arguments (type Model) are not of type Model. Cannot process hit.")
+			return
+		end
 	end
-	if not forceTime then
-		warn("Force time is nil. Cannot process hit.")
-		return
-	elseif type(forceTime) ~= "number" then
-		warn("Force time is not a number. Cannot process hit.")
-		return
+	for _, arg in ipairs(arguments.number) do
+		if arg == nil then
+			warn("One or more arguments (type Number) are nil. Cannot process hit.")
+			return
+		elseif type(arg) ~= "number" then
+			warn("One or more arguments (type Number) are not of type number. Cannot process hit.")
+			return
+		end
 	end
-	if not damage then
-		warn("Damage is nil. Cannot process hit.")
-		return
-	elseif type(damage) ~= "number" then
-		warn("Damage is not a number. Cannot process hit.")
-		return
+	for _, arg in ipairs(arguments.string) do
+		if arg == nil then
+			warn("One or more arguments (type String) are nil. Cannot process hit.")
+			return
+		elseif type(arg) ~= "string" then
+			warn("One or more arguments (type String) are not of type string. Cannot process hit.")
+			return
+		end
 	end
 
 	--Proceed with attack logic
 	-- print(attacker.Name .. " hit " .. target.Name .. " for " .. damage .. " damage.")
 	-- print("BEFORE HIT - Attacker Health: " .. attackerHumanoid.Health .. ", Target Health: " .. targetHumanoid.Health)
-	KnockbackHandler.ApplyKnockback(attacker, target, force, forceTime)
+	KnockbackHandler:Apply(attacker, target, force, forceTime)
+	StunHandler:Apply(attacker, target, stunTime_self, stunTime_target, stunType_self, stunType_target)
 	targetHumanoid:TakeDamage(damage)
 	-- print("AFTER HIT - Attacker Health: " .. attackerHumanoid.Health .. ", Target Health: " .. targetHumanoid.Health)
 end

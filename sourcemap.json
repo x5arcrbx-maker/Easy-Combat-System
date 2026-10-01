@@ -22,10 +22,17 @@
             },
             {
               "name": "CharacterAttributes",
-              "className": "Script",
+              "className": "Folder",
               "pluginManaged": true,
-              "filePaths": [
-                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Scripts/CharacterAttributes.legacy.luau"
+              "children": [
+                {
+                  "name": "AttributeHandler",
+                  "className": "Script",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Scripts/CharacterAttributes/AttributeHandler.legacy.luau"
+                  ]
+                }
               ]
             }
           ]
@@ -65,6 +72,119 @@
               "pluginManaged": true,
               "filePaths": [
                 "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Modules/SkillsLibrary.luau"
+              ]
+            },
+            {
+              "name": "StunHandler",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Modules/StunHandler.luau"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "StarterPlayer",
+      "className": "StarterPlayer",
+      "pluginManaged": true,
+      "children": [
+        {
+          "name": "StarterCharacterScripts",
+          "className": "StarterCharacterScripts",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "Loader",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "GameCharacterLoader",
+                  "className": "LocalScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Loader/GameCharacterLoader.local.luau"
+                  ]
+                },
+                {
+                  "name": "GameCharacterObj",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Loader/GameCharacterObj.luau"
+                  ]
+                },
+                {
+                  "name": "Controls",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Loader/Controls.luau"
+                  ]
+                },
+                {
+                  "name": "Animations",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Loader/Animations.luau"
+                  ]
+                },
+                {
+                  "name": "Combo",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Loader/Combo.luau"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ReplicatedStorage",
+      "className": "ReplicatedStorage",
+      "pluginManaged": true,
+      "children": [
+        {
+          "name": "Tables",
+          "className": "Folder",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "Dictionaries",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "Attributes",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Tables/Dictionaries/Attributes.luau"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Modules",
+          "className": "Folder",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "AllowedToAttack",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/AllowedToAttack.luau"
               ]
             }
           ]

@@ -8,6 +8,10 @@ HitboxCaster.castRectangleHitbox = function(
 	cframe: CFrame,
 	hitboxSize: Vector3,
 	damage: number,
+	stunTime_self: number,
+	stunTime_target: number,
+	stunType_self: string,
+	stunType_target: string,
 	force: number,
 	forceTime: number
 )
@@ -23,7 +27,17 @@ HitboxCaster.castRectangleHitbox = function(
 			end
 			local hitCharacter = part:FindFirstAncestorOfClass("Model")
 			if hitCharacter and hitCharacter ~= character then
-				HitManager.TryHit(character, hitCharacter, force, forceTime, damage)
+				HitManager.TryHit(
+					character,
+					hitCharacter,
+					damage,
+					stunTime_self,
+					stunTime_target,
+					stunType_self,
+					stunType_target,
+					force,
+					forceTime
+				)
 			end
 		end
 	end
