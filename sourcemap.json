@@ -3,6 +3,57 @@
   "className": "DataModel",
   "children": [
     {
+      "name": "ReplicatedStorage",
+      "className": "ReplicatedStorage",
+      "pluginManaged": true,
+      "children": [
+        {
+          "name": "Modules",
+          "className": "Folder",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "Functions",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "AllowedToAttack",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Functions/AllowedToAttack.luau"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Tables",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "Dictionaries",
+                  "className": "Folder",
+                  "pluginManaged": true,
+                  "children": [
+                    {
+                      "name": "Attributes",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Tables/Dictionaries/Attributes.luau"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "ServerScriptService",
       "className": "ServerScriptService",
       "pluginManaged": true,
@@ -81,49 +132,44 @@
               "filePaths": [
                 "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Modules/StunHandler.luau"
               ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "ReplicatedStorage",
-      "className": "ReplicatedStorage",
-      "pluginManaged": true,
-      "children": [
-        {
-          "name": "Tables",
-          "className": "Folder",
-          "pluginManaged": true,
-          "children": [
+            },
             {
-              "name": "Dictionaries",
+              "name": "R6Ragdoll",
               "className": "Folder",
               "pluginManaged": true,
               "children": [
                 {
-                  "name": "Attributes",
+                  "name": "Client",
+                  "className": "LocalScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Modules/R6Ragdoll/Client.local.luau"
+                  ]
+                },
+                {
+                  "name": "Events",
+                  "className": "Script",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Modules/R6Ragdoll/Events.legacy.luau"
+                  ]
+                },
+                {
+                  "name": "Functions",
                   "className": "ModuleScript",
                   "pluginManaged": true,
                   "filePaths": [
-                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Tables/Dictionaries/Attributes.luau"
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Modules/R6Ragdoll/Functions.luau"
                   ]
                 }
               ]
-            }
-          ]
-        },
-        {
-          "name": "Modules",
-          "className": "Folder",
-          "pluginManaged": true,
-          "children": [
+            },
             {
-              "name": "AllowedToAttack",
+              "name": "ClashHandler",
               "className": "ModuleScript",
               "pluginManaged": true,
               "filePaths": [
-                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/AllowedToAttack.luau"
+                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Modules/ClashHandler.luau"
               ]
             }
           ]

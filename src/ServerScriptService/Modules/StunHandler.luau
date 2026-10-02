@@ -54,32 +54,38 @@ function StunHandler:Apply(character: Model, stunTime: number, stunType: string)
 			string = { stunType },
 		}
 
-		for _, arg in ipairs(arguments.Model) do
+		for argName, arg in ipairs(arguments.Model) do
 			if arg == nil then
 				warn("One or more arguments (type Model) are nil. Cannot apply stun.")
+				warn(string.format("Name (%*) : Value (%*)", argName, arg))
 				return
 			elseif not arg:IsA("Model") then
 				warn("One or more arguments (type Model) are not of type Model. Cannot apply stun.")
+				warn(string.format("Name (%*) : Value (%*)", argName, arg))
 				return
 			end
 		end
 
-		for _, arg in ipairs(arguments.number) do
+		for argName, arg in ipairs(arguments.number) do
 			if arg == nil then
 				warn("One or more arguments (type number) are nil. Cannot apply stun.")
+				warn(string.format("Name (%*) : Value (%*)", argName, arg))
 				return
 			elseif type(arg) ~= "number" then
 				warn("One or more arguments (type number) are not of type number. Cannot apply stun.")
+				warn(string.format("Name (%*) : Value (%*)", argName, arg))
 				return
 			end
 		end
 
-		for _, arg in ipairs(arguments.string) do
+		for argName, arg in ipairs(arguments.string) do
 			if arg == nil then
 				warn("One or more arguments (type string) are nil. Cannot apply stun.")
+				warn(string.format("Name (%*) : Value (%*)", argName, arg))
 				return
 			elseif type(arg) ~= "string" then
 				warn("One or more arguments (type string) are not of type string. Cannot apply stun.")
+				warn(string.format("Name (%*) : Value (%*)", argName, arg))
 				return
 			end
 		end

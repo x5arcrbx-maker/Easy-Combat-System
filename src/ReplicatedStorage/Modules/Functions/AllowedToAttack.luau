@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local tablesFolder = ReplicatedStorage:FindFirstChild("Tables")
+local RS_Modules = ReplicatedStorage:FindFirstChild("Modules")
+local tablesFolder = RS_Modules:FindFirstChild("Tables")
 local dictionariesFolder = tablesFolder:FindFirstChild("Dictionaries")
 local attributesModule = dictionariesFolder:FindFirstChild("Attributes")
 local attributes = require(attributesModule)

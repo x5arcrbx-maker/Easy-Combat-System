@@ -5,9 +5,10 @@ local ServerScriptService = game:GetService("ServerScriptService")
 -- VARIABLES
 local SSS_Modules = ServerScriptService:FindFirstChild("Modules")
 local RS_Modules = ReplicatedStorage:FindFirstChild("Modules")
+local RS_Functions = RS_Modules:FindFirstChild("Functions")
 
 -- MODULES
-local allowedToAttack = require(RS_Modules:FindFirstChild("AllowedToAttack"))
+local allowedToAttack = require(RS_Functions:FindFirstChild("AllowedToAttack"))
 local skillsLibrary = require(SSS_Modules:FindFirstChild("SkillsLibrary"))
 
 -- REMOTES

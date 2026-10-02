@@ -3,11 +3,13 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- VARIABLES
+local RS_Modules = ReplicatedStorage:FindFirstChild("Modules") :: Folder
+--
 local connections = {
 	players = {},
 }
 --
-local attributesModule = ReplicatedStorage.Tables.Dictionaries.Attributes
+local attributesModule = RS_Modules.Tables.Dictionaries.Attributes
 
 -- MODULES
 local attributes = require(attributesModule)

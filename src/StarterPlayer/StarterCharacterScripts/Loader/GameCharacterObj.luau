@@ -1,31 +1,34 @@
 -- SERVICES
 local ContextActionService = game:GetService("ContextActionService")
-local DebuggerConnectionManager = game:GetService("DebuggerConnectionManager")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local UserInputService = game:GetService("UserInputService")
+local _UserInputService = game:GetService("UserInputService")
 
 -- VARIABLES
 local player = Players.LocalPlayer :: Player
 local character = player.Character or player.CharacterAdded:Wait() :: Model
 local humanoid = character:WaitForChild("Humanoid") :: Humanoid
 local animator = humanoid:WaitForChild("Animator") :: Animator
-local Loader = script.Parent
 --
-local remotesFolder = ReplicatedStorage:WaitForChild("Remotes")
+local playingTrack_LightAttack: AnimationTrack?
+local playingTrack_HeavyAttack: AnimationTrack?
+--
+local Loader = script.Parent :: Folder
+local remotesFolder = ReplicatedStorage:WaitForChild("Remotes") :: Folder
+local RS_Modules = ReplicatedStorage:FindFirstChild("Modules") :: Folder
+local RS_Functions = RS_Modules:FindFirstChild("Functions")
+local tablesFolder = RS_Modules:FindFirstChild("Tables") :: Folder
+local dictionariesFolder = tablesFolder:FindFirstChild("Dictionaries") :: Folder
+local attributesModule = dictionariesFolder:FindFirstChild("Attributes") :: Folder
 --
 local controlsModule = Loader:WaitForChild("Controls")
 local animationsModule = Loader:WaitForChild("Animations")
 local comboModule = Loader:WaitForChild("Combo")
-local RS_Modules = ReplicatedStorage:FindFirstChild("Modules")
-local tablesFolder = ReplicatedStorage:FindFirstChild("Tables")
-local dictionariesFolder = tablesFolder:FindFirstChild("Dictionaries")
-local attributesModule = dictionariesFolder:FindFirstChild("Attributes")
 --
 local debounce: boolean = false
 
 -- MODULES
-local allowedToAttack = require(RS_Modules:FindFirstChild("AllowedToAttack"))
+local allowedToAttack = require(RS_Functions:FindFirstChild("AllowedToAttack"))
 local animations = require(animationsModule)
 local attributes = require(attributesModule)
 local combo = require(comboModule)
@@ -117,34 +120,54 @@ function GameCharacterObj:Init()
 		init_Animations()
 
 		local function init_AttackControls()
+			self.Combo.ResetTime = character:GetAttribute("ComboResetTime")
+			self.Combo.LastHitTime = character:GetAttribute("ComboLastHit")
+
 			local function tryLightAttack(
 				actionName: string,
 				inputState: Enum.UserInputState,
 				inputObject: InputObject
 			): Enum.ContextActionResult
-				if inputState == Enum.UserInputState.Begin then
-					local attackType: string = "Light"
-					if not self:TryAttack(attackType) or debounce then
-						return Enum.ContextActionResult.Pass
-					end
-					if (tick() - self.Combo.LastHitTime >= self.Combo.ResetTime) or ((self.Combo.Amount + 1) > 5) then
-						self.Combo.Amount = 1
-					else
-						self.Combo.Amount = math.min(self.Combo.Amount + 1, #lightAnims)
-					end
-					self.Combo.LastHitTime = tick()
-
-					local index: number = self.Combo.Amount
-					local animToPlay = lightAnims[index]
-					if animToPlay and not animToPlay.IsPlaying then
-						animToPlay:Play()
-						print(string.format("Playing light attack animation (combo amount: %d)", index))
-					else
-						warn(string.format("No animation found for light attack (combo amount: %d)", index))
-					end
-					return Enum.ContextActionResult.Sink
+				-- Safety checks
+				if inputState ~= Enum.UserInputState.Begin then
+					return Enum.ContextActionResult.Pass
 				end
-				return Enum.ContextActionResult.Pass
+				local attackType: string = "Light"
+				if debounce or not self:TryAttack(attackType) then
+					return Enum.ContextActionResult.Pass
+				end
+
+				debounce = true
+				if ((tick() - self.Combo.LastHitTime) >= self.Combo.ResetTime) or ((self.Combo.Amount + 1) > 5) then
+					self.Combo.Amount = 1
+				else
+					self.Combo.Amount = math.min(self.Combo.Amount + 1, #lightAnims)
+				end
+				self.Combo.LastHitTime = tick()
+
+				local index: number = self.Combo.Amount
+				local animTrack: AnimationTrack = lightAnims[index]
+				if animTrack then
+					if playingTrack_LightAttack and playingTrack_LightAttack ~= animTrack then
+						playingTrack_LightAttack:Stop()
+						playingTrack_LightAttack:Destroy()
+						playingTrack_LightAttack = nil
+					end
+					playingTrack_LightAttack = animTrack
+					animTrack:Play()
+					animTrack:GetMarkerReachedSignal("Ended"):Once(function()
+						debounce = false
+					end)
+					animTrack.Stopped:Connect(function()
+						if playingTrack_LightAttack == animTrack then
+							playingTrack_LightAttack = nil
+						end
+					end)
+					print(string.format("Playing light attack animation (combo amount: %d)", index))
+				else
+					warn(string.format("No animation found for light attack (combo amount: %d)", index))
+				end
+				return Enum.ContextActionResult.Sink
 			end
 
 			local function tryHeavyAttack(
@@ -152,21 +175,36 @@ function GameCharacterObj:Init()
 				inputState: Enum.UserInputState,
 				inputObject: InputObject
 			): Enum.ContextActionResult
-				if inputState == Enum.UserInputState.Begin then
-					local attackType: string = "Heavy"
-					if not self:TryAttack(attackType) or debounce then
-						return Enum.ContextActionResult.Pass
-					end
-					local index = math.random(1, #heavyAnims)
-					local animToPlay = heavyAnims[index]
-					if animToPlay and not animToPlay.IsPlaying then
-						animToPlay:Play()
-					else
-						warn(string.format("No animation found for heavy attack (index: %d)", index))
-					end
-					return Enum.ContextActionResult.Sink
+				-- Safety checks
+				if inputState ~= Enum.UserInputState.Begin then
+					return Enum.ContextActionResult.Pass
 				end
-				return Enum.ContextActionResult.Pass
+				local attackType: string = "Heavy"
+				if debounce or not self:TryAttack(attackType) then
+					return Enum.ContextActionResult.Pass
+				end
+
+				debounce = true
+				local index = math.random(1, #heavyAnims)
+				local animTrack = heavyAnims[index]
+				if animTrack then
+					if playingTrack_HeavyAttack and playingTrack_HeavyAttack ~= animTrack then
+						playingTrack_HeavyAttack:Stop()
+						playingTrack_HeavyAttack:Destroy()
+						playingTrack_HeavyAttack = nil
+					end
+					playingTrack_HeavyAttack = animTrack
+					animTrack:Play()
+					animTrack.Stopped:Connect(function()
+						if playingTrack_HeavyAttack == animTrack then
+							playingTrack_HeavyAttack = nil
+						end
+						debounce = false
+					end)
+				else
+					warn(string.format("No animation found for heavy attack (index: %d)", index))
+				end
+				return Enum.ContextActionResult.Sink
 			end
 
 			local createTouchButton_LightAtk = false
