@@ -87,6 +87,50 @@
       ]
     },
     {
+      "name": "ReplicatedStorage",
+      "className": "ReplicatedStorage",
+      "pluginManaged": true,
+      "children": [
+        {
+          "name": "Tables",
+          "className": "Folder",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "Dictionaries",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "Attributes",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Tables/Dictionaries/Attributes.luau"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Modules",
+          "className": "Folder",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "AllowedToAttack",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/AllowedToAttack.luau"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "StarterPlayer",
       "className": "StarterPlayer",
       "pluginManaged": true,
@@ -141,50 +185,6 @@
                     "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Loader/Combo.luau"
                   ]
                 }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "ReplicatedStorage",
-      "className": "ReplicatedStorage",
-      "pluginManaged": true,
-      "children": [
-        {
-          "name": "Tables",
-          "className": "Folder",
-          "pluginManaged": true,
-          "children": [
-            {
-              "name": "Dictionaries",
-              "className": "Folder",
-              "pluginManaged": true,
-              "children": [
-                {
-                  "name": "Attributes",
-                  "className": "ModuleScript",
-                  "pluginManaged": true,
-                  "filePaths": [
-                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Tables/Dictionaries/Attributes.luau"
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "name": "Modules",
-          "className": "Folder",
-          "pluginManaged": true,
-          "children": [
-            {
-              "name": "AllowedToAttack",
-              "className": "ModuleScript",
-              "pluginManaged": true,
-              "filePaths": [
-                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/AllowedToAttack.luau"
               ]
             }
           ]

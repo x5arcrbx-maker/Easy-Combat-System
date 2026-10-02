@@ -1,3 +1,19 @@
+local function LoadAnim(
+	folder: Folder,
+	index: number,
+	animator: Animator,
+	priority: Enum.AnimationPriority
+): AnimationTrack
+	local animation = folder:FindFirstChild(tostring(index))
+	if not animation then
+		warn(string.format("Animation with index %d not found in folder %s", index, folder:GetFullName()))
+		return nil
+	end
+	local animationTrack: AnimationTrack = animator:LoadAnimation(animation :: Animation)
+	animationTrack.Priority = priority or Enum.AnimationPriority.Action
+	return animationTrack
+end
+
 return function(character: Model): { Light: { Animation }, Heavy: { Animation } }
 	if not character then
 		warn("Character is nil. Cannot load animations.")
@@ -22,17 +38,23 @@ return function(character: Model): { Light: { Animation }, Heavy: { Animation } 
 	local lightTracks = {}
 	local heavyTracks = {}
 
-	for _, animation in ipairs(light_Basic_Animations) do
-		local animationTrack: AnimationTrack = animator:LoadAnimation(animation :: Animation)
-		animationTrack.Priority = Enum.AnimationPriority.Action
-		table.insert(lightTracks, animationTrack)
+	for i = 1, #light_Basic_Animations do
+		lightTracks[i] = LoadAnim(light_Basic_Animations_Folder, i, animator, Enum.AnimationPriority.Action)
 	end
 
-	for _, animation in ipairs(heavy_Basic_Animations) do
-		local animationTrack: AnimationTrack = animator:LoadAnimation(animation :: Animation)
-		animationTrack.Priority = Enum.AnimationPriority.Action
-		table.insert(heavyTracks, animationTrack)
+	for i = 1, #heavy_Basic_Animations do
+		heavyTracks[i] = LoadAnim(heavy_Basic_Animations_Folder, i, animator, Enum.AnimationPriority.Action)
 	end
+
+	print("List of light animation tracks:")
+	for i, track in ipairs(lightTracks) do
+		print(string.format("  Track %d: %s", i, track.Animation.Name))
+	end
+	print("List of heavy animation tracks:")
+	for i, track in ipairs(heavyTracks) do
+		print(string.format("  Track %d: %s", i, track.Animation.Name))
+	end
+
 	return {
 		Light = lightTracks,
 		Heavy = heavyTracks,

@@ -12,7 +12,8 @@ function HitManager.TryHit(
 	stunType_self: string,
 	stunType_target: string,
 	force: number,
-	forceTime: number
+	forceTime: number,
+	direction: string
 )
 	local targetHumanoid = target:FindFirstChildOfClass("Humanoid")
 	if not targetHumanoid then
@@ -38,6 +39,7 @@ function HitManager.TryHit(
 		string = {
 			stunType_self,
 			stunType_target,
+			direction,
 		},
 	}
 	for _, arg in ipairs(arguments.Model) do
@@ -71,8 +73,8 @@ function HitManager.TryHit(
 	--Proceed with attack logic
 	-- print(attacker.Name .. " hit " .. target.Name .. " for " .. damage .. " damage.")
 	-- print("BEFORE HIT - Attacker Health: " .. attackerHumanoid.Health .. ", Target Health: " .. targetHumanoid.Health)
-	KnockbackHandler:Apply(attacker, target, force, forceTime)
-	StunHandler:Apply(attacker, target, stunTime_self, stunTime_target, stunType_self, stunType_target)
+	KnockbackHandler:Apply(attacker, target, force, forceTime, direction)
+	StunHandler:Apply(target, stunTime_target, stunType_target)
 	targetHumanoid:TakeDamage(damage)
 	-- print("AFTER HIT - Attacker Health: " .. attackerHumanoid.Health .. ", Target Health: " .. targetHumanoid.Health)
 end

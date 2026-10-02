@@ -5,7 +5,10 @@ local SkillsLibrary = {}
 
 SkillsLibrary.standardAttacks = {
 	Light = {
-		hitbox = Vector3.new(4, 4, 5),
+		Hitbox = {
+			Size = Vector3.new(5, 6, 5),
+			Shape = "Rectangle",
+		},
 		Damage = 4,
 		StunTime_self = 0.4,
 		StunTime_target = 0.7,
@@ -13,23 +16,29 @@ SkillsLibrary.standardAttacks = {
 		StunType_target = "Stunned",
 		Force = 30,
 		ForceTime = 0.1,
+		Direction = "Push",
 		trigger = function(character: Model, rootPart: BasePart)
-			HitboxCaster.castRectangleHitbox(
+			HitboxCaster.TryCast(
+				SkillsLibrary.standardAttacks.Light.Hitbox.Shape,
 				character,
 				rootPart.CFrame,
-				SkillsLibrary.standardAttacks.Light.hitbox,
+				SkillsLibrary.standardAttacks.Light.Hitbox.Size,
 				SkillsLibrary.standardAttacks.Light.Damage,
 				SkillsLibrary.standardAttacks.Light.StunTime_self,
 				SkillsLibrary.standardAttacks.Light.StunTime_target,
 				SkillsLibrary.standardAttacks.Light.StunType_self,
 				SkillsLibrary.standardAttacks.Light.StunType_target,
 				SkillsLibrary.standardAttacks.Light.Force,
-				SkillsLibrary.standardAttacks.Light.ForceTime
+				SkillsLibrary.standardAttacks.Light.ForceTime,
+				SkillsLibrary.standardAttacks.Light.Direction
 			)
 		end,
 	},
 	Heavy = {
-		hitbox = Vector3.new(7, 7, 8),
+		Hitbox = {
+			Size = Vector3.new(5.5, 7, 8),
+			Shape = "Rectangle",
+		},
 		Damage = 8,
 		StunTime_self = 1,
 		StunTime_target = 2,
@@ -37,18 +46,21 @@ SkillsLibrary.standardAttacks = {
 		StunType_target = "Stunned",
 		Force = 50,
 		ForceTime = 0.2,
+		Direction = "Push",
 		trigger = function(character: Model, rootPart: BasePart)
-			HitboxCaster.castRectangleHitbox(
+			HitboxCaster.TryCast(
+				SkillsLibrary.standardAttacks.Heavy.Hitbox.Shape,
 				character,
 				rootPart.CFrame,
-				SkillsLibrary.standardAttacks.Heavy.hitbox,
+				SkillsLibrary.standardAttacks.Heavy.Hitbox.Size,
 				SkillsLibrary.standardAttacks.Heavy.Damage,
 				SkillsLibrary.standardAttacks.Heavy.StunTime_self,
 				SkillsLibrary.standardAttacks.Heavy.StunTime_target,
 				SkillsLibrary.standardAttacks.Heavy.StunType_self,
 				SkillsLibrary.standardAttacks.Heavy.StunType_target,
 				SkillsLibrary.standardAttacks.Heavy.Force,
-				SkillsLibrary.standardAttacks.Heavy.ForceTime
+				SkillsLibrary.standardAttacks.Heavy.ForceTime,
+				SkillsLibrary.standardAttacks.Heavy.Direction
 			)
 		end,
 	},

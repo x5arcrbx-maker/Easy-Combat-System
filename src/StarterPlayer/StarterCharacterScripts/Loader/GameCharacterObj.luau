@@ -1,5 +1,6 @@
 -- SERVICES
 local ContextActionService = game:GetService("ContextActionService")
+local DebuggerConnectionManager = game:GetService("DebuggerConnectionManager")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
@@ -17,10 +18,16 @@ local controlsModule = Loader:WaitForChild("Controls")
 local animationsModule = Loader:WaitForChild("Animations")
 local comboModule = Loader:WaitForChild("Combo")
 local RS_Modules = ReplicatedStorage:FindFirstChild("Modules")
+local tablesFolder = ReplicatedStorage:FindFirstChild("Tables")
+local dictionariesFolder = tablesFolder:FindFirstChild("Dictionaries")
+local attributesModule = dictionariesFolder:FindFirstChild("Attributes")
+--
+local debounce: boolean = false
 
 -- MODULES
 local allowedToAttack = require(RS_Modules:FindFirstChild("AllowedToAttack"))
 local animations = require(animationsModule)
+local attributes = require(attributesModule)
 local combo = require(comboModule)
 local controls = require(controlsModule)
 
@@ -28,6 +35,30 @@ local controls = require(controlsModule)
 local attackRemote = remotesFolder:WaitForChild("CharacterAttack")
 
 -- FUNCTIONS
+local function debounceIfStunned(attr: string)
+	if character:GetAttribute(attr) then
+		debounce = true
+	else
+		for otherAttr, _ in pairs(attributes.Combat.Stun) do
+			if attr == otherAttr then
+				continue
+			end
+			if character:GetAttribute(otherAttr) then
+				debounce = true
+				continue
+			else
+				debounce = false
+			end
+		end
+	end
+end
+
+-- EVENTS
+for attr, _ in pairs(attributes.Combat.Stun) do
+	character:GetAttributeChangedSignal(attr):Connect(function()
+		debounceIfStunned(attr)
+	end)
+end
 
 -- Code --
 local GameCharacterObj = {}
@@ -58,7 +89,7 @@ end
 
 function GameCharacterObj:TryAttack(attackType: string): boolean
 	if not allowedToAttack(self.Character) then
-		print("Cannot attack while stunned or incapacitated.")
+		-- print("Cannot attack while stunned or incapacitated.")
 		return false
 	end
 	attackRemote:FireServer(attackType)
@@ -68,18 +99,18 @@ end
 
 function GameCharacterObj:Init()
 	local ok, err = pcall(function()
-		local gameCharacter = GameCharacterObj.new()
+		local self = GameCharacterObj.new()
 
-		local anims
-		local lightAnims
-		local heavyAnims
+		local anims: { Heavy: Animation, Light: Animation }
+		local lightAnims: { Animation }
+		local heavyAnims: { Animation }
 		local function init_Animations()
-			if gameCharacter.Character then
+			if self.Character then
 				print("Character exists")
 			else
 				print("Character is nil")
 			end
-			anims = animations(gameCharacter.Character)
+			anims = animations(self.Character)
 			lightAnims = anims.Light
 			heavyAnims = anims.Heavy
 		end
@@ -93,26 +124,21 @@ function GameCharacterObj:Init()
 			): Enum.ContextActionResult
 				if inputState == Enum.UserInputState.Begin then
 					local attackType: string = "Light"
-					if not gameCharacter:TryAttack(attackType) then
+					if not self:TryAttack(attackType) or debounce then
 						return Enum.ContextActionResult.Pass
 					end
-					if tick() - gameCharacter.Combo.LastHitTime > gameCharacter.Combo.ResetTime then
-						gameCharacter.Combo.Amount = 0
+					if (tick() - self.Combo.LastHitTime >= self.Combo.ResetTime) or ((self.Combo.Amount + 1) > 5) then
+						self.Combo.Amount = 1
 					else
-						gameCharacter.Combo.Amount = math.min(gameCharacter.Combo.Amount + 1, #lightAnims)
+						self.Combo.Amount = math.min(self.Combo.Amount + 1, #lightAnims)
 					end
-					gameCharacter.Combo.LastHitTime = tick()
+					self.Combo.LastHitTime = tick()
 
-					local index: number
-					if gameCharacter.Combo.Amount < 5 then
-						index = gameCharacter.Combo.Amount + 1
-					else
-						gameCharacter.Combo.Amount = 1
-						index = gameCharacter.Combo.Amount
-					end
+					local index: number = self.Combo.Amount
 					local animToPlay = lightAnims[index]
 					if animToPlay and not animToPlay.IsPlaying then
 						animToPlay:Play()
+						print(string.format("Playing light attack animation (combo amount: %d)", index))
 					else
 						warn(string.format("No animation found for light attack (combo amount: %d)", index))
 					end
@@ -128,7 +154,7 @@ function GameCharacterObj:Init()
 			): Enum.ContextActionResult
 				if inputState == Enum.UserInputState.Begin then
 					local attackType: string = "Heavy"
-					if not gameCharacter:TryAttack(attackType) then
+					if not self:TryAttack(attackType) or debounce then
 						return Enum.ContextActionResult.Pass
 					end
 					local index = math.random(1, #heavyAnims)

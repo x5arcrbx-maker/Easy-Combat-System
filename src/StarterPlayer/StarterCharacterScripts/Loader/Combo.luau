@@ -1,5 +1,5 @@
 return {
 	Amount = 0,
-	ResetTime = 3,
+	ResetTime = 2,
 	LastHitTime = 0,
 }
