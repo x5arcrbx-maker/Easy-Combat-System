@@ -1457,6 +1457,56 @@
               "filePaths": [
                 "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Modules/ClashHandler.luau"
               ]
+            },
+            {
+              "name": "SkillsModule",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Modules/SkillsModule/init.luau"
+              ],
+              "children": [
+                {
+                  "name": "BreathingHandler",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Modules/SkillsModule/BreathingHandler.luau"
+                  ]
+                },
+                {
+                  "name": "CooldownHandler",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Modules/SkillsModule/CooldownHandler.luau"
+                  ]
+                },
+                {
+                  "name": "PlayerCooldowns",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Modules/SkillsModule/PlayerCooldowns.luau"
+                  ]
+                },
+                {
+                  "name": "SkillGuard",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Modules/SkillsModule/SkillGuard.luau"
+                  ]
+                },
+                {
+                  "name": "HitTracker",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Modules/SkillsModule/HitTracker.luau"
+                  ]
+                }
+              ]
             }
           ]
         },
