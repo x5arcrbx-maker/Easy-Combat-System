@@ -3,6 +3,31 @@
   "className": "DataModel",
   "children": [
     {
+      "name": "ReplicatedFirst",
+      "className": "ReplicatedFirst",
+      "pluginManaged": true,
+      "children": [
+        {
+          "name": "LoadingScreenReplicater",
+          "className": "LocalScript",
+          "pluginManaged": true,
+          "filePaths": [
+            "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedFirst/LoadingScreenReplicater/init.local.luau"
+          ],
+          "children": [
+            {
+              "name": "LocalTeleportHandler",
+              "className": "LocalScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedFirst/LoadingScreenReplicater/LocalTeleportHandler.local.luau"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "StarterPlayer",
       "className": "StarterPlayer",
       "pluginManaged": true,
@@ -12,6 +37,22 @@
           "className": "StarterCharacterScripts",
           "pluginManaged": true,
           "children": [
+            {
+              "name": "Health",
+              "className": "Script",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Health.legacy.luau"
+              ]
+            },
+            {
+              "name": "Animate",
+              "className": "LocalScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Animate.local.luau"
+              ]
+            },
             {
               "name": "Loader",
               "className": "Folder",
@@ -93,22 +134,6 @@
               ]
             },
             {
-              "name": "Health",
-              "className": "Script",
-              "pluginManaged": true,
-              "filePaths": [
-                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Health.legacy.luau"
-              ]
-            },
-            {
-              "name": "Animate",
-              "className": "LocalScript",
-              "pluginManaged": true,
-              "filePaths": [
-                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Animate.local.luau"
-              ]
-            },
-            {
               "name": "Extra",
               "className": "Folder",
               "pluginManaged": true,
@@ -178,6 +203,1126 @@
                   "pluginManaged": true,
                   "filePaths": [
                     "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Functions/AllowedToAttack.luau"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Packages",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "CameraShaker",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/CameraShaker/init.luau"
+                  ],
+                  "children": [
+                    {
+                      "name": "CameraShakeInstance",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/CameraShaker/CameraShakeInstance.luau"
+                      ]
+                    },
+                    {
+                      "name": "CameraShakePresets",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/CameraShaker/CameraShakePresets.luau"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "WindShake",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/WindShake/init.luau"
+                  ],
+                  "children": [
+                    {
+                      "name": "Settings",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/WindShake/Settings.luau"
+                      ]
+                    },
+                    {
+                      "name": "VectorMap",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/WindShake/VectorMap.luau"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "ContextActionUtility",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/ContextActionUtility.luau"
+                  ]
+                },
+                {
+                  "name": "RockModule",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/RockModule/init.luau"
+                  ],
+                  "children": [
+                    {
+                      "name": "RockModuleServer",
+                      "className": "Script",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/RockModule/RockModuleServer.legacy.luau"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "topbarplus",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/topbarplus/init.luau"
+                  ],
+                  "children": [
+                    {
+                      "name": "Attribute",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/topbarplus/Attribute.luau"
+                      ]
+                    },
+                    {
+                      "name": "Reference",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/topbarplus/Reference.luau"
+                      ]
+                    },
+                    {
+                      "name": "Types",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/topbarplus/Types.luau"
+                      ]
+                    },
+                    {
+                      "name": "Utility",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/topbarplus/Utility.luau"
+                      ]
+                    },
+                    {
+                      "name": "VERSION",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/topbarplus/VERSION.luau"
+                      ]
+                    },
+                    {
+                      "name": "Elements",
+                      "className": "Folder",
+                      "pluginManaged": true,
+                      "children": [
+                        {
+                          "name": "Caption",
+                          "className": "ModuleScript",
+                          "pluginManaged": true,
+                          "filePaths": [
+                            "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/topbarplus/Elements/Caption.luau"
+                          ]
+                        },
+                        {
+                          "name": "Container",
+                          "className": "ModuleScript",
+                          "pluginManaged": true,
+                          "filePaths": [
+                            "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/topbarplus/Elements/Container.luau"
+                          ]
+                        },
+                        {
+                          "name": "Dropdown",
+                          "className": "ModuleScript",
+                          "pluginManaged": true,
+                          "filePaths": [
+                            "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/topbarplus/Elements/Dropdown.luau"
+                          ]
+                        },
+                        {
+                          "name": "Indicator",
+                          "className": "ModuleScript",
+                          "pluginManaged": true,
+                          "filePaths": [
+                            "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/topbarplus/Elements/Indicator.luau"
+                          ]
+                        },
+                        {
+                          "name": "Menu",
+                          "className": "ModuleScript",
+                          "pluginManaged": true,
+                          "filePaths": [
+                            "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/topbarplus/Elements/Menu.luau"
+                          ]
+                        },
+                        {
+                          "name": "Notice",
+                          "className": "ModuleScript",
+                          "pluginManaged": true,
+                          "filePaths": [
+                            "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/topbarplus/Elements/Notice.luau"
+                          ]
+                        },
+                        {
+                          "name": "Selection",
+                          "className": "ModuleScript",
+                          "pluginManaged": true,
+                          "filePaths": [
+                            "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/topbarplus/Elements/Selection.luau"
+                          ]
+                        },
+                        {
+                          "name": "Widget",
+                          "className": "ModuleScript",
+                          "pluginManaged": true,
+                          "filePaths": [
+                            "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/topbarplus/Elements/Widget.luau"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Features",
+                      "className": "Folder",
+                      "pluginManaged": true,
+                      "children": [
+                        {
+                          "name": "Gamepad",
+                          "className": "ModuleScript",
+                          "pluginManaged": true,
+                          "filePaths": [
+                            "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/topbarplus/Features/Gamepad.luau"
+                          ]
+                        },
+                        {
+                          "name": "Overflow",
+                          "className": "ModuleScript",
+                          "pluginManaged": true,
+                          "filePaths": [
+                            "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/topbarplus/Features/Overflow.luau"
+                          ]
+                        },
+                        {
+                          "name": "Themes",
+                          "className": "ModuleScript",
+                          "pluginManaged": true,
+                          "filePaths": [
+                            "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/topbarplus/Features/Themes/init.luau"
+                          ],
+                          "children": [
+                            {
+                              "name": "Classic",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/topbarplus/Features/Themes/Classic.luau"
+                              ]
+                            },
+                            {
+                              "name": "Default",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/topbarplus/Features/Themes/Default.luau"
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Packages",
+                      "className": "Folder",
+                      "pluginManaged": true,
+                      "children": [
+                        {
+                          "name": "GoodSignal",
+                          "className": "ModuleScript",
+                          "pluginManaged": true,
+                          "filePaths": [
+                            "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/topbarplus/Packages/GoodSignal.luau"
+                          ]
+                        },
+                        {
+                          "name": "Janitor",
+                          "className": "ModuleScript",
+                          "pluginManaged": true,
+                          "filePaths": [
+                            "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/topbarplus/Packages/Janitor.luau"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "SimpleWeather",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/SimpleWeather/init.luau"
+                  ],
+                  "children": [
+                    {
+                      "name": "Rain",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/SimpleWeather/Rain.luau"
+                      ]
+                    },
+                    {
+                      "name": "CameraShaker",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/SimpleWeather/CameraShaker/init.luau"
+                      ],
+                      "children": [
+                        {
+                          "name": "CameraShakeInstance",
+                          "className": "ModuleScript",
+                          "pluginManaged": true,
+                          "filePaths": [
+                            "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/SimpleWeather/CameraShaker/CameraShakeInstance.luau"
+                          ]
+                        },
+                        {
+                          "name": "CameraShakePresets",
+                          "className": "ModuleScript",
+                          "pluginManaged": true,
+                          "filePaths": [
+                            "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/SimpleWeather/CameraShaker/CameraShakePresets.luau"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Knit",
+                  "className": "Folder",
+                  "pluginManaged": true,
+                  "children": [
+                    {
+                      "name": "Comm",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/Comm.luau"
+                      ]
+                    },
+                    {
+                      "name": "Component",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/Component.luau"
+                      ]
+                    },
+                    {
+                      "name": "EnumList",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/EnumList.luau"
+                      ]
+                    },
+                    {
+                      "name": "Input",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/Input.luau"
+                      ]
+                    },
+                    {
+                      "name": "Option",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/Option.luau"
+                      ]
+                    },
+                    {
+                      "name": "Promise",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/Promise.luau"
+                      ]
+                    },
+                    {
+                      "name": "Signal",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/Signal.luau"
+                      ]
+                    },
+                    {
+                      "name": "Streamable",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/Streamable.luau"
+                      ]
+                    },
+                    {
+                      "name": "TableUtil",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/TableUtil.luau"
+                      ]
+                    },
+                    {
+                      "name": "Timer",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/Timer.luau"
+                      ]
+                    },
+                    {
+                      "name": "Trove",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/Trove.luau"
+                      ]
+                    },
+                    {
+                      "name": "Knit",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/Knit/init.luau"
+                      ],
+                      "children": [
+                        {
+                          "name": "KnitClient",
+                          "className": "ModuleScript",
+                          "pluginManaged": true,
+                          "filePaths": [
+                            "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/Knit/KnitClient.luau"
+                          ]
+                        },
+                        {
+                          "name": "KnitServer",
+                          "className": "ModuleScript",
+                          "pluginManaged": true,
+                          "filePaths": [
+                            "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/Knit/KnitServer.luau"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "_Index",
+                      "className": "Folder",
+                      "pluginManaged": true,
+                      "children": [
+                        {
+                          "name": "evaera_promise@4.0.0",
+                          "className": "Folder",
+                          "pluginManaged": true,
+                          "children": [
+                            {
+                              "name": "promise",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/evaera_promise@4.0.0/promise/init.luau"
+                              ],
+                              "children": [
+                                {
+                                  "name": "init.spec",
+                                  "className": "ModuleScript",
+                                  "pluginManaged": true,
+                                  "filePaths": [
+                                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/evaera_promise@4.0.0/promise/init.spec.luau"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "sleitnick_comm@1.0.1",
+                          "className": "Folder",
+                          "pluginManaged": true,
+                          "children": [
+                            {
+                              "name": "Option",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_comm@1.0.1/Option.luau"
+                              ]
+                            },
+                            {
+                              "name": "Promise",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_comm@1.0.1/Promise.luau"
+                              ]
+                            },
+                            {
+                              "name": "Signal",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_comm@1.0.1/Signal.luau"
+                              ]
+                            },
+                            {
+                              "name": "comm",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_comm@1.0.1/comm/init.luau"
+                              ],
+                              "children": [
+                                {
+                                  "name": "Client",
+                                  "className": "ModuleScript",
+                                  "pluginManaged": true,
+                                  "filePaths": [
+                                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_comm@1.0.1/comm/Client/init.luau"
+                                  ],
+                                  "children": [
+                                    {
+                                      "name": "ClientComm",
+                                      "className": "ModuleScript",
+                                      "pluginManaged": true,
+                                      "filePaths": [
+                                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_comm@1.0.1/comm/Client/ClientComm.luau"
+                                      ]
+                                    },
+                                    {
+                                      "name": "ClientRemoteProperty",
+                                      "className": "ModuleScript",
+                                      "pluginManaged": true,
+                                      "filePaths": [
+                                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_comm@1.0.1/comm/Client/ClientRemoteProperty.luau"
+                                      ]
+                                    },
+                                    {
+                                      "name": "ClientRemoteSignal",
+                                      "className": "ModuleScript",
+                                      "pluginManaged": true,
+                                      "filePaths": [
+                                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_comm@1.0.1/comm/Client/ClientRemoteSignal.luau"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "name": "Server",
+                                  "className": "ModuleScript",
+                                  "pluginManaged": true,
+                                  "filePaths": [
+                                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_comm@1.0.1/comm/Server/init.luau"
+                                  ],
+                                  "children": [
+                                    {
+                                      "name": "RemoteProperty",
+                                      "className": "ModuleScript",
+                                      "pluginManaged": true,
+                                      "filePaths": [
+                                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_comm@1.0.1/comm/Server/RemoteProperty.luau"
+                                      ]
+                                    },
+                                    {
+                                      "name": "RemoteSignal",
+                                      "className": "ModuleScript",
+                                      "pluginManaged": true,
+                                      "filePaths": [
+                                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_comm@1.0.1/comm/Server/RemoteSignal.luau"
+                                      ]
+                                    },
+                                    {
+                                      "name": "ServerComm",
+                                      "className": "ModuleScript",
+                                      "pluginManaged": true,
+                                      "filePaths": [
+                                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_comm@1.0.1/comm/Server/ServerComm.luau"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "name": "Types",
+                                  "className": "ModuleScript",
+                                  "pluginManaged": true,
+                                  "filePaths": [
+                                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_comm@1.0.1/comm/Types.luau"
+                                  ]
+                                },
+                                {
+                                  "name": "Util",
+                                  "className": "ModuleScript",
+                                  "pluginManaged": true,
+                                  "filePaths": [
+                                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_comm@1.0.1/comm/Util.luau"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "sleitnick_component@2.4.8",
+                          "className": "Folder",
+                          "pluginManaged": true,
+                          "children": [
+                            {
+                              "name": "Promise",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_component@2.4.8/Promise.luau"
+                              ]
+                            },
+                            {
+                              "name": "Signal",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_component@2.4.8/Signal.luau"
+                              ]
+                            },
+                            {
+                              "name": "Symbol",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_component@2.4.8/Symbol.luau"
+                              ]
+                            },
+                            {
+                              "name": "Trove",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_component@2.4.8/Trove.luau"
+                              ]
+                            },
+                            {
+                              "name": "component",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_component@2.4.8/component/init.luau"
+                              ],
+                              "children": [
+                                {
+                                  "name": "init.spec",
+                                  "className": "ModuleScript",
+                                  "pluginManaged": true,
+                                  "filePaths": [
+                                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_component@2.4.8/component/init.spec.luau"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "sleitnick_enum-list@2.1.0",
+                          "className": "Folder",
+                          "pluginManaged": true,
+                          "children": [
+                            {
+                              "name": "enum-list",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_enum-list@2.1.0/enum-list/init.luau"
+                              ],
+                              "children": [
+                                {
+                                  "name": "init.spec",
+                                  "className": "ModuleScript",
+                                  "pluginManaged": true,
+                                  "filePaths": [
+                                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_enum-list@2.1.0/enum-list/init.spec.luau"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "sleitnick_input@2.3.0",
+                          "className": "Folder",
+                          "pluginManaged": true,
+                          "children": [
+                            {
+                              "name": "Signal",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_input@2.3.0/Signal.luau"
+                              ]
+                            },
+                            {
+                              "name": "Trove",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_input@2.3.0/Trove.luau"
+                              ]
+                            },
+                            {
+                              "name": "input",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_input@2.3.0/input/init.luau"
+                              ],
+                              "children": [
+                                {
+                                  "name": "Gamepad",
+                                  "className": "ModuleScript",
+                                  "pluginManaged": true,
+                                  "filePaths": [
+                                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_input@2.3.0/input/Gamepad.luau"
+                                  ]
+                                },
+                                {
+                                  "name": "Keyboard",
+                                  "className": "ModuleScript",
+                                  "pluginManaged": true,
+                                  "filePaths": [
+                                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_input@2.3.0/input/Keyboard.luau"
+                                  ]
+                                },
+                                {
+                                  "name": "Mouse",
+                                  "className": "ModuleScript",
+                                  "pluginManaged": true,
+                                  "filePaths": [
+                                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_input@2.3.0/input/Mouse.luau"
+                                  ]
+                                },
+                                {
+                                  "name": "PreferredInput",
+                                  "className": "ModuleScript",
+                                  "pluginManaged": true,
+                                  "filePaths": [
+                                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_input@2.3.0/input/PreferredInput.luau"
+                                  ]
+                                },
+                                {
+                                  "name": "Touch",
+                                  "className": "ModuleScript",
+                                  "pluginManaged": true,
+                                  "filePaths": [
+                                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_input@2.3.0/input/Touch.luau"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "sleitnick_option@1.0.5",
+                          "className": "Folder",
+                          "pluginManaged": true,
+                          "children": [
+                            {
+                              "name": "option",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_option@1.0.5/option/init.luau"
+                              ],
+                              "children": [
+                                {
+                                  "name": "init.spec",
+                                  "className": "ModuleScript",
+                                  "pluginManaged": true,
+                                  "filePaths": [
+                                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_option@1.0.5/option/init.spec.luau"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "sleitnick_signal@1.5.0",
+                          "className": "Folder",
+                          "pluginManaged": true,
+                          "children": [
+                            {
+                              "name": "signal",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_signal@1.5.0/signal/init.luau"
+                              ],
+                              "children": [
+                                {
+                                  "name": "init.spec",
+                                  "className": "ModuleScript",
+                                  "pluginManaged": true,
+                                  "filePaths": [
+                                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_signal@1.5.0/signal/init.spec.luau"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "sleitnick_signal@2.0.1",
+                          "className": "Folder",
+                          "pluginManaged": true,
+                          "children": [
+                            {
+                              "name": "signal",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_signal@2.0.1/signal/init.luau"
+                              ],
+                              "children": [
+                                {
+                                  "name": "init.spec",
+                                  "className": "ModuleScript",
+                                  "pluginManaged": true,
+                                  "filePaths": [
+                                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_signal@2.0.1/signal/init.spec.luau"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "sleitnick_streamable@1.2.4",
+                          "className": "Folder",
+                          "pluginManaged": true,
+                          "children": [
+                            {
+                              "name": "Signal",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_streamable@1.2.4/Signal.luau"
+                              ]
+                            },
+                            {
+                              "name": "Trove",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_streamable@1.2.4/Trove.luau"
+                              ]
+                            },
+                            {
+                              "name": "streamable",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_streamable@1.2.4/streamable/init.luau"
+                              ],
+                              "children": [
+                                {
+                                  "name": "Streamable",
+                                  "className": "ModuleScript",
+                                  "pluginManaged": true,
+                                  "filePaths": [
+                                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_streamable@1.2.4/streamable/Streamable.luau"
+                                  ]
+                                },
+                                {
+                                  "name": "Streamable.spec",
+                                  "className": "ModuleScript",
+                                  "pluginManaged": true,
+                                  "filePaths": [
+                                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_streamable@1.2.4/streamable/Streamable.spec.luau"
+                                  ]
+                                },
+                                {
+                                  "name": "StreamableUtil",
+                                  "className": "ModuleScript",
+                                  "pluginManaged": true,
+                                  "filePaths": [
+                                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_streamable@1.2.4/streamable/StreamableUtil.luau"
+                                  ]
+                                },
+                                {
+                                  "name": "StreamableUtil.spec",
+                                  "className": "ModuleScript",
+                                  "pluginManaged": true,
+                                  "filePaths": [
+                                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_streamable@1.2.4/streamable/StreamableUtil.spec.luau"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "sleitnick_symbol@2.0.1",
+                          "className": "Folder",
+                          "pluginManaged": true,
+                          "children": [
+                            {
+                              "name": "symbol",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_symbol@2.0.1/symbol/init.luau"
+                              ],
+                              "children": [
+                                {
+                                  "name": "init.spec",
+                                  "className": "ModuleScript",
+                                  "pluginManaged": true,
+                                  "filePaths": [
+                                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_symbol@2.0.1/symbol/init.spec.luau"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "sleitnick_table-util@1.2.1",
+                          "className": "Folder",
+                          "pluginManaged": true,
+                          "children": [
+                            {
+                              "name": "table-util",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_table-util@1.2.1/table-util/init.luau"
+                              ],
+                              "children": [
+                                {
+                                  "name": "init.spec",
+                                  "className": "ModuleScript",
+                                  "pluginManaged": true,
+                                  "filePaths": [
+                                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_table-util@1.2.1/table-util/init.spec.luau"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "sleitnick_timer@1.1.2",
+                          "className": "Folder",
+                          "pluginManaged": true,
+                          "children": [
+                            {
+                              "name": "Signal",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_timer@1.1.2/Signal.luau"
+                              ]
+                            },
+                            {
+                              "name": "timer",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_timer@1.1.2/timer/init.luau"
+                              ],
+                              "children": [
+                                {
+                                  "name": "init.spec",
+                                  "className": "ModuleScript",
+                                  "pluginManaged": true,
+                                  "filePaths": [
+                                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_timer@1.1.2/timer/init.spec.luau"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "sleitnick_trove@0.4.2",
+                          "className": "Folder",
+                          "pluginManaged": true,
+                          "children": [
+                            {
+                              "name": "trove",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_trove@0.4.2/trove/init.luau"
+                              ],
+                              "children": [
+                                {
+                                  "name": "init.spec",
+                                  "className": "ModuleScript",
+                                  "pluginManaged": true,
+                                  "filePaths": [
+                                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_trove@0.4.2/trove/init.spec.luau"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "sleitnick_trove@1.1.0",
+                          "className": "Folder",
+                          "pluginManaged": true,
+                          "children": [
+                            {
+                              "name": "trove",
+                              "className": "ModuleScript",
+                              "pluginManaged": true,
+                              "filePaths": [
+                                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_trove@1.1.0/trove/init.luau"
+                              ],
+                              "children": [
+                                {
+                                  "name": "init.spec",
+                                  "className": "ModuleScript",
+                                  "pluginManaged": true,
+                                  "filePaths": [
+                                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Knit/_Index/sleitnick_trove@1.1.0/trove/init.spec.luau"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Dynamic Animations R6",
+                  "className": "Folder",
+                  "pluginManaged": true,
+                  "children": [
+                    {
+                      "name": "!!! READ ME !!!",
+                      "className": "Script",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Dynamic Animations R6/!!! READ ME !!!.legacy.luau"
+                      ]
+                    },
+                    {
+                      "name": "AnimationSettings",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Packages/Dynamic Animations R6/AnimationSettings/init.luau"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Services",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "AnimationService",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Services/AnimationService.luau"
+                  ]
+                },
+                {
+                  "name": "VfxStudioEmitter",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Services/VfxStudioEmitter.luau"
+                  ]
+                },
+                {
+                  "name": "DialogueService",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Services/DialogueService.luau"
+                  ]
+                },
+                {
+                  "name": "NotificationService",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Services/NotificationService.luau"
+                  ]
+                },
+                {
+                  "name": "SkillsService_Client",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Services/SkillsService_Client.luau"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Values",
+          "className": "Folder",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "Tables",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "HumanoidStateTypes",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Values/Tables/HumanoidStateTypes.luau"
                   ]
                 }
               ]
@@ -443,31 +1588,6 @@
                     }
                   ]
                 }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "ReplicatedFirst",
-      "className": "ReplicatedFirst",
-      "pluginManaged": true,
-      "children": [
-        {
-          "name": "LoadingScreenReplicater",
-          "className": "LocalScript",
-          "pluginManaged": true,
-          "filePaths": [
-            "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedFirst/LoadingScreenReplicater/init.local.luau"
-          ],
-          "children": [
-            {
-              "name": "LocalTeleportHandler",
-              "className": "LocalScript",
-              "pluginManaged": true,
-              "filePaths": [
-                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedFirst/LoadingScreenReplicater/LocalTeleportHandler.local.luau"
               ]
             }
           ]
