@@ -15,6 +15,7 @@ local playingTrack_HeavyAttack: AnimationTrack?
 --
 local Loader = script.Parent :: Folder
 local remotesFolder = ReplicatedStorage:WaitForChild("Remotes") :: Folder
+local remoteEventsFolder = remotesFolder:FindFirstChild("Events")
 local RS_Modules = ReplicatedStorage:FindFirstChild("Modules") :: Folder
 local RS_Functions = RS_Modules:FindFirstChild("Functions")
 local tablesFolder = RS_Modules:FindFirstChild("Tables") :: Folder
@@ -22,7 +23,7 @@ local dictionariesFolder = tablesFolder:FindFirstChild("Dictionaries") :: Folder
 local attributesModule = dictionariesFolder:FindFirstChild("Attributes") :: Folder
 --
 local controlsModule = Loader:WaitForChild("Controls")
-local animationsModule = Loader:WaitForChild("Animations")
+local animationsModule = Loader:WaitForChild("AttackAnimations")
 local comboModule = Loader:WaitForChild("Combo")
 --
 local debounce: boolean = false
@@ -35,7 +36,7 @@ local combo = require(comboModule)
 local controls = require(controlsModule)
 
 -- REMOTES
-local attackRemote = remotesFolder:WaitForChild("CharacterAttack")
+local attackRemote = remoteEventsFolder:WaitForChild("CharacterAttack")
 
 -- FUNCTIONS
 local function debounceIfStunned(attr: string)
@@ -138,14 +139,25 @@ function GameCharacterObj:Init()
 				end
 
 				debounce = true
-				if ((tick() - self.Combo.LastHitTime) >= self.Combo.ResetTime) or ((self.Combo.Amount + 1) > 5) then
-					self.Combo.Amount = 1
+				local currentCombo: number = character:GetAttribute("Combo") or 0
+				local comboToSet: number
+				local lastHitTime: number = character:GetAttribute("ComboLastHit")
+				local resetTime: number = character:GetAttribute("ComboResetTime")
+				if ((tick() - lastHitTime) >= resetTime) or ((currentCombo + 1) > 5) then
+					comboToSet = 1
+					print("Reset combo")
 				else
-					self.Combo.Amount = math.min(self.Combo.Amount + 1, #lightAnims)
+					comboToSet = math.min(currentCombo + 1, #lightAnims)
 				end
-				self.Combo.LastHitTime = tick()
+				-- if ((tick() - self.Combo.LastHitTime) >= self.Combo.ResetTime) or ((self.Combo.Amount + 1) > 5) then
+				-- 	self.Combo.Amount = 1
+				-- 	print("Reset combo")
+				-- else
+				-- 	self.Combo.Amount = math.min(self.Combo.Amount + 1, #lightAnims)
+				-- end
+				lastHitTime = tick()
 
-				local index: number = self.Combo.Amount
+				local index: number = comboToSet
 				local animTrack: AnimationTrack = lightAnims[index]
 				if animTrack then
 					if playingTrack_LightAttack and playingTrack_LightAttack ~= animTrack then
@@ -224,28 +236,6 @@ function GameCharacterObj:Init()
 				controls.HeavyAttack.Keyboard,
 				controls.HeavyAttack.Gamepad
 			)
-
-			-- local function onInputBegan(input: InputObject, GPE: boolean)
-			-- 	if GPE then
-			-- 		return
-			-- 	end
-
-			-- 	if (input.UserInputType == controls.LightAttack.Keyboard) or (input.KeyCode == controls.LightAttack.Console) then
-			-- 		self:TryAttack("Light")
-			-- 	elseif (input.KeyCode == controls.HeavyAttack.Keyboard) or (input.KeyCode == controls.HeavyAttack.Console) then
-			-- 		self:TryAttack("Heavy")
-			-- 	end
-			-- end
-
-			-- UserInputService.InputBegan:Connect(function(input: InputObject, GPE: boolean)
-			-- 	if GPE then
-			-- 		return
-			-- 	end
-
-			-- 	if (input.UserInputType == controls.LightAttack.Keyboard) or (input.KeyCode == controls.LightAttack.Console) then
-			-- 		self:TryAttack("Light")
-			-- 	end
-			-- end)
 		end
 		init_AttackControls()
 	end)

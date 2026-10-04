@@ -3,6 +3,100 @@
   "className": "DataModel",
   "children": [
     {
+      "name": "StarterPlayer",
+      "className": "StarterPlayer",
+      "pluginManaged": true,
+      "children": [
+        {
+          "name": "StarterCharacterScripts",
+          "className": "StarterCharacterScripts",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "Loader",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "GameCharacterLoader",
+                  "className": "LocalScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Loader/GameCharacterLoader.local.luau"
+                  ]
+                },
+                {
+                  "name": "GameCharacterObj",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Loader/GameCharacterObj.luau"
+                  ]
+                },
+                {
+                  "name": "Controls",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Loader/Controls.luau"
+                  ]
+                },
+                {
+                  "name": "Combo",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Loader/Combo.luau"
+                  ]
+                },
+                {
+                  "name": "AttackAnimations",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Loader/AttackAnimations.luau"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Animations",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "CharacterTilt",
+                  "className": "LocalScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Animations/CharacterTilt/init.local.luau"
+                  ],
+                  "children": [
+                    {
+                      "name": "Instructions",
+                      "className": "Script",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Animations/CharacterTilt/Instructions.legacy.luau"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "CustomMovementAnims",
+                  "className": "LocalScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Animations/CustomMovementAnims.local.luau"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "ReplicatedStorage",
       "className": "ReplicatedStorage",
       "pluginManaged": true,
@@ -12,21 +106,6 @@
           "className": "Folder",
           "pluginManaged": true,
           "children": [
-            {
-              "name": "Functions",
-              "className": "Folder",
-              "pluginManaged": true,
-              "children": [
-                {
-                  "name": "AllowedToAttack",
-                  "className": "ModuleScript",
-                  "pluginManaged": true,
-                  "filePaths": [
-                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Functions/AllowedToAttack.luau"
-                  ]
-                }
-              ]
-            },
             {
               "name": "Tables",
               "className": "Folder",
@@ -45,6 +124,21 @@
                         "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Tables/Dictionaries/Attributes.luau"
                       ]
                     }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Functions",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "AllowedToAttack",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedStorage/Modules/Functions/AllowedToAttack.luau"
                   ]
                 }
               ]
@@ -84,6 +178,14 @@
                     "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Scripts/CharacterAttributes/AttributeHandler.legacy.luau"
                   ]
                 }
+              ]
+            },
+            {
+              "name": "NpcSpawner",
+              "className": "Script",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Scripts/NpcSpawner.legacy.luau"
               ]
             }
           ]
@@ -173,62 +275,133 @@
               ]
             }
           ]
-        }
-      ]
-    },
-    {
-      "name": "StarterPlayer",
-      "className": "StarterPlayer",
-      "pluginManaged": true,
-      "children": [
+        },
         {
-          "name": "StarterCharacterScripts",
-          "className": "StarterCharacterScripts",
+          "name": "Services",
+          "className": "Folder",
           "pluginManaged": true,
           "children": [
             {
-              "name": "Loader",
-              "className": "Folder",
+              "name": "HealthService",
+              "className": "ModuleScript",
               "pluginManaged": true,
+              "filePaths": [
+                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Services/HealthService.luau"
+              ]
+            },
+            {
+              "name": "NpcService",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Services/NpcService/init.luau"
+              ],
               "children": [
                 {
-                  "name": "GameCharacterLoader",
-                  "className": "LocalScript",
+                  "name": "AttackScript",
+                  "className": "Script",
                   "pluginManaged": true,
                   "filePaths": [
-                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Loader/GameCharacterLoader.local.luau"
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Services/NpcService/AttackScript.legacy.luau"
                   ]
                 },
                 {
-                  "name": "GameCharacterObj",
-                  "className": "ModuleScript",
+                  "name": "Handler (Grip and Carry) NPC",
+                  "className": "Script",
                   "pluginManaged": true,
                   "filePaths": [
-                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Loader/GameCharacterObj.luau"
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Services/NpcService/Handler (Grip and Carry) NPC.legacy.luau"
                   ]
                 },
                 {
-                  "name": "Controls",
-                  "className": "ModuleScript",
+                  "name": "Health",
+                  "className": "Script",
                   "pluginManaged": true,
                   "filePaths": [
-                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Loader/Controls.luau"
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Services/NpcService/Health.legacy.luau"
                   ]
                 },
                 {
-                  "name": "Animations",
+                  "name": "MovementAnimator",
                   "className": "ModuleScript",
                   "pluginManaged": true,
                   "filePaths": [
-                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Loader/Animations.luau"
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Services/NpcService/MovementAnimator.luau"
                   ]
                 },
                 {
-                  "name": "Combo",
-                  "className": "ModuleScript",
+                  "name": "Ragdoll",
+                  "className": "Script",
                   "pluginManaged": true,
                   "filePaths": [
-                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Loader/Combo.luau"
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Services/NpcService/Ragdoll.legacy.luau"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "FoodService",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Services/FoodService/init.luau"
+              ],
+              "children": [
+                {
+                  "name": "GiveFood",
+                  "className": "Script",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Services/FoodService/GiveFood.legacy.luau"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "ProfileStore",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Services/ProfileStore/init.luau"
+              ],
+              "children": [
+                {
+                  "name": "Data",
+                  "className": "Folder",
+                  "pluginManaged": true,
+                  "children": [
+                    {
+                      "name": "Template",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Services/ProfileStore/Data/Template.luau"
+                      ]
+                    },
+                    {
+                      "name": "DataInit",
+                      "className": "Script",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Services/ProfileStore/Data/DataInit.legacy.luau"
+                      ]
+                    },
+                    {
+                      "name": "DataManager",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Services/ProfileStore/Data/DataManager.luau"
+                      ]
+                    },
+                    {
+                      "name": "GamePassHandler",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ServerScriptService/Services/ProfileStore/Data/GamePassHandler.luau"
+                      ]
+                    }
                   ]
                 }
               ]

@@ -45,8 +45,8 @@ SkillsLibrary.standardAttacks = {
 			end
 			local currentCombo: number = character:GetAttribute("Combo") or 0
 			local comboToSet: number
-			local lastTimeHit = character:GetAttribute("ComboLastHit")
-			local resetTime = character:GetAttribute("ComboResetTime")
+			local lastTimeHit: number = character:GetAttribute("ComboLastHit")
+			local resetTime: number = character:GetAttribute("ComboResetTime")
 			if ((tick() - lastTimeHit) >= resetTime) or ((currentCombo + 1) > 5) then
 				comboToSet = 1
 			else
@@ -55,11 +55,11 @@ SkillsLibrary.standardAttacks = {
 
 			local new_StunTime_target: number = SkillsLibrary.standardAttacks.Light.StunTime_target
 			local new_Force: number = SkillsLibrary.standardAttacks.Light.Force
-			local new_RagdollValue: number = SkillsLibrary.standardAttacks.Light.Ragdoll.Value
+			local new_RagdollValue: boolean = SkillsLibrary.standardAttacks.Light.Ragdoll.Value
 			local new_RagdollTime: number = SkillsLibrary.standardAttacks.Light.Ragdoll.Time
 			if comboToSet == 5 then
-				new_StunTime_target = new_StunTime_target * 1.5
-				new_Force = new_Force * 4
+				new_StunTime_target = new_StunTime_target * 1.25
+				new_Force = new_Force * 3
 				new_RagdollValue = true
 				new_RagdollTime = new_StunTime_target
 			end

@@ -13,7 +13,8 @@ local skillsLibrary = require(SSS_Modules:FindFirstChild("SkillsLibrary"))
 
 -- REMOTES
 local remotesFolder = ReplicatedStorage:FindFirstChild("Remotes")
-local attackCharacter_remote = remotesFolder:FindFirstChild("CharacterAttack")
+local remoteEventsFolder = remotesFolder:FindFirstChild("Events")
+local attackCharacter_remote = remoteEventsFolder:FindFirstChild("CharacterAttack")
 
 -- FUNCTIONS
 local function attackExistsInLibrary(attack: string): boolean
