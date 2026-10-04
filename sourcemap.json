@@ -91,6 +91,45 @@
                   ]
                 }
               ]
+            },
+            {
+              "name": "Health",
+              "className": "Script",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Health.legacy.luau"
+              ]
+            },
+            {
+              "name": "Animate",
+              "className": "LocalScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Animate.local.luau"
+              ]
+            },
+            {
+              "name": "Extra",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "Chat Changer",
+                  "className": "LocalScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Extra/Chat Changer.local.luau"
+                  ]
+                },
+                {
+                  "name": "VFX",
+                  "className": "LocalScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/StarterPlayer/StarterCharacterScripts/Extra/VFX.local.luau"
+                  ]
+                }
+              ]
             }
           ]
         }
@@ -404,6 +443,31 @@
                     }
                   ]
                 }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ReplicatedFirst",
+      "className": "ReplicatedFirst",
+      "pluginManaged": true,
+      "children": [
+        {
+          "name": "LoadingScreenReplicater",
+          "className": "LocalScript",
+          "pluginManaged": true,
+          "filePaths": [
+            "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedFirst/LoadingScreenReplicater/init.local.luau"
+          ],
+          "children": [
+            {
+              "name": "LocalTeleportHandler",
+              "className": "LocalScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Users/kodyh/OneDrive/Documents/Projects/Easy Combat System/src/ReplicatedFirst/LoadingScreenReplicater/LocalTeleportHandler.local.luau"
               ]
             }
           ]
